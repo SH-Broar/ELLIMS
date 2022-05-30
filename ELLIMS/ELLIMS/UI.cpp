@@ -53,3 +53,66 @@ void Game::print(const char* data, int x, int y)
 		strcpy_s(&DoubleFrameBuffer[x][y], SCREEN_WIDTH - x, data);
 	}
 }
+
+void Game::print(const char* data, Zone& z)
+{
+	int trackerX = z.l;
+	int trackerY = z.b;
+
+	const char* tmp = data;
+	while (*tmp != '\0')
+	{
+		DoubleFrameBuffer[trackerX][trackerY] = *tmp;
+		trackerX++;
+
+		if (trackerX - z.l > z.r - z.l)
+		{
+			trackerX = z.l;
+			trackerY++;
+
+			if (trackerY - z.b > z.t - z.b && z.printMode == ZoneWrapMode::WRAPPING)
+			{
+				break;
+			}
+		}
+
+		tmp = tmp + 1;
+	}
+}
+
+void Game::print(Zone& z, FramePrintType type, char p)
+{
+	int x = z.l - 1;
+	int y = z.b - 1;
+
+	int mx = z.r + 1;
+	int my = z.t + 1;
+
+	for (int i = x; i <= mx; i++)
+	{
+		for (int j = y; j <= my; j++)
+		{
+			if (i >= 0 && i < SCREEN_WIDTH)
+			{
+				if (j >= 0 && j < SCREEN_HEIGHT)
+				{
+					if (type == FramePrintType::FULL)
+					{
+						if (i == x || i == mx || j == y || j == my)
+						{
+							DoubleFrameBuffer[i][j] = p;
+						}
+					}
+					else if (type == FramePrintType::POINT)
+					{
+						if ((i == x || i == mx) && (j == y || j == my))
+						{
+							DoubleFrameBuffer[i][j] = p;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+}

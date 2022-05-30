@@ -8,9 +8,13 @@ int Game::GameStart()
 	//
 	while (true)
 	{
+		Zone tmpz{ mouse_X,mouse_X + 9,mouse_Y,mouse_Y + 1,ZoneWrapMode::WRAPPING };
+
+		print(tmpz, FramePrintType::POINT);
+
 		if (mouse_Left_down)
 		{
-			print("*", mouse_X, mouse_Y);
+			print("1234567890123456789012345678901234567890", tmpz);
 		}
 		//contents
 		// ¸Ê Ãâ·Â

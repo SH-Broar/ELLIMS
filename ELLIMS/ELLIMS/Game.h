@@ -2,6 +2,8 @@
 #include <atomic>
 #include "Turboc.h"
 
+enum class FramePrintType { FULL, POINT };
+
 class Game
 {
 private:
@@ -33,7 +35,8 @@ public:
 	static COORD getMouseXY();
 
 	void print(const char* data, int x, int y);
-
+	void print(const char* data, Zone& z);
+	void print(Zone& z, FramePrintType type = FramePrintType::FULL, char p = '*');
 
 };
 

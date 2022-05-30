@@ -10,6 +10,8 @@
 #include <time.h>
 #include <windows.h>
 
+#include "Zone.h"
+
 #define SCREEN_WIDTH 120
 #define SCREEN_HEIGHT 35
 
