@@ -8,7 +8,6 @@ int Game::GameStart()
 	//
 	while (true)
 	{
-		SleepEx(25,TRUE);
 		if (mouse_Left_down)
 		{
 			print("*", mouse_X, mouse_Y);
@@ -22,6 +21,7 @@ int Game::GameStart()
 		//std::cout << mouse_X;
 
 		//break;
+		SleepEx(25, TRUE);
 	}
 
 	gameEnd = true;

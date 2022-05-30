@@ -28,7 +28,6 @@ void Game::GameFrameAdvance()
 {
 	while (true)
 	{
-		SleepEx(25, TRUE);
 		if (gameEnd)
 			break;
 		for (int i = 0; i < SCREEN_WIDTH; i++)
@@ -43,6 +42,7 @@ void Game::GameFrameAdvance()
 				}
 			}
 		}
+		SleepEx(25, TRUE);
 	}
 }
 

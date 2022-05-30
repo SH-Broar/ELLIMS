@@ -1,0 +1,8 @@
+Client
+씬 전환 구조 만들기
+맵 - 스테이터스 - 채팅 UI 제작
+플레이 가능해지는 대로 Server 연결
+
+Server
+폴더 생성
+IOCP 구축되는대로 Client랑 연결
