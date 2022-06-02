@@ -5,16 +5,20 @@ bool Game::gameEnd = false;
 
 int Game::GameStart()
 {
-	//
+	//여기서 초기화
+
 	while (true)
 	{
-		Zone tmpz{ mouse_X,mouse_X + 9,mouse_Y,mouse_Y + 1,ZoneWrapMode::WRAPPING };
-
-		print(tmpz, FramePrintType::POINT);
-
-		if (mouse_Left_down)
+		if (mouse_Left_down_Event)
 		{
-			print("1234567890123456789012345678901234567890", tmpz);
+			//여기서 Scene의 모든 zone에 clicked 실행
+		}
+
+		if (mouse_Left_down_Event)
+		{
+			Zone tmpz{ mouse_X,mouse_X + 9,mouse_Y,mouse_Y + 1,true };
+			tmpz = "1234567890123456789012345678901234567890";
+			tmpz.print();
 		}
 		//contents
 		// 맵 출력

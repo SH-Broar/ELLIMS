@@ -26,4 +26,5 @@ void CClear();
 #define randomize() srand((unsigned)time(NULL))		// 난수 발생기 초기화
 #define random(n) (rand() % (n))					//0~n까지의 난수 발생
 
+
 #endif // TURBOC_HEADER
