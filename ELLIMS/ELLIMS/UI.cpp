@@ -4,7 +4,9 @@
 char Game::FrameBuffer[120][35] = {};
 char Game::DoubleFrameBuffer[120][35] = {};
 
-
+Game::Game()
+{
+}
 
 void Game::InitUISetting()
 {
@@ -45,6 +47,13 @@ void Game::GameFrameAdvance()
 		SleepEx(25, TRUE);
 	}
 }
+
+void Game::gameEnded()
+{
+	//std::cout << "end";
+	gameEnd = true;
+}
+
 
 void Game::print(const char* data, int x, int y)
 {

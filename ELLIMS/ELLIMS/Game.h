@@ -1,22 +1,22 @@
 #pragma once
 #include <atomic>
+#include "Scene.h"
 #include "Turboc.h"
 
 class Game
 {
 private:
 	static bool gameEnd;
+	Scene nowScene;
 
 public:
-	Game()
-	{
-	}
+	Game();
 
 	static void InitUISetting();
 
 	int GameStart();
 	static void GameFrameAdvance();
-
+	static void gameEnded();
 
 
 	//-------¿ÜºÎ

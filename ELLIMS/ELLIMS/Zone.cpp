@@ -1,9 +1,10 @@
 #include "Zone.h"
 #include "Game.h"
 
-Zone::Zone(): l(0), r(0), t(0), b(0), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::FULL), borderCharacter('*'),text(nullptr),isClickable(false),clickFunction(nullptr) {};
-Zone::Zone(int _l, int _r, int _b, int _t, bool Clickable) : l(_l), r(_r), b(_b), t(_t), isClickable(Clickable), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::FULL), borderCharacter('*'), text(nullptr), clickFunction(nullptr)
+Zone::Zone() : l(0), r(0), t(0), b(0), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), isClickable(ClickableType::NONE), CallbackFunction(nullptr) {};
+Zone::Zone(int _l, int _r, int _b, int _t, ClickableType Clickable) : l(_l), r(_r), b(_b), t(_t), isClickable(Clickable), hovered(false), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), borderCharacter('*'), text(""), CallbackFunction(nullptr)
 {};
+
 
 void Zone::setRegion(int _l, int _r, int _b, int _t)
 {
@@ -21,19 +22,24 @@ void Zone::setType(FramePrintType type)
 {
 	printType = type;
 }
-void Zone::setBorder(char border) 
+void Zone::setClickableType(ClickableType type)
+{
+	isClickable = type;
+}
+void Zone::setBorder(char border)
 {
 	borderCharacter = border;
 }
+
 
 void Zone::operator=(const char* data)
 {
 	text = data;
 }
 
-void Zone::operator=(int(*cFunction)(int, int))
+void Zone::operator=(std::function<int(int, int)> func)
 {
-	clickFunction = cFunction;
+	CallbackFunction = func;
 }
 
 void Zone::print()
@@ -44,26 +50,29 @@ void Zone::print()
 	int mx = r + 1;
 	int my = t + 1;
 
-	for (int i = x; i <= mx; i++)
+	if (printType != FramePrintType::NONE)
 	{
-		for (int j = y; j <= my; j++)
+		for (int i = x; i <= mx; i++)
 		{
-			if (i >= 0 && i < SCREEN_WIDTH)
+			for (int j = y; j <= my; j++)
 			{
-				if (j >= 0 && j < SCREEN_HEIGHT)
+				if (i >= 0 && i < SCREEN_WIDTH)
 				{
-					if (printType == FramePrintType::FULL)
+					if (j >= 0 && j < SCREEN_HEIGHT)
 					{
-						if (i == x || i == mx || j == y || j == my)
+						if (printType == FramePrintType::FULL)
 						{
-							Game::DoubleFrameBuffer[i][j] = borderCharacter;
+							if (i == x || i == mx || j == y || j == my)
+							{
+								Game::DoubleFrameBuffer[i][j] = borderCharacter;
+							}
 						}
-					}
-					else if (printType == FramePrintType::POINT)
-					{
-						if ((i == x || i == mx) && (j == y || j == my))
+						else if (printType == FramePrintType::POINT)
 						{
-							Game::DoubleFrameBuffer[i][j] = borderCharacter;
+							if ((i == x || i == mx) && (j == y || j == my))
+							{
+								Game::DoubleFrameBuffer[i][j] = borderCharacter;
+							}
 						}
 					}
 				}
@@ -74,10 +83,18 @@ void Zone::print()
 	int trackerX = l;
 	int trackerY = b;
 
-	const char* tmp = text;
-	while (*tmp != '\0')
+	if (isClickable == ClickableType::HOVER)
 	{
-		Game::DoubleFrameBuffer[trackerX][trackerY] = *tmp;
+		if (hovered)
+			Game::DoubleFrameBuffer[trackerX - 2][trackerY] = '>';
+		else
+			Game::DoubleFrameBuffer[trackerX - 2][trackerY] = ' ';
+	}
+	
+	int tracs = 0;
+	while (strlen(text) > tracs)
+	{
+		Game::DoubleFrameBuffer[trackerX][trackerY] = text[tracs];
 		trackerX++;
 
 		if (trackerX - l > r - l)
@@ -90,26 +107,50 @@ void Zone::print()
 				break;
 			}
 		}
+		tracs++;
+	}
 
-		tmp = tmp + 1;
+	if (isClickable == ClickableType::HOVER)
+	{
+		if (hovered)
+			Game::DoubleFrameBuffer[trackerX + 1][trackerY] = '<';
+		else
+			Game::DoubleFrameBuffer[trackerX + 1][trackerY] = ' ';
 	}
 
 }
 
-bool Zone::clicked(int mx, int my)
+bool Zone::MouseInteraction(int mx, int my, bool clicked)
 {
-	if (isClickable && Intersect(mx, my))
+	if (isClickable == ClickableType::NONE)
+		return false;
+
+	bool intered = Intersect(mx, my);
+
+	if (intered)
 	{
-		if (clickFunction != nullptr)
+		if (isClickable == ClickableType::HOVER)
 		{
-			clickFunction(mx, my);
+			hovered = true;
 		}
-		return true;
+
+		if (clicked)
+		{
+			if (CallbackFunction != nullptr)
+			{
+				int ret = CallbackFunction(mx, my);
+
+			}
+			return true;
+		}
+	}
+	else
+	{
+		hovered = false;
 	}
 
 	return false;
 }
-
 bool Zone::Intersect(int _x, int _y)
 {
 	if (l <= _x && _x <= r)

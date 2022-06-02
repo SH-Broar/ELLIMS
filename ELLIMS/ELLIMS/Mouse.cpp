@@ -24,7 +24,10 @@ void Game::MouseClick()
 			break;
 		ReadConsoleInput(hIn, &rec, 1, &dwNOER);
 
-		if (rec.EventType == MOUSE_EVENT) {
+		if (rec.EventType == MOUSE_EVENT)
+		{
+			mouse_X = rec.Event.MouseEvent.dwMousePosition.X;
+			mouse_Y = rec.Event.MouseEvent.dwMousePosition.Y;
 
 			if (rec.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED) {
 				mouse_Left_down = true;
@@ -33,14 +36,7 @@ void Game::MouseClick()
 					mouse_Left_down_Event = true;
 					eventOnce = true;
 				}
-				else
-				{
-					mouse_Left_down_Event = false;
-				}
-				mouse_X = rec.Event.MouseEvent.dwMousePosition.X;
-				mouse_Y = rec.Event.MouseEvent.dwMousePosition.Y;
 
-				SleepEx(25, TRUE);
 				continue;
 			}
 			mouse_Left_down = false;

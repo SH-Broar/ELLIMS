@@ -19,6 +19,9 @@
     <Filter Include="소스 파일\Base">
       <UniqueIdentifier>{9b246bc4-96ec-44a1-9a75-7f1a9284ce13}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Scene">
+      <UniqueIdentifier>{9d3d64a0-cdfb-415f-8128-9bbc68097fcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Turboc.cpp">
@@ -36,11 +39,11 @@
     <ClCompile Include="Mouse.cpp">
       <Filter>소스 파일\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>소스 파일\Frames</Filter>
-    </ClCompile>
     <ClCompile Include="Zone.cpp">
       <Filter>소스 파일\Frames</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,11 +53,11 @@
     <ClInclude Include="Game.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Zone.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>소스 파일\Scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

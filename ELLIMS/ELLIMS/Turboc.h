@@ -9,6 +9,7 @@
 #include <conio.h>
 #include <time.h>
 #include <windows.h>
+#include <functional>
 
 #include "Zone.h"
 
