@@ -1,6 +1,9 @@
 #include "Game.h"
 
 bool Game::gameEnd = false;
+std::atomic<bool> Game::newCharInputed;
+char Game::inputChar;
+Zone* Game::focusedZone = nullptr;
 
 int Game::GameStart()
 {
@@ -20,6 +23,11 @@ int Game::GameStart()
 			tmpz = "12345678";
 			tmpz.print();*/
 		}
+		if (newCharInputed)
+		{
+			if (focusedZone != nullptr)
+				focusedZone->addTyping(inputChar);
+		}
 		//contents
 		// ¸Ê Ãâ·Â
 		nowScene.printScene();
@@ -33,7 +41,16 @@ int Game::GameStart()
 		if (gameEnd)
 			break;
 		mouse_Left_down_Event = false;
+		newCharInputed = false;
 		SleepEx(25, TRUE);
 	}
 	return 0;
+}
+
+void Game::setFocusZone(Zone& z, ClearType c)
+{
+	z.clearZone(c);
+	z = " ";
+
+	focusedZone = &z;
 }

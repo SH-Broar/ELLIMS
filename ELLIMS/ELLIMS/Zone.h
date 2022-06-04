@@ -4,17 +4,20 @@
 enum class FramePrintType { NONE, FULL, POINT };
 enum class ZoneWrapMode { NOWRAPPING, WRAPPING };
 enum class ClickableType { NONE, HOVER, BUTTON };
+enum class ClearType { NONE, TEXT, FULL };
 
 class Zone
 {
 private:
 	int l, r, b, t;
+	bool temperanceActive;
+	bool isActive;
 	
 	ZoneWrapMode wrappingMode;
 	FramePrintType printType;
 	char borderCharacter;
 
-	const char* text;
+	char text[256];
 	ClickableType isClickable;
 	bool hovered;
 	std::function<int(int,int)> CallbackFunction;
@@ -28,12 +31,17 @@ public:
 	void setType(FramePrintType type);
 	void setClickableType(ClickableType type);
 	void setBorder(char border);
+	void setActive(bool active);
+	void setActiveByFrame();
 
 	void print();
+	void clearZone(ClearType c);
 	bool MouseInteraction(int mx, int my, bool clicked);
 	bool Intersect(int _x, int _y);
 
 	void operator= (const char* data);
 	void operator= (std::function<int(int, int)>);
+
+	void addTyping(char c);
 };
 

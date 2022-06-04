@@ -42,6 +42,16 @@ void Game::MouseClick()
 			mouse_Left_down = false;
 			eventOnce = false;
 		}
+
+		if (rec.EventType == KEY_EVENT)
+		{
+			if (rec.Event.KeyEvent.bKeyDown)
+			{
+				inputChar = rec.Event.KeyEvent.uChar.AsciiChar;
+				newCharInputed = true;
+			}
+
+		}
 		SleepEx(25, TRUE);
 
 	}

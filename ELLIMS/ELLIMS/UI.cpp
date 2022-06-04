@@ -4,6 +4,7 @@
 char Game::FrameBuffer[120][35] = {};
 char Game::DoubleFrameBuffer[120][35] = {};
 
+
 Game::Game()
 {
 }
@@ -57,8 +58,16 @@ void Game::gameEnded()
 
 void Game::print(const char* data, int x, int y)
 {
-	if (SCREEN_WIDTH - x > strlen(data))
+	int trackerX = x;
+	int trackerY = y;
+
+	int tracs = 0;
+	while (strlen(data) > tracs)
 	{
-		strcpy_s(&DoubleFrameBuffer[x][y], SCREEN_WIDTH - x, data);
+		Game::DoubleFrameBuffer[trackerX][trackerY] = data[tracs];
+		trackerX++;
+
+		tracs++;
 	}
+
 }
