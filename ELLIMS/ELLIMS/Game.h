@@ -1,7 +1,9 @@
 #pragma once
 #include <atomic>
 #include "Scene.h"
+#include "Network.h"
 #include "Turboc.h"
+#include "Player.h"
 
 class Game
 {
@@ -10,12 +12,16 @@ private:
 	Scene nowScene;
 	static Zone* focusedZone;
 
+	Player player;
+
 public:
 	Game();
 
 	static void InitUISetting();
 
 	int GameStart();
+	void PacketProcess();
+
 	static void GameFrameAdvance();
 	static void gameEnded();
 
@@ -40,5 +46,8 @@ public:
 
 	static void print(const char* data, int x, int y);
 
+	//---------네트워크
+	static Network network;
+	static bool isGameEnded();
 };
 

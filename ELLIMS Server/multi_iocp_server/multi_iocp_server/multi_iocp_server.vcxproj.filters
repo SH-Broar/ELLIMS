@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="include\lauxlib.h">
+      <Filter>스크립트\라이브러리</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lua.h">
+      <Filter>스크립트\라이브러리</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lua.hpp">
+      <Filter>스크립트\라이브러리</Filter>
+    </ClInclude>
+    <ClInclude Include="include\luaconf.h">
+      <Filter>스크립트\라이브러리</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lualib.h">
+      <Filter>스크립트\라이브러리</Filter>
+    </ClInclude>
+    <ClInclude Include="protocol.h">
+      <Filter>헤더</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="소스">
+      <UniqueIdentifier>{6300b272-b6ed-44df-8b75-3d1281212704}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더">
+      <UniqueIdentifier>{7f7e8799-15e9-4185-b08b-7fc677a4edf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="스크립트">
+      <UniqueIdentifier>{0eff849f-fbc3-46d4-9bde-8768053e1a15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="스크립트\라이브러리">
+      <UniqueIdentifier>{437e17ec-13f1-4862-bfc3-ab9f21fa7fda}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lua54.lib">
+      <Filter>스크립트\라이브러리</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>소스</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="hello.lua">
+      <Filter>스크립트</Filter>
+    </None>
+  </ItemGroup>
+</Project>

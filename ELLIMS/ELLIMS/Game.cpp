@@ -8,12 +8,16 @@ Zone* Game::focusedZone = nullptr;
 int Game::GameStart()
 {
 	//여기서 초기화
+	network.NetworkCodex();
 	SleepEx(25, TRUE);
 
 	nowScene.changeScene(SceneName::TITLE);
 
 	while (true)
 	{
+		//Network Process
+		PacketProcess();
+
 		//hover and click
 		nowScene.clickScene(mouse_X, mouse_Y, mouse_Left_down_Event);
 
@@ -47,10 +51,22 @@ int Game::GameStart()
 	return 0;
 }
 
+void Game::PacketProcess()
+{
+	OverlappedExtra over;
+
+
+}
+
 void Game::setFocusZone(Zone& z, ClearType c)
 {
 	z.clearZone(c);
 	z = " ";
 
 	focusedZone = &z;
+}
+
+bool Game::isGameEnded()
+{
+	return gameEnd;
 }

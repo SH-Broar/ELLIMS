@@ -8,10 +8,18 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
-#include <windows.h>
 #include <functional>
 
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <MSWSock.h>
+#include <winsock.h>
+#pragma comment (lib, "ws2_32.lib")
+
+#include <windows.h>
+
 #include "Zone.h"
+#include "..\..\ELLIMS Server\multi_iocp_server\multi_iocp_server\protocol.h"
 
 #define SCREEN_WIDTH 120
 #define SCREEN_HEIGHT 35

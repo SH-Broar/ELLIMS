@@ -61,4 +61,3 @@ COORD Game::getMouseXY()
 {
 	return { static_cast<short>(mouse_X),static_cast<short>(mouse_Y) };
 }
-
