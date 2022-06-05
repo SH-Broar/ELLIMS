@@ -1,21 +1,19 @@
 #pragma once
-#include <atomic>
-#include "Scene.h"
-#include "Network.h"
-#include "Player.h"
 #include "Turboc.h"
 
-enum class PlayerCommand { NONE, UP, DOWN, LEFT, RIGHT};
+class Zone;
+class Player;
+class Scene;
+
+enum class ClearType;
 
 class Game
 {
 private:
 	static bool gameEnd;
 
-	Scene nowScene;
+	static Scene nowScene;
 	static Zone* focusedZone;
-
-	Player player;
 
 public:
 	Game();
@@ -28,6 +26,10 @@ public:
 	static void gameEnded();
 
 	static void setFocusZone(Zone& z, ClearType c);
+
+	static int myPlayerID;
+	static std::unordered_map<int, int> playerIDMapper;
+	static std::vector<Player*> players;
 
 
 	//-------¿ÜºÎ
@@ -56,8 +58,10 @@ public:
 	static bool isGameEnded();
 	static void printDebug(const char* data, const char* name = nullptr);
 	static void clearDebug();
+	static void networkT();
 
 	static bool networkConnected;
+	static bool ingame;
 
 	//----
 private:

@@ -1,13 +1,14 @@
 #include "Network.h"
 #include "Game.h"
+#include "Player.h"
 
 HANDLE Network::g_h_iocp;
 SOCKET Network::g_c_socket;
 OverlappedExtra Network::recv_over;
 
 unsigned char Network::packet_buf[BUF_SIZE] = {};
-int Network::prev_packet_data=0;
-int Network::curr_packet_size=0;
+int Network::prev_packet_data = 0;
+int Network::curr_packet_size = 0;
 
 void Network::error_display(const char* msg, int err_no)
 {
@@ -42,11 +43,11 @@ void Network::NetworkCodex()
 {
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
-	
+
 	g_h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	//
 	g_c_socket = WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-	
+
 	SOCKADDR_IN server_addr;
 	ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -64,7 +65,6 @@ void Network::NetworkCodex()
 	{
 		Game::networkConnected = true;
 	}
-
 	recv_over._comp_type = OP_RECV;
 	recv_over._wsabuf.buf = reinterpret_cast<CHAR*>(recv_over._overlapped_buf);
 	recv_over._wsabuf.len = sizeof(recv_over._overlapped_buf);
@@ -126,10 +126,10 @@ void Network::PacketProcess()
 
 	if (FALSE == ret) {
 
-			Game::printDebug("FAILED", "GQCS");
-			return;
-			//Game::gameEnded();
-		//int err_no = WSAGetLastError();
+		Game::printDebug("FAILED", "GQCS");
+		return;
+		//Game::gameEnded();
+	//int err_no = WSAGetLastError();
 
 	}
 	if (0 == io_size) {
@@ -137,7 +137,7 @@ void Network::PacketProcess()
 		Game::gameEnded();
 		return;
 	}
-
+	
 	switch (cross_over->_comp_type)
 	{
 	case OP_SEND:
@@ -156,7 +156,7 @@ void Network::PacketProcess()
 				unsigned char packet[BUF_SIZE];
 				memcpy(packet, packet_buf, pr_size);
 				memcpy(packet + pr_size, buf, psize - pr_size);
-				
+
 				//패킷 처리
 				RecvPacketProcess(packet);
 
@@ -184,11 +184,12 @@ void Network::PacketProcess()
 			}
 		}
 	}
-		break;
+	break;
 	case OP_PLAYER_MOVE:
 		delete over;
 		break;
 	}
+
 }
 
 void Network::RecvPacketProcess(unsigned char packet[])
@@ -197,7 +198,15 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	case SC_LOGIN_INFO:
 	{
 		SC_LOGIN_INFO_PACKET* login_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
-		Game::printDebug("SUCCESS","LOGIN");
+		Game::myPlayerID = 0;
+		Game::playerIDMapper[login_packet->id] = Game::myPlayerID;
+		Game::players.emplace_back(new Player());
+		Game::players[Game::playerIDMapper[login_packet->id]]->p();
+		Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
+		Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
+		Game::ingame = true;
+		Game::printDebug("SUCCESS", "LOGIN");
+
 	}
 	break;
 	case SC_ADD_PLAYER:

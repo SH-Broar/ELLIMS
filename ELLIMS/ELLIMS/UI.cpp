@@ -1,11 +1,19 @@
 #include <iostream>
 #include "Game.h"
+#include "Player.h"
+#include "Scene.h"
+#include "Zone.h"
 
 char Game::FrameBuffer[120][35] = {};
 char Game::DoubleFrameBuffer[120][35] = {};
 char Game::DebugFrameBuffer[120][35] = {};
 
 int Game::debugNum = 0;
+
+Scene Game::nowScene;
+int Game::myPlayerID;
+std::unordered_map<int, int>  Game::playerIDMapper;
+std::vector<Player*>  Game::players;
 
 Game::Game()
 {
@@ -14,6 +22,7 @@ Game::Game()
 void Game::InitUISetting()
 {
 	setcursortype(CURSOR_TYPE::NOCURSOR);
+
 
 	for (int i = 0; i < SCREEN_WIDTH; i++)
 	{

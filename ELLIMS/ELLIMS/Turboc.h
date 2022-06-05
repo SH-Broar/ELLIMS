@@ -8,7 +8,11 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
+#include <atomic>
 #include <functional>
+#include <vector>
+#include <array>
+#include <unordered_map>
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -18,13 +22,20 @@
 
 #include <windows.h>
 
-#include "Zone.h"
+enum class PlayerCommand { NONE, UP, DOWN, LEFT, RIGHT };
+
 #include "..\..\ELLIMS Server\multi_iocp_server\multi_iocp_server\protocol.h"
+
+#include "Network.h"
+
+
 
 #define SCREEN_WIDTH 120
 #define SCREEN_HEIGHT 35
 
 enum class CURSOR_TYPE { NOCURSOR, SOLIDCURSOR, NORMALCURSOR } ;
+
+
 void clrscr();
 void gotoxy(int x, int y);
 int wherex();

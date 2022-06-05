@@ -1,6 +1,8 @@
 #pragma once
 #include "Turboc.h"
 
+class Game;
+class Player;
 
 enum COMP_TYPE { OP_RECV, OP_SEND, OP_PLAYER_MOVE };
 

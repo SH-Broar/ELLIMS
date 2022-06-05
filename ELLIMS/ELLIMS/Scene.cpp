@@ -1,8 +1,13 @@
 #include "Scene.h"
 #include "Game.h"
+#include "Zone.h"
+#include "Player.h"
+
 Scene::Scene()
 {
 	areas.clear();
+	updatable = false;
+	nowScene = SceneName::TITLE;
 }
 
 void Scene::changeScene(SceneName sceneName)
@@ -11,10 +16,13 @@ void Scene::changeScene(SceneName sceneName)
 	Zone all{};
 	all.clearZone(ClearType::FULL);
 
+	nowScene = sceneName;
+
 	switch (sceneName)
 	{
 	case SceneName::TITLE:
 	{
+		updatable = false;
 		areas.emplace_back(SCREEN_WIDTH / 2 - 11, SCREEN_WIDTH / 2 + 13, 10, 10, ClickableType::NONE);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 19, 19, ClickableType::HOVER);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 22, 22, ClickableType::HOVER);
@@ -66,6 +74,7 @@ void Scene::changeScene(SceneName sceneName)
 			Network::NetworkCodex();
 			while (!Game::networkConnected) { SleepEx(30, TRUE); }
 			changeScene(SceneName::INGAME);
+			
 			return 0;
 		};
 
@@ -73,13 +82,30 @@ void Scene::changeScene(SceneName sceneName)
 	break;
 	case SceneName::INGAME:
 	{
+		updatable = true;
 		areas.emplace_back();
 		areas[0].setType(FramePrintType::FULL);
-
 	}
 		break;
 	default:
 		break;
+	}
+}
+
+void Scene::UpdateScene(Player& p)
+{
+	if (updatable)
+	{
+		switch (nowScene)
+		{
+		case SceneName::INGAME:
+		{
+			areas[0] = mapCalc(p.x, p.y);
+		}
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -108,4 +134,41 @@ void Scene::printDebugConsole()
 	Zone all{};
 	all.clearZone(ClearType::FULL);
 
+}
+
+const char* Scene::mapCalc(int px, int py)
+{
+	char tmp[SCREEN_WIDTH * SCREEN_HEIGHT] = {};
+	char basemap[SCREEN_WIDTH][SCREEN_HEIGHT] = {};
+
+	for (int i = 0; i < SCREEN_WIDTH-2; ++i)
+	{
+		for (int j = 0; j < SCREEN_HEIGHT-2; ++j)
+		{
+			int tile_x = i + px - (SCREEN_WIDTH / 2-1);
+			int tile_y = j + py - (SCREEN_HEIGHT / 2-1);
+
+			basemap[i][j] = '.';
+			if ((tile_x < 0) || (tile_y < 0)) continue;
+			if ((tile_x >= W_WIDTH) || (tile_y >= W_HEIGHT)) continue;
+
+			basemap[i][j] = '-';
+			/*if ((tile_x + tile_y * 3) < 4) {
+				basemap[i + j * SCREEN_WIDTH] = '-';
+			}
+			else
+			{
+				basemap[i + j * SCREEN_WIDTH] = '+';
+			}*/
+		}
+	}
+	for (int i = 0; i < SCREEN_WIDTH-2; ++i)
+	{
+		for (int j = 0; j < SCREEN_HEIGHT-2; ++j)
+		{
+			tmp[i+j * (SCREEN_WIDTH-2)] = basemap[i][j];
+		}
+	}
+
+	return tmp;
 }

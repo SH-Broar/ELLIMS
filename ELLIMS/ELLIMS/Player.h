@@ -1,15 +1,28 @@
 #pragma once
-class Player
+#include "Turboc.h"
+#include "Zone.h"
+
+class Game;
+
+class Player : public Zone
 {
 public:
-	bool isActive;
+	Player();
+
+public:
+	int pID;
 	char characterIcon;
+	char name[10];
 
 	int x;
 	int y;
 
-	Player();
-	Player(bool isThisPlayer);
+	void p();
+	void InitZone();
 
+	virtual void print() override;
 
+	void setPlayerActive(bool active);
+	void SetPlayersRegion(int px, int py);
+	void ProcessCommand(PlayerCommand c);
 };

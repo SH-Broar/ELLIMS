@@ -89,7 +89,6 @@ void Game::MouseClick()
 							if (debugKeyInput)
 								Game::printDebug("VIRTUAL", "KEY");
 						}
-						newCommandInputed = PlayerCommand::NONE;
 						break;
 					}
 
