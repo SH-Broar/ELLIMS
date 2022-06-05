@@ -62,7 +62,9 @@ void Scene::changeScene(SceneName sceneName)
 		};
 
 		areas[5] = [&](int mx, int my) -> int {
-			Game::print("ID / Password Invaild!", SCREEN_WIDTH / 2 - 10, 26);
+			Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
+			Network::NetworkCodex();
+			while (!Game::networkConnected) { SleepEx(30, TRUE); }
 			changeScene(SceneName::INGAME);
 			return 0;
 		};
@@ -105,6 +107,5 @@ void Scene::printDebugConsole()
 {
 	Zone all{};
 	all.clearZone(ClearType::FULL);
-
 
 }

@@ -38,9 +38,14 @@ public:
 	~Network();
 
 	static void NetworkCodex();
-	static void SendPacket(void* packet);
 	static void PacketProcess();
+
+private:
+	static void SendPacket(void* packet);
 	static void RecvPacketProcess(unsigned char packet[]);
+
+public:
+
 
 private:
 	static HANDLE g_h_iocp;

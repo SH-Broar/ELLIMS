@@ -10,6 +10,7 @@ class Game
 {
 private:
 	static bool gameEnd;
+
 	Scene nowScene;
 	static Zone* focusedZone;
 
@@ -21,7 +22,6 @@ public:
 	static void InitUISetting();
 
 	int GameStart();
-	void PacketProcess();
 
 	static void GameFrameAdvance();
 	static void gameEnded();
@@ -49,14 +49,18 @@ public:
 	static void print(const char* data, int x, int y);
 
 	//---------네트워크
-	static Network network;
+public:
+	//static Network network;
 	static bool isGameEnded();
-
-	//----
-	static bool debugConsole;
-	static int debugNum;
 	static void printDebug(const char* data, const char* name = nullptr);
 	static void clearDebug();
+
+	static bool networkConnected;
+
+	//----
+private:
+	static int debugNum;
+	static bool debugConsole;
 
 };
 

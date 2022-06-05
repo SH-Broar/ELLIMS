@@ -21,7 +21,6 @@ void Game::InitUISetting()
 		{
 			FrameBuffer[i][j] = ' ';
 			DoubleFrameBuffer[i][j] = ' ';
-			DebugFrameBuffer[i][j] = ' ';
 		}
 		std::cout << FrameBuffer[i];
 	}
@@ -131,5 +130,12 @@ void Game::clearDebug()
 			Game::DebugFrameBuffer[i][j] = ' ';
 		}
 	}
+
+	constexpr char dg[11] = "DEBUG PAGE";
+	for (int i = 0; i < 11; ++i)
+	{
+		Game::DebugFrameBuffer[i][0] = dg[i];
+	}
+
 	debugNum = 0;
 }

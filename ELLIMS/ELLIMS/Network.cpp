@@ -45,8 +45,6 @@ void Network::NetworkCodex()
 	
 	g_h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	//
-
-
 	g_c_socket = WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 	
 	SOCKADDR_IN server_addr;
@@ -61,6 +59,10 @@ void Network::NetworkCodex()
 		int err_no = WSAGetLastError();
 		Game::printDebug("CONNETION ERROR", "IOCP");
 		//error_display("CONNETION ERROR", err_no);
+	}
+	else
+	{
+		Game::networkConnected = true;
 	}
 
 	recv_over._comp_type = OP_RECV;
@@ -131,6 +133,7 @@ void Network::PacketProcess()
 
 	}
 	if (0 == io_size) {
+		Game::printDebug("CONNECTION LOST", "GQCS");
 		Game::gameEnded();
 		return;
 	}
@@ -143,18 +146,20 @@ void Network::PacketProcess()
 	case OP_RECV:
 	{
 		//패킷 재조립 (수정 필요)
-
 		char* buf = recv_over._overlapped_buf;
 		unsigned psize = curr_packet_size;
 		unsigned pr_size = prev_packet_data;
 		while (io_size > 0) {
 			if (0 == psize) psize = buf[0];
 			if (io_size + pr_size >= psize) {
-				// 지금 패킷 완성 가능
+				// 패킷 완성 가능
 				unsigned char packet[BUF_SIZE];
 				memcpy(packet, packet_buf, pr_size);
 				memcpy(packet + pr_size, buf, psize - pr_size);
+				
+				//패킷 처리
 				RecvPacketProcess(packet);
+
 				io_size -= psize - pr_size;
 				buf += psize - pr_size;
 				psize = 0; pr_size = 0;
@@ -173,6 +178,7 @@ void Network::PacketProcess()
 			int err_no = WSAGetLastError();
 			if (err_no != WSA_IO_PENDING)
 			{
+				Game::printDebug("FAILED!", "LOGIN");
 				error_display("RECV ERROR", err_no);
 				Game::gameEnded();
 			}
@@ -192,7 +198,6 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	{
 		SC_LOGIN_INFO_PACKET* login_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
 		Game::printDebug("SUCCESS","LOGIN");
-
 	}
 	break;
 	case SC_ADD_PLAYER:

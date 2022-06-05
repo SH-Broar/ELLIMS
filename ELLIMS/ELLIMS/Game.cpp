@@ -1,22 +1,27 @@
 #include "Game.h"
 
-bool Game::gameEnd = false;
-std::atomic<bool> Game::newCharInputed;
 char Game::inputChar;
+bool Game::networkConnected = false;
+bool Game::gameEnd = false;
 Zone* Game::focusedZone = nullptr;
+std::atomic<bool> Game::newCharInputed;
+
 
 int Game::GameStart()
 {
 	//여기서 초기화
-	network.NetworkCodex();
-	SleepEx(25, TRUE);
+	clearDebug();
 
+	SleepEx(25, TRUE);
 	nowScene.changeScene(SceneName::TITLE);
 
 	while (true)
 	{
-		//Network Process
-		Network::PacketProcess();
+		if (networkConnected)
+		{
+			//Network Process
+			Network::PacketProcess();
+		}
 
 		//hover and click
 		nowScene.clickScene(mouse_X, mouse_Y, mouse_Left_down_Event);
@@ -53,12 +58,6 @@ int Game::GameStart()
 		SleepEx(25, TRUE);
 	}
 	return 0;
-}
-
-void Game::PacketProcess()
-{
-
-
 }
 
 void Game::setFocusZone(Zone& z, ClearType c)

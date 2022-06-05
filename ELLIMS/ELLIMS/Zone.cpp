@@ -165,45 +165,7 @@ void Zone::clearZone(ClearType c)
 		}
 		return;
 	}
-	/*if (c == ClearType::FULL)
-	{
-		int x = l - 1;
-		int y = b - 1;
-
-		int mx = r + 1;
-		int my = t + 1;
-
-		if (printType != FramePrintType::NONE)
-		{
-			for (int i = x; i <= mx; i++)
-			{
-				for (int j = y; j <= my; j++)
-				{
-					if (i >= 0 && i < SCREEN_WIDTH)
-					{
-						if (j >= 0 && j < SCREEN_HEIGHT)
-						{
-							if (printType == FramePrintType::FULL)
-							{
-								if (i == x || i == mx || j == y || j == my)
-								{
-									Game::DoubleFrameBuffer[i][j] = ' ';
-								}
-							}
-							else if (printType == FramePrintType::POINT)
-							{
-								if ((i == x || i == mx) && (j == y || j == my))
-								{
-									Game::DoubleFrameBuffer[i][j] = ' ';
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}*/
-
+	
 	int trackerX = l;
 	int trackerY = b;
 
