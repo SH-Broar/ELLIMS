@@ -5,6 +5,7 @@ int Game::mouse_X = 0;
 int Game::mouse_Y = 0;
 
 bool Game::debugConsole;
+bool Game::debugKeyInput;
 
 std::atomic<bool> Game::mouse_Left_down;
 std::atomic<bool> Game::mouse_Left_down_Event;
@@ -49,32 +50,56 @@ void Game::MouseClick()
 		{
 			if (rec.Event.KeyEvent.bKeyDown)
 			{
-				switch (rec.Event.KeyEvent.wVirtualKeyCode)
+				if (rec.Event.KeyEvent.wVirtualKeyCode)
 				{
-				case VK_F1:
-					Game::debugConsole = true;
-					break;
-				case VK_F5:
-					Game::clearDebug();
-					break;
-				case VK_UP:
-					Game::printDebug("KEY UP");
-					break;
-				case VK_DOWN:
-					Game::printDebug("KEY DOWN");
-					break;
-				case VK_LEFT:
-					Game::printDebug("KEY LEFT");
-					break;
-				case VK_RIGHT:
-					Game::printDebug("KEY RIGHT");
-					break;
-				}
+					switch (rec.Event.KeyEvent.wVirtualKeyCode)
+					{
+					case VK_F1:
+						Game::debugConsole = true;
+						break;
+					case VK_F5:
+						Game::clearDebug();
+						break;
+					case VK_F12:
+						debugKeyInput ^= true;
+						break;
+					case VK_UP:
+						if (debugKeyInput)
+							Game::printDebug("UP", "KEY");
+						newCommandInputed = PlayerCommand::UP;
+						break;
+					case VK_DOWN:
+						if (debugKeyInput)
+							Game::printDebug("DOWN", "KEY");
+						newCommandInputed = PlayerCommand::DOWN;
+						break;
+					case VK_LEFT:
+						if (debugKeyInput)
+							Game::printDebug("LEFT", "KEY");
+						newCommandInputed = PlayerCommand::LEFT;
+						break;
+					case VK_RIGHT:
+						if (debugKeyInput)
+							Game::printDebug("RIGHT", "KEY");
+						newCommandInputed = PlayerCommand::RIGHT;
+						break;
+					default:
+						if (!rec.Event.KeyEvent.uChar.AsciiChar)
+						{
+							if (debugKeyInput)
+								Game::printDebug("VIRTUAL", "KEY");
+						}
+						newCommandInputed = PlayerCommand::NONE;
+						break;
+					}
 
-				if (rec.Event.KeyEvent.uChar.AsciiChar)
-				{
-					inputChar = rec.Event.KeyEvent.uChar.AsciiChar;
-					newCharInputed = true;
+					if (rec.Event.KeyEvent.uChar.AsciiChar)
+					{
+						inputChar = rec.Event.KeyEvent.uChar.AsciiChar;
+						newCharInputed = true;
+						if (debugKeyInput)
+							Game::printDebug(&inputChar, "KEY");
+					}
 				}
 			}
 			else if (!rec.Event.KeyEvent.bKeyDown)
@@ -86,9 +111,8 @@ void Game::MouseClick()
 					break;
 				}
 			}
+			SleepEx(25, TRUE);
 		}
-		SleepEx(25, TRUE);
-
 	}
 }
 

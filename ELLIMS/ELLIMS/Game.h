@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Turboc.h"
 
+enum class PlayerCommand { NONE, UP, DOWN, LEFT, RIGHT};
 
 class Game
 {
@@ -37,6 +38,7 @@ private:
 	static std::atomic<bool> mouse_Left_down;
 	static std::atomic<bool> mouse_Left_down_Event;
 	static std::atomic<bool> newCharInputed;
+	static std::atomic<PlayerCommand> newCommandInputed;
 
 public:
 	static void MouseClick();
@@ -61,6 +63,7 @@ public:
 private:
 	static int debugNum;
 	static bool debugConsole;
+	static bool debugKeyInput;
 
 };
 

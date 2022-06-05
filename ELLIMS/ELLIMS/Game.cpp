@@ -5,6 +5,7 @@ bool Game::networkConnected = false;
 bool Game::gameEnd = false;
 Zone* Game::focusedZone = nullptr;
 std::atomic<bool> Game::newCharInputed;
+std::atomic<PlayerCommand> Game::newCommandInputed;
 
 
 int Game::GameStart()
@@ -43,6 +44,7 @@ int Game::GameStart()
 			nowScene.printDebugConsole();
 		else
 			nowScene.printScene();
+
 		// 스탯 출력
 		// 채팅 출력
 
