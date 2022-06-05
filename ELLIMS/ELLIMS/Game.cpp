@@ -16,7 +16,7 @@ int Game::GameStart()
 	while (true)
 	{
 		//Network Process
-		PacketProcess();
+		Network::PacketProcess();
 
 		//hover and click
 		nowScene.clickScene(mouse_X, mouse_Y, mouse_Left_down_Event);
@@ -57,7 +57,6 @@ int Game::GameStart()
 
 void Game::PacketProcess()
 {
-	OverlappedExtra over;
 
 
 }

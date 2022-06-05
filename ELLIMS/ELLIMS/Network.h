@@ -2,29 +2,29 @@
 #include "Turboc.h"
 
 
-enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_PLAYER_MOVE };
+enum COMP_TYPE { OP_RECV, OP_SEND, OP_PLAYER_MOVE };
 
 class OverlappedExtra {
 public:
 	WSAOVERLAPPED _over;
 	WSABUF _wsabuf;
-	char _send_buf[BUF_SIZE];
+	char _overlapped_buf[BUF_SIZE];
 	COMP_TYPE _comp_type;
 	int target_id;
 	OverlappedExtra()
 	{
 		_wsabuf.len = BUF_SIZE;
-		_wsabuf.buf = _send_buf;
+		_wsabuf.buf = _overlapped_buf;
 		_comp_type = OP_RECV;
 		ZeroMemory(&_over, sizeof(_over));
 	}
 	OverlappedExtra(char* packet)
 	{
 		_wsabuf.len = packet[0];
-		_wsabuf.buf = _send_buf;
+		_wsabuf.buf = _overlapped_buf;
 		ZeroMemory(&_over, sizeof(_over));
 		_comp_type = OP_SEND;
-		memcpy(_send_buf, packet, packet[0]);
+		memcpy(_overlapped_buf, packet, packet[0]);
 	}
 };
 
@@ -39,15 +39,16 @@ public:
 
 	static void NetworkCodex();
 	static void SendPacket(void* packet);
-
+	static void PacketProcess();
+	static void RecvPacketProcess(unsigned char packet[]);
 
 private:
 	static HANDLE g_h_iocp;
 	static SOCKET g_c_socket;
 	static OverlappedExtra recv_over;
 
-	unsigned char packet_buf[BUF_SIZE];
-	int prev_packet_data;
-	int curr_packet_size;
+	static unsigned char packet_buf[BUF_SIZE];
+	static int prev_packet_data;
+	static int curr_packet_size;
 
 };
