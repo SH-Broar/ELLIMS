@@ -3,7 +3,9 @@
 
 char Game::FrameBuffer[120][35] = {};
 char Game::DoubleFrameBuffer[120][35] = {};
+char Game::DebugFrameBuffer[120][35] = {};
 
+int Game::debugNum = 0;
 
 Game::Game()
 {
@@ -19,7 +21,7 @@ void Game::InitUISetting()
 		{
 			FrameBuffer[i][j] = ' ';
 			DoubleFrameBuffer[i][j] = ' ';
-			
+			DebugFrameBuffer[i][j] = ' ';
 		}
 		std::cout << FrameBuffer[i];
 	}
@@ -37,11 +39,23 @@ void Game::GameFrameAdvance()
 		{
 			for (int j = 0; j < SCREEN_HEIGHT; j++)
 			{
-				if (FrameBuffer[i][j] != DoubleFrameBuffer[i][j])
+				if (debugConsole)
 				{
-					FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
-					gotoxy(i, j);
-					std::cout << DoubleFrameBuffer[i][j];
+					if (FrameBuffer[i][j] != DebugFrameBuffer[i][j])
+					{
+						FrameBuffer[i][j] = DebugFrameBuffer[i][j];
+						gotoxy(i, j);
+						std::cout << DebugFrameBuffer[i][j];
+					}
+				}
+				else
+				{
+					if (FrameBuffer[i][j] != DoubleFrameBuffer[i][j])
+					{
+						FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
+						gotoxy(i, j);
+						std::cout << DoubleFrameBuffer[i][j];
+					}
 				}
 			}
 		}
@@ -70,4 +84,52 @@ void Game::print(const char* data, int x, int y)
 		tracs++;
 	}
 
+}
+
+void Game::printDebug(const char* data, const char* name)
+{
+	int trackerX = 5 + debugNum/(SCREEN_HEIGHT / 2 - 1) * 30;
+	int trackerY = 2 + (debugNum%(SCREEN_HEIGHT / 2 - 1))*2;
+
+	int tracs = 0;
+
+	char tmp[SCREEN_WIDTH];
+
+	if (name != nullptr)
+	{
+		sprintf(tmp, "%d", debugNum);
+		strcat(tmp, ". ");
+		strcat(tmp, name);
+		strcat(tmp, " : ");
+		strcat(tmp, data);
+	}
+	else
+	{
+		sprintf(tmp, "%d", debugNum);
+		strcat(tmp, ". ");
+		strcat(tmp, data);
+	}
+
+	while (strlen(tmp) > tracs)
+	{
+		Game::DebugFrameBuffer[trackerX][trackerY] = tmp[tracs];
+		trackerX++;
+
+		tracs++;
+	}
+
+	debugNum++;
+
+}
+
+void Game::clearDebug()
+{
+	for (int i = 0; i < SCREEN_WIDTH; ++i)
+	{
+		for (int j = 0; j < SCREEN_HEIGHT; ++j)
+		{
+			Game::DebugFrameBuffer[i][j] = ' ';
+		}
+	}
+	debugNum = 0;
 }

@@ -34,7 +34,10 @@ int Game::GameStart()
 		}
 		//contents
 		// 맵 출력
-		nowScene.printScene();
+		if (debugConsole)
+			nowScene.printDebugConsole();
+		else
+			nowScene.printScene();
 		// 스탯 출력
 		// 채팅 출력
 
@@ -46,6 +49,7 @@ int Game::GameStart()
 			break;
 		mouse_Left_down_Event = false;
 		newCharInputed = false;
+
 		SleepEx(25, TRUE);
 	}
 	return 0;

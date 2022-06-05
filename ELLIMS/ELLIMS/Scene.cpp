@@ -8,19 +8,22 @@ Scene::Scene()
 void Scene::changeScene(SceneName sceneName)
 {
 	areas.clear();
+	Zone all{};
+	all.clearZone(ClearType::FULL);
+
 	switch (sceneName)
 	{
 	case SceneName::TITLE:
 	{
-		areas.emplace_back(SCREEN_WIDTH/2 - 6, SCREEN_WIDTH/2 + 10, 10, 10, ClickableType::NONE);
-		areas.emplace_back(SCREEN_WIDTH/2 - 2, SCREEN_WIDTH/2 + 10, 19, 19, ClickableType::HOVER);
-		areas.emplace_back(SCREEN_WIDTH/2 - 2, SCREEN_WIDTH/2 + 10, 22, 22, ClickableType::HOVER);
+		areas.emplace_back(SCREEN_WIDTH / 2 - 11, SCREEN_WIDTH / 2 + 13, 10, 10, ClickableType::NONE);
+		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 19, 19, ClickableType::HOVER);
+		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 22, 22, ClickableType::HOVER);
 
 		areas.emplace_back(SCREEN_WIDTH / 2 - 5, SCREEN_WIDTH / 2 + 5, 19, 19, ClickableType::BUTTON);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 5, SCREEN_WIDTH / 2 + 5, 23, 23, ClickableType::BUTTON);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 28, 28, ClickableType::HOVER);
 
-		areas[0] = " E L L I M S ";
+		areas[0] = "Game Server Project #7";
 		areas[1] = "Start";
 		areas[2] = "Close";
 
@@ -49,7 +52,7 @@ void Scene::changeScene(SceneName sceneName)
 		};
 
 		areas[3] = [&](int mx, int my) -> int {
-			Game::setFocusZone(areas[3],ClearType::TEXT);
+			Game::setFocusZone(areas[3], ClearType::TEXT);
 			return 0;
 		};
 
@@ -60,12 +63,18 @@ void Scene::changeScene(SceneName sceneName)
 
 		areas[5] = [&](int mx, int my) -> int {
 			Game::print("ID / Password Invaild!", SCREEN_WIDTH / 2 - 10, 26);
+			changeScene(SceneName::INGAME);
 			return 0;
 		};
 
 	}
-		break;
+	break;
 	case SceneName::INGAME:
+	{
+		areas.emplace_back();
+		areas[0].setType(FramePrintType::FULL);
+
+	}
 		break;
 	default:
 		break;
@@ -90,4 +99,12 @@ void Scene::clickScene(int mx, int my, bool clicked)
 	{
 		z.setActiveByFrame();
 	}
+}
+
+void Scene::printDebugConsole()
+{
+	Zone all{};
+	all.clearZone(ClearType::FULL);
+
+
 }

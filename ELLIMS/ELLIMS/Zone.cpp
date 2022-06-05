@@ -1,7 +1,7 @@
 #include "Zone.h"
 #include "Game.h"
 
-Zone::Zone() : l(0), r(0), t(0), b(0), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), isClickable(ClickableType::NONE), CallbackFunction(nullptr), isActive(true), temperanceActive(true) {};
+Zone::Zone() : l(1), r(SCREEN_WIDTH-2), t(SCREEN_HEIGHT-2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), isClickable(ClickableType::NONE), CallbackFunction(nullptr), isActive(true), temperanceActive(true) {};
 Zone::Zone(int _l, int _r, int _b, int _t, ClickableType Clickable) : l(_l), r(_r), b(_b), t(_t), isClickable(Clickable), hovered(false), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), borderCharacter('*'), text(""), CallbackFunction(nullptr), isActive(true), temperanceActive(true)
 {};
 
@@ -141,7 +141,31 @@ void Zone::clearZone(ClearType c)
 {
 	if (c == ClearType::NONE)
 		return;
+
 	if (c == ClearType::FULL)
+	{
+		int x = l - 1;
+		int y = b - 1;
+
+		int mx = r + 1;
+		int my = t + 1;
+
+		for (int i = x; i <= mx; i++)
+		{
+			for (int j = y; j <= my; j++)
+			{
+				if (i >= 0 && i < SCREEN_WIDTH)
+				{
+					if (j >= 0 && j < SCREEN_HEIGHT)
+					{
+						Game::DoubleFrameBuffer[i][j] = ' ';
+					}
+				}
+			}
+		}
+		return;
+	}
+	/*if (c == ClearType::FULL)
 	{
 		int x = l - 1;
 		int y = b - 1;
@@ -178,7 +202,7 @@ void Zone::clearZone(ClearType c)
 				}
 			}
 		}
-	}
+	}*/
 
 	int trackerX = l;
 	int trackerY = b;

@@ -15,5 +15,7 @@ public:
 	void changeScene(SceneName sceneName);
 	void printScene();
 	void clickScene(int mx, int my, bool clicked);
+
+	void printDebugConsole();
 };
 

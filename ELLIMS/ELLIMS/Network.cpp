@@ -14,8 +14,8 @@ void Network::error_display(const char* msg, int err_no)
 		NULL, err_no,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&lpMsgBuf, 0, NULL);
-	printf("%s", msg);
-	printf("%S", lpMsgBuf);
+	Game::printDebug(msg);
+	//printf("%S", lpMsgBuf);
 
 	//MessageBox(hWnd, lpMsgBuf, L"ERROR", 0);
 	LocalFree(lpMsgBuf);
@@ -55,7 +55,8 @@ void Network::NetworkCodex()
 	if (WSAConnect(g_c_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr), NULL, NULL, NULL, NULL) != 0)
 	{
 		int err_no = WSAGetLastError();
-		error_display("CONNETION ERROR", err_no);
+		Game::printDebug("CONNETION ERROR", "IOCP");
+		//error_display("CONNETION ERROR", err_no);
 	}
 
 	recv_over._comp_type = OP_RECV;
@@ -76,13 +77,12 @@ void Network::NetworkCodex()
 	SendPacket(&l_packet);
 
 	//RECV LOGIN DATA
-	
 	int ret = WSARecv(g_c_socket, &recv_over._wsabuf, 1, NULL, &recv_flag, &recv_over._over, NULL);
 	if (SOCKET_ERROR == ret) {
 		int err_no = WSAGetLastError();
 		if (err_no != WSA_IO_PENDING)
 		{
-			error_display("RECV ERROR", err_no);
+			Game::printDebug("RECV ERROR", "IOCP");
 		}
 	}
 }
@@ -103,7 +103,7 @@ void Network::SendPacket(void* packet)
 	if (0 != ret) {
 		int err_no = WSAGetLastError();
 		if (WSA_IO_PENDING != err_no)
-			error_display("SEND ERROR", err_no);
+			Game::printDebug("SEND ERROR", "IOCP");
 	}
 	// std::cout << "Send Packet [" << ptype << "] To Client : " << cl << std::endl;
 }

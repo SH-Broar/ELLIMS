@@ -2,8 +2,9 @@
 #include <atomic>
 #include "Scene.h"
 #include "Network.h"
-#include "Turboc.h"
 #include "Player.h"
+#include "Turboc.h"
+
 
 class Game
 {
@@ -43,11 +44,19 @@ public:
 
 	static char FrameBuffer[120][35];
 	static char DoubleFrameBuffer[120][35];
+	static char DebugFrameBuffer[120][35];
 
 	static void print(const char* data, int x, int y);
 
 	//---------네트워크
 	static Network network;
 	static bool isGameEnded();
+
+	//----
+	static bool debugConsole;
+	static int debugNum;
+	static void printDebug(const char* data, const char* name = nullptr);
+	static void clearDebug();
+
 };
 

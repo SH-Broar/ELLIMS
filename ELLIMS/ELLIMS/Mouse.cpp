@@ -4,6 +4,8 @@
 int Game::mouse_X = 0;
 int Game::mouse_Y = 0;
 
+bool Game::debugConsole;
+
 std::atomic<bool> Game::mouse_Left_down;
 std::atomic<bool> Game::mouse_Left_down_Event;
 
@@ -47,10 +49,43 @@ void Game::MouseClick()
 		{
 			if (rec.Event.KeyEvent.bKeyDown)
 			{
-				inputChar = rec.Event.KeyEvent.uChar.AsciiChar;
-				newCharInputed = true;
-			}
+				switch (rec.Event.KeyEvent.wVirtualKeyCode)
+				{
+				case VK_F1:
+					Game::debugConsole = true;
+					break;
+				case VK_F5:
+					Game::clearDebug();
+					break;
+				case VK_UP:
+					Game::printDebug("KEY UP");
+					break;
+				case VK_DOWN:
+					Game::printDebug("KEY DOWN");
+					break;
+				case VK_LEFT:
+					Game::printDebug("KEY LEFT");
+					break;
+				case VK_RIGHT:
+					Game::printDebug("KEY RIGHT");
+					break;
+				}
 
+				if (rec.Event.KeyEvent.uChar.AsciiChar)
+				{
+					inputChar = rec.Event.KeyEvent.uChar.AsciiChar;
+					newCharInputed = true;
+				}
+			}
+			else if (!rec.Event.KeyEvent.bKeyDown)
+			{
+				switch (rec.Event.KeyEvent.wVirtualKeyCode)
+				{
+				case VK_F1:
+					Game::debugConsole = false;
+					break;
+				}
+			}
 		}
 		SleepEx(25, TRUE);
 
