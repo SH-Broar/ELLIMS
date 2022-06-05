@@ -1,6 +1,6 @@
 #include "Zone.h"
 #include "Game.h"
-
+#include <string>
 Zone::Zone() : l(1), r(SCREEN_WIDTH-2), t(SCREEN_HEIGHT-2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), isClickable(ClickableType::NONE), CallbackFunction(nullptr), isActive(true), temperanceActive(true) {};
 Zone::Zone(int _l, int _r, int _b, int _t, ClickableType Clickable) : l(_l), r(_r), b(_b), t(_t), isClickable(Clickable), hovered(false), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), borderCharacter('*'), text(""), CallbackFunction(nullptr), isActive(true), temperanceActive(true)
 {};
@@ -43,7 +43,7 @@ void Zone::setActiveByFrame()
 
 void Zone::operator=(const char* data)
 {
-	strcpy(text, data);
+	strcpy_s(text, data);
 }
 
 void Zone::operator=(std::function<int(int, int)> func)
@@ -53,7 +53,9 @@ void Zone::operator=(std::function<int(int, int)> func)
 
 void Zone::addTyping(char c)
 {
-	strcat(text, &c);
+	std::string t{ c };
+	//Game::printDebug(std::to_string(strlen(text)).c_str(), "length");
+	strcat_s(text, t.c_str());
 }
 
 void Zone::print()

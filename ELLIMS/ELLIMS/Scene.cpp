@@ -23,7 +23,7 @@ void Scene::changeScene(SceneName sceneName)
 	case SceneName::TITLE:
 	{
 		updatable = false;
-		areas.emplace_back(SCREEN_WIDTH / 2 - 11, SCREEN_WIDTH / 2 + 13, 10, 10, ClickableType::NONE);
+		areas.emplace_back(SCREEN_WIDTH / 2 - 6, SCREEN_WIDTH / 2 + 13, 10, 10, ClickableType::NONE);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 19, 19, ClickableType::HOVER);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 22, 22, ClickableType::HOVER);
 
@@ -31,7 +31,7 @@ void Scene::changeScene(SceneName sceneName)
 		areas.emplace_back(SCREEN_WIDTH / 2 - 5, SCREEN_WIDTH / 2 + 5, 23, 23, ClickableType::BUTTON);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 28, 28, ClickableType::HOVER);
 
-		areas[0] = "Game Server Project #7";
+		areas[0] = " E L L I M S ";
 		areas[1] = "Start";
 		areas[2] = "Close";
 
@@ -83,7 +83,7 @@ void Scene::changeScene(SceneName sceneName)
 	case SceneName::INGAME:
 	{
 		updatable = true;
-		areas.emplace_back();
+		areas.emplace_back(1, (SCREEN_HEIGHT-2)*2, 1, SCREEN_HEIGHT-2);
 		areas[0].setType(FramePrintType::FULL);
 	}
 		break;
@@ -141,35 +141,30 @@ void Scene::printDebugConsole()
 
 const char* Scene::mapCalc(int px, int py)
 {
-	char tmp[SCREEN_WIDTH * SCREEN_HEIGHT] = {};
-	char basemap[SCREEN_WIDTH][SCREEN_HEIGHT] = {};
+	char tmp[SCREEN_HEIGHT*2 * SCREEN_HEIGHT] = {};
+	char basemap[SCREEN_HEIGHT*2][SCREEN_HEIGHT] = {};
 
-	for (int i = 0; i < SCREEN_WIDTH-2; ++i)
+	for (int i = 0; i < (SCREEN_HEIGHT-2)*2; ++i)
 	{
 		for (int j = 0; j < SCREEN_HEIGHT-2; ++j)
 		{
-			int tile_x = i + px - (SCREEN_WIDTH / 2-1);
+			int tile_x = i + px - (SCREEN_HEIGHT-2);
 			int tile_y = j + py - (SCREEN_HEIGHT / 2-1);
 
 			basemap[i][j] = ' ';
-			if ((tile_x < 0) || (tile_y < 0)) continue;
-			if ((tile_x >= W_WIDTH) || (tile_y >= W_HEIGHT)) continue;
+			if (tile_x>0 && tile_y > 0 && tile_y < W_HEIGHT - 1 && tile_x < W_WIDTH - 1 && (tile_x*5 + tile_y) % 7 == 0) basemap[i][j] = '.';
+			if ((tile_x == 0 && tile_y > 0) || (tile_y == 0 && tile_x>0)) basemap[i][j] = '|';
+			if ((tile_x == W_WIDTH-1 && tile_y < W_HEIGHT-1) || (tile_y == W_HEIGHT-1 && tile_x < W_WIDTH-1)) basemap[i][j] = '-';
 
-			
-			if (((tile_x + tile_y * 10) % 15) < 2) {
-				basemap[i][j] = '_';
-			}
-			else
-			{
-				basemap[i][j] = '.';
-			}
+
+
 		}
 	}
-	for (int i = 0; i < SCREEN_WIDTH-2; ++i)
+	for (int i = 0; i < (SCREEN_HEIGHT -2)*2; ++i)
 	{
 		for (int j = 0; j < SCREEN_HEIGHT-2; ++j)
 		{
-			tmp[i+j * (SCREEN_WIDTH-2)] = basemap[i][j];
+			tmp[i+j * (SCREEN_HEIGHT -2)*2] = basemap[i][j];
 		}
 	}
 

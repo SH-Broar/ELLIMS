@@ -79,7 +79,7 @@ void Game::GameFrameAdvance()
 #endif
 			}
 		}
-		SleepEx(10, TRUE);
+		SleepEx(50, TRUE);
 	}
 }
 

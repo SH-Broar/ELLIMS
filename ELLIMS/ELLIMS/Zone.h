@@ -19,7 +19,7 @@ protected:
 	FramePrintType printType;
 	char borderCharacter;
 
-	char text[SCREEN_WIDTH*SCREEN_HEIGHT];
+	char text[SCREEN_WIDTH * SCREEN_HEIGHT] = {};
 	ClickableType isClickable;
 	bool hovered;
 	std::function<int(int,int)> CallbackFunction;

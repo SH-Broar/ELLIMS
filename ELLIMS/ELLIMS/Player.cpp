@@ -58,7 +58,7 @@ void Player::print()
 
 void Player::SetPlayersRegion(int px, int py)
 {
-	l = SCREEN_WIDTH / 2 - (px - x);
+	l = (SCREEN_HEIGHT / 2)*2 - (px - x);
 	r = l;
 	t = SCREEN_HEIGHT / 2 - (py - y);
 	b = t;
@@ -75,19 +75,15 @@ void Player::ProcessCommand(PlayerCommand c)
 	{
 	case PlayerCommand::UP:
 		Network::SendMove(0);
-		y--;
 		break;
 	case PlayerCommand::DOWN:
 		Network::SendMove(1);
-		y++;
 		break;
 	case PlayerCommand::LEFT:
 		Network::SendMove(2);
-		x--;
 		break;
 	case PlayerCommand::RIGHT:
 		Network::SendMove(3);
-		x++;
 		break;
 	}
 }

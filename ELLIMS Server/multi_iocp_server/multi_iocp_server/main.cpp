@@ -302,7 +302,7 @@ void process_packet(int c_id, char* packet)
 		clients[c_id]._s_state = ST_INGAME;
 		clients[c_id]._sl.unlock();
 
-		clients[c_id].setXY(rand() % W_WIDTH, rand() % W_HEIGHT);
+		clients[c_id].setXY(1,1);
 		//clients[c_id].x = rand() % W_WIDTH;
 		//clients[c_id].y = rand() % W_HEIGHT;
 		//clients[c_id].x = 0;
