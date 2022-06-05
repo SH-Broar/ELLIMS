@@ -47,7 +47,7 @@ private:
 	static void RecvPacketProcess(unsigned char packet[]);
 
 public:
-
+	static void SendMove(int dir);
 
 private:
 	static HANDLE g_h_iocp;

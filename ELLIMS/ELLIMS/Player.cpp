@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Game.h"
 #include "Zone.h"
+#include "Network.h"
 
 
 Player::Player()
@@ -59,6 +60,20 @@ void Player::setPlayerActive(bool active)
 
 void Player::ProcessCommand(PlayerCommand c)
 {
-
+	switch (c)
+	{
+	case PlayerCommand::UP:
+		Network::SendMove(0);
+		break;
+	case PlayerCommand::DOWN:
+		Network::SendMove(1);
+		break;
+	case PlayerCommand::LEFT:
+		Network::SendMove(2);
+		break;
+	case PlayerCommand::RIGHT:
+		Network::SendMove(3);
+		break;
+	}
 }
 

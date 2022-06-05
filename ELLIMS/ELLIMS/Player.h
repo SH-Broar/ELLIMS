@@ -3,6 +3,7 @@
 #include "Zone.h"
 
 class Game;
+class Network;
 
 class Player : public Zone
 {

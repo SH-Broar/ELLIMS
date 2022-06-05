@@ -72,10 +72,9 @@ void Network::NetworkCodex()
 	DWORD recv_flag = 0;
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_c_socket), g_h_iocp, 1, 0);
 
+	//SERVER IMMIDIATE LOGIN
 	CS_LOGIN_PACKET l_packet;
 
-
-	//SERVER IMMIDIATE LOGIN
 	int temp = 1;
 	sprintf_s(l_packet.name, "Player%d", temp);
 	l_packet.size = sizeof(l_packet);
@@ -204,6 +203,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		Game::players[Game::playerIDMapper[login_packet->id]]->p();
 		Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
 		Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
+		Game::players[Game::playerIDMapper[login_packet->id]]->pID = login_packet->id;
 		Game::ingame = true;
 		Game::printDebug("SUCCESS", "LOGIN");
 
@@ -212,6 +212,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	case SC_ADD_PLAYER:
 	{
 		SC_ADD_PLAYER_PACKET* add_packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet);
+
 	}
 	break;
 	case SC_REMOVE_PLAYER:
@@ -222,6 +223,9 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	case SC_MOVE_PLAYER:
 	{
 		SC_MOVE_PLAYER_PACKET* move_packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(packet);
+		Game::players[Game::playerIDMapper[move_packet->id]]->x = move_packet->x;
+		Game::players[Game::playerIDMapper[move_packet->id]]->y = move_packet->y;
+		Game::printDebug("MOVE", "SERVER");
 	}
 	break;
 	case SC_CHAT:
@@ -232,4 +236,15 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	default: Game::printDebug("Unknown Packet", "RECV");
 
 	}
+}
+
+void Network::SendMove(int dir)
+{
+	CS_MOVE_PACKET cs_move_packet;
+
+	cs_move_packet.size = sizeof(cs_move_packet);
+	cs_move_packet.type = CS_MOVE;
+	cs_move_packet.direction = dir;
+	cs_move_packet.client_time = 0;
+	SendPacket(&cs_move_packet);
 }

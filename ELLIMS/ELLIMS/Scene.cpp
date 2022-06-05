@@ -131,9 +131,12 @@ void Scene::clickScene(int mx, int my, bool clicked)
 
 void Scene::printDebugConsole()
 {
+#ifdef DEBUG
 	Zone all{};
 	all.clearZone(ClearType::FULL);
-
+#else
+	printScene();
+#endif
 }
 
 const char* Scene::mapCalc(int px, int py)
@@ -148,18 +151,18 @@ const char* Scene::mapCalc(int px, int py)
 			int tile_x = i + px - (SCREEN_WIDTH / 2-1);
 			int tile_y = j + py - (SCREEN_HEIGHT / 2-1);
 
-			basemap[i][j] = '.';
+			basemap[i][j] = ' ';
 			if ((tile_x < 0) || (tile_y < 0)) continue;
 			if ((tile_x >= W_WIDTH) || (tile_y >= W_HEIGHT)) continue;
 
-			basemap[i][j] = '-';
-			/*if ((tile_x + tile_y * 3) < 4) {
-				basemap[i + j * SCREEN_WIDTH] = '-';
+			
+			if (((tile_x + tile_y * 10) % 15) < 2) {
+				basemap[i][j] = '_';
 			}
 			else
 			{
-				basemap[i + j * SCREEN_WIDTH] = '+';
-			}*/
+				basemap[i][j] = '.';
+			}
 		}
 	}
 	for (int i = 0; i < SCREEN_WIDTH-2; ++i)

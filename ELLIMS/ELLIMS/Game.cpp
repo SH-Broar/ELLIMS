@@ -13,7 +13,6 @@ std::atomic<bool> Game::newCharInputed;
 std::atomic<PlayerCommand> Game::newCommandInputed;
 bool Game::ingame;
 
-
 int Game::GameStart()
 {
 	//여기서 초기화

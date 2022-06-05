@@ -47,6 +47,7 @@ void Game::GameFrameAdvance()
 		{
 			for (int j = 0; j < SCREEN_HEIGHT; j++)
 			{
+#ifdef DEBUG
 				if (debugConsole)
 				{
 					if (FrameBuffer[i][j] != DebugFrameBuffer[i][j])
@@ -65,6 +66,14 @@ void Game::GameFrameAdvance()
 						std::cout << DoubleFrameBuffer[i][j];
 					}
 				}
+#else
+				if (FrameBuffer[i][j] != DoubleFrameBuffer[i][j])
+				{
+					FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
+					gotoxy(i, j);
+					std::cout << DoubleFrameBuffer[i][j];
+				}
+#endif
 			}
 		}
 		SleepEx(25, TRUE);
@@ -94,8 +103,10 @@ void Game::print(const char* data, int x, int y)
 
 }
 
+//#define DEBUG
 void Game::printDebug(const char* data, const char* name)
 {
+#ifdef DEBUG
 	int trackerX = 5 + debugNum/(SCREEN_HEIGHT / 2 - 1) * 30;
 	int trackerY = 2 + (debugNum%(SCREEN_HEIGHT / 2 - 1))*2;
 
@@ -127,11 +138,12 @@ void Game::printDebug(const char* data, const char* name)
 	}
 
 	debugNum++;
-
+#endif
 }
 
 void Game::clearDebug()
 {
+#ifdef DEBUG
 	for (int i = 0; i < SCREEN_WIDTH; ++i)
 	{
 		for (int j = 0; j < SCREEN_HEIGHT; ++j)
@@ -147,4 +159,5 @@ void Game::clearDebug()
 	}
 
 	debugNum = 0;
+#endif
 }
