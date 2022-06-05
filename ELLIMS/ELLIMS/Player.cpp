@@ -19,7 +19,7 @@ Player::Player()
 
 void Player::p()
 {
-	characterIcon = 'O';
+	characterIcon = 'T';
 	isActive = true;
 }
 
@@ -31,7 +31,7 @@ void Player::InitZone()
 	b = t;
 
 	strcpy(text, &characterIcon);
-
+	isClickable = ClickableType::HOVER;
 }
 
 void Player::print()
@@ -39,18 +39,29 @@ void Player::print()
 	if (!isActive)
 		return;
 
+	if (l <= 0 || l >= SCREEN_WIDTH - 1 || b <= 0 || b >= SCREEN_HEIGHT - 1)
+		return;
+
 	Game::DoubleFrameBuffer[l][b] = characterIcon;
+
+	if (hovered)
+	{
+		if (b > 0)
+		{
+			for (int i = 0; i < strlen(name); i++)
+			{
+				Game::DoubleFrameBuffer[l - (strlen(name) / 2) + i][b - 1] = name[i];
+			}
+		}
+	}
 }
 
 void Player::SetPlayersRegion(int px, int py)
 {
-	l = SCREEN_WIDTH / 2 - (x - px);
+	l = SCREEN_WIDTH / 2 - (px - x);
 	r = l;
-	t = SCREEN_HEIGHT / 2 - (y - py);
+	t = SCREEN_HEIGHT / 2 - (py - y);
 	b = t;
-
-	if (l <= 0 || l >= SCREEN_WIDTH - 1 || b <= 0 || b >= SCREEN_HEIGHT - 1)
-		isActive = false;
 }
 
 void Player::setPlayerActive(bool active)
@@ -64,15 +75,19 @@ void Player::ProcessCommand(PlayerCommand c)
 	{
 	case PlayerCommand::UP:
 		Network::SendMove(0);
+		y--;
 		break;
 	case PlayerCommand::DOWN:
 		Network::SendMove(1);
+		y++;
 		break;
 	case PlayerCommand::LEFT:
 		Network::SendMove(2);
+		x--;
 		break;
 	case PlayerCommand::RIGHT:
 		Network::SendMove(3);
+		x++;
 		break;
 	}
 }

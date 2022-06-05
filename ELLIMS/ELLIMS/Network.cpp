@@ -77,6 +77,7 @@ void Network::NetworkCodex()
 
 	int temp = 1;
 	sprintf_s(l_packet.name, "Player%d", temp);
+
 	l_packet.size = sizeof(l_packet);
 	l_packet.type = CS_LOGIN;
 	SendPacket(&l_packet);
@@ -197,35 +198,63 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	case SC_LOGIN_INFO:
 	{
 		SC_LOGIN_INFO_PACKET* login_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
-		Game::myPlayerID = 0;
-		Game::playerIDMapper[login_packet->id] = Game::myPlayerID;
-		Game::players.emplace_back(new Player());
+		Game::myPlayerID = login_packet->id;
+		Game::playerIDMapper[login_packet->id] = Game::nowPlayerNums;
+
+		Game::players[Game::playerIDMapper[login_packet->id]] = new Player();
 		Game::players[Game::playerIDMapper[login_packet->id]]->p();
 		Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
 		Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
 		Game::players[Game::playerIDMapper[login_packet->id]]->pID = login_packet->id;
+		strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, "player");
+
 		Game::ingame = true;
 		Game::printDebug("SUCCESS", "LOGIN");
 
+		Game::nowPlayerNums++;
 	}
 	break;
 	case SC_ADD_PLAYER:
 	{
 		SC_ADD_PLAYER_PACKET* add_packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet);
+		Game::playerIDMapper[add_packet->id] = Game::nowPlayerNums;
 
+		Game::players[Game::playerIDMapper[add_packet->id]] = new Player();
+		Game::players[Game::playerIDMapper[add_packet->id]]->x = add_packet->x;
+		Game::players[Game::playerIDMapper[add_packet->id]]->y = add_packet->y;
+		strcpy(Game::players[Game::playerIDMapper[add_packet->id]]->name, add_packet->name);
+		Game::players[Game::playerIDMapper[add_packet->id]]->pID = add_packet->id;
+		Game::players[Game::playerIDMapper[add_packet->id]]->setPlayerActive(true);
+
+		Game::nowPlayerNums++;
+		char tmp[10];
+		sprintf(tmp, "%d", add_packet->id);
+		Game::printDebug("ADD", tmp);
 	}
 	break;
 	case SC_REMOVE_PLAYER:
 	{
 		SC_REMOVE_PLAYER_PACKET* remove_packet = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(packet);
+		if (Game::playerIDMapper.contains(remove_packet->id))
+		{
+			Game::players[Game::playerIDMapper[remove_packet->id]]->setPlayerActive(false);
+			Game::printDebug("REMOVE", "SERVER");
+		}
 	}
 	break;
 	case SC_MOVE_PLAYER:
 	{
 		SC_MOVE_PLAYER_PACKET* move_packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(packet);
-		Game::players[Game::playerIDMapper[move_packet->id]]->x = move_packet->x;
-		Game::players[Game::playerIDMapper[move_packet->id]]->y = move_packet->y;
-		Game::printDebug("MOVE", "SERVER");
+
+		if (Game::playerIDMapper.contains(move_packet->id))
+		{
+			Game::players[Game::playerIDMapper[move_packet->id]]->x = move_packet->x;
+			Game::players[Game::playerIDMapper[move_packet->id]]->y = move_packet->y;
+			char tmp[10];
+			sprintf(tmp, "%d", move_packet->id);
+			Game::printDebug("MOVE", tmp);
+		}
+		
 	}
 	break;
 	case SC_CHAT:

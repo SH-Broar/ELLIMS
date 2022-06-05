@@ -12,6 +12,7 @@ Zone* Game::focusedZone = nullptr;
 std::atomic<bool> Game::newCharInputed;
 std::atomic<PlayerCommand> Game::newCommandInputed;
 bool Game::ingame;
+int Game::nowPlayerNums = 0;
 
 int Game::GameStart()
 {
@@ -26,32 +27,6 @@ int Game::GameStart()
 		//hover and click
 		nowScene.clickScene(mouse_X, mouse_Y, mouse_Left_down_Event);
 
-		if (mouse_Left_down_Event)
-		{
-			
-		}
-		if (newCharInputed)
-		{
-			if (focusedZone != nullptr)
-				focusedZone->addTyping(inputChar);
-		}
-		if (newCommandInputed != PlayerCommand::NONE)
-		{
-			players[myPlayerID]->ProcessCommand(newCommandInputed);
-		}
-
-		// 업데이트
-		if (ingame)
-		{
-			//Game::printDebug("LOOP");
-			nowScene.UpdateScene(*players[myPlayerID]);
-			for (auto op : players)
-			{
-				op->SetPlayersRegion(players[myPlayerID]->x, players[myPlayerID]->y);
-			}
-		}
-
-		// 맵 출력
 		if (debugConsole)
 		{
 			nowScene.printDebugConsole();
@@ -59,24 +34,31 @@ int Game::GameStart()
 		else
 		{
 			nowScene.printScene();
-			if (ingame)
+		}
+		if (newCharInputed)
+		{
+			if (focusedZone != nullptr)
+				focusedZone->addTyping(inputChar);
+		}
+		if (ingame)
+		{
+			//Game::printDebug("LOOP");
+			nowScene.UpdateScene(*players[playerIDMapper[myPlayerID]]);
+
+			for (int i = 0; i < nowPlayerNums; i++)
 			{
-				for (auto pp : players)
+				if (players[i] != nullptr)
 				{
-					pp->print();
+					players[i]->MouseInteraction(mouse_X, mouse_Y, mouse_Left_down_Event);
+					players[i]->SetPlayersRegion(players[playerIDMapper[myPlayerID]]->x, players[playerIDMapper[myPlayerID]]->y);
+					players[i]->print();
 				}
 			}
+			if (newCommandInputed != PlayerCommand::NONE)
+			{
+				players[playerIDMapper[myPlayerID]]->ProcessCommand(newCommandInputed);
+			}
 		}
-
-		// 오브젝트 출력
-
-		// 스탯 출력
-		// 채팅 출력
-
-		//CClear();
-		//std::cout << mouse_X;
-
-		//break;
 
 
 		if (gameEnd)
@@ -84,7 +66,7 @@ int Game::GameStart()
 		mouse_Left_down_Event = false;
 		newCharInputed = false;
 		newCommandInputed = PlayerCommand::NONE;
-		SleepEx(25, TRUE);
+		SleepEx(10, TRUE);
 	}
 	return 0;
 }

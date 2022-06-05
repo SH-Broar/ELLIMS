@@ -29,7 +29,8 @@ public:
 
 	static int myPlayerID;
 	static std::unordered_map<int, int> playerIDMapper;
-	static std::vector<Player*> players;
+	static std::array<Player*, 5000> players;
+	static int nowPlayerNums;
 
 
 	//-------¿ÜºÎ

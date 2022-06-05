@@ -110,7 +110,7 @@ void Game::MouseClick()
 					break;
 				}
 			}
-			SleepEx(25, TRUE);
+			SleepEx(10, TRUE);
 		}
 	}
 }

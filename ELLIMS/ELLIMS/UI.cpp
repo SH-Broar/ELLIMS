@@ -4,6 +4,9 @@
 #include "Scene.h"
 #include "Zone.h"
 
+
+#define DEBUG
+
 char Game::FrameBuffer[120][35] = {};
 char Game::DoubleFrameBuffer[120][35] = {};
 char Game::DebugFrameBuffer[120][35] = {};
@@ -13,7 +16,7 @@ int Game::debugNum = 0;
 Scene Game::nowScene;
 int Game::myPlayerID;
 std::unordered_map<int, int>  Game::playerIDMapper;
-std::vector<Player*>  Game::players;
+std::array<Player*,5000>  Game::players;
 
 Game::Game()
 {
@@ -76,7 +79,7 @@ void Game::GameFrameAdvance()
 #endif
 			}
 		}
-		SleepEx(25, TRUE);
+		SleepEx(10, TRUE);
 	}
 }
 
@@ -103,12 +106,11 @@ void Game::print(const char* data, int x, int y)
 
 }
 
-//#define DEBUG
 void Game::printDebug(const char* data, const char* name)
 {
 #ifdef DEBUG
-	int trackerX = 5 + debugNum/(SCREEN_HEIGHT / 2 - 1) * 30;
-	int trackerY = 2 + (debugNum%(SCREEN_HEIGHT / 2 - 1))*2;
+	int trackerX = 5 + (debugNum%64)/(SCREEN_HEIGHT / 2 - 1) * 30;
+	int trackerY = 2 + ((debugNum%64)%(SCREEN_HEIGHT / 2 - 1))*2;
 
 	int tracs = 0;
 
