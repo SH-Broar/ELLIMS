@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Player.h"
 #include "Scene.h"
+#include "WorldMap.h"
 
 
 char Game::inputChar;
@@ -18,6 +19,7 @@ int Game::GameStart()
 {
 	//여기서 초기화
 	clearDebug();
+	c_Map::loadMap();
 
 	SleepEx(25, TRUE);
 	nowScene.changeScene(SceneName::TITLE);

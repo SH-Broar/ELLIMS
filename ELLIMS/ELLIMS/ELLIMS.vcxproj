@@ -148,6 +148,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Turboc.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="WorldMap.cpp" />
     <ClCompile Include="Zone.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Turboc.h" />
+    <ClInclude Include="WorldMap.h" />
     <ClInclude Include="Zone.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

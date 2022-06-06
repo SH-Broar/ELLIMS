@@ -25,6 +25,9 @@
     <Filter Include="헤더 파일\프로토콜">
       <UniqueIdentifier>{9147a7c3-6581-4e09-a591-2e5f9101f31a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\맵">
+      <UniqueIdentifier>{e485e66b-f51e-4b2b-8329-053ecece171f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Turboc.cpp">
@@ -54,6 +57,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="WorldMap.cpp">
+      <Filter>소스 파일\Frames</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Turboc.h">
@@ -76,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldMap.h">
+      <Filter>헤더 파일\맵</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

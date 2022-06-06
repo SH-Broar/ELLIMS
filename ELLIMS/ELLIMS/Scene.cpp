@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "Zone.h"
 #include "Player.h"
+#include "WorldMap.h"
 
 Scene::Scene()
 {
@@ -142,29 +143,18 @@ void Scene::printDebugConsole()
 const char* Scene::mapCalc(int px, int py)
 {
 	char tmp[SCREEN_HEIGHT*2 * SCREEN_HEIGHT] = {};
-	char basemap[SCREEN_HEIGHT*2][SCREEN_HEIGHT] = {};
 
-	for (int i = 0; i < (SCREEN_HEIGHT-2)*2; ++i)
+	for (int i = 0; i < (SCREEN_HEIGHT -2)*2; ++i)
 	{
 		for (int j = 0; j < SCREEN_HEIGHT-2; ++j)
 		{
 			int tile_x = i + px - (SCREEN_HEIGHT-2);
 			int tile_y = j + py - (SCREEN_HEIGHT / 2-1);
 
-			basemap[i][j] = ' ';
-			if (tile_x>0 && tile_y > 0 && tile_y < W_HEIGHT - 1 && tile_x < W_WIDTH - 1 && (tile_x*5 + tile_y) % 7 == 0) basemap[i][j] = '.';
-			if ((tile_x == 0 && tile_y > 0) || (tile_y == 0 && tile_x>0)) basemap[i][j] = '|';
-			if ((tile_x == W_WIDTH-1 && tile_y < W_HEIGHT-1) || (tile_y == W_HEIGHT-1 && tile_x < W_WIDTH-1)) basemap[i][j] = '-';
-
-
-
-		}
-	}
-	for (int i = 0; i < (SCREEN_HEIGHT -2)*2; ++i)
-	{
-		for (int j = 0; j < SCREEN_HEIGHT-2; ++j)
-		{
-			tmp[i+j * (SCREEN_HEIGHT -2)*2] = basemap[i][j];
+			if (tile_x >= 0 && tile_y >= 0 && tile_x < W_WIDTH && tile_y < W_HEIGHT)
+				tmp[i + j * (SCREEN_HEIGHT - 2) * 2] = c_Map::c_basemap[tile_x][tile_y];
+			else
+				tmp[i + j * (SCREEN_HEIGHT - 2) * 2] = ' ';
 		}
 	}
 
