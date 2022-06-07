@@ -9,7 +9,7 @@ OVER_EXP::OVER_EXP()
 	ZeroMemory(&_over, sizeof(_over));
 };
 
-OVER_EXP::OVER_EXP(char* packet)
+OVER_EXP::OVER_EXP(unsigned char* packet)
 {
 	_wsabuf.len = packet[0];
 	_wsabuf.buf = _send_buf;
@@ -36,6 +36,30 @@ void SESSION::send_remove_packet(int c_id)
 	p.id = c_id;
 	p.size = sizeof(p);
 	p.type = SC_REMOVE_PLAYER;
+	do_send(&p);
+}
+
+void SESSION::send_chat_packet(int c_id, char* mess)
+{
+	SC_CHAT_PACKET p;
+	p.id = c_id;
+	p.size = sizeof(SC_CHAT_PACKET) - sizeof(p.mess) + strlen(mess) + 1;
+	p.type = SC_CHAT;
+
+	//System Message
+	if (c_id < 0)
+	{
+		strcpy_s(p.name, "_SYSTEM");
+		strcpy_s(p.mess, mess);
+		printf(" : %s", p.mess);
+	}
+	else
+	{
+		strcpy_s(p.name, clients[c_id]._name);
+		strcpy_s(p.mess, mess);
+		printf("chat : %s\n", p.mess);
+	}
+
 	do_send(&p);
 }
 
@@ -67,8 +91,7 @@ void SESSION::	do_recv()
 
 void SESSION::do_send(void* packet)
 {
-
-	OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<char*>(packet) };
+	OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<unsigned char*>(packet) };
 	WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, 0);
 }
 
@@ -117,7 +140,7 @@ void SESSION::setXY(short _x, short _y)
 
 	if (sectors[sectorX][sectorY][_id] == false)
 	{
-		printf("%d sector f->t",_id);
+		//printf("%d sector f->t",_id);
 		sectors[sectorX][sectorY][_id] = true;
 	}
 

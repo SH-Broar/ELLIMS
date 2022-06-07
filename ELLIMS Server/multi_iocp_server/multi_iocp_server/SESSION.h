@@ -16,7 +16,7 @@ public:
 
 	OVER_EXP();
 
-	OVER_EXP(char* packet);
+	OVER_EXP(unsigned char* packet);
 };
 
 
@@ -51,6 +51,7 @@ public:
 	void send_put_packet(int c_id);
 	void send_move_packet(int c_id, int client_time);
 	void send_remove_packet(int c_id);
+	void send_chat_packet(int c_id, char* mess);
 
 	void setXY(short x, short y);
 

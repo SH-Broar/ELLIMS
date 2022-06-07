@@ -13,6 +13,10 @@ int main()
 
 	game.GameStart();
 
+
+	printf("Bye bye!");
+	SleepEx(10000, TRUE);
+
 	networkThread.join();
 	mouseThread.join();
 	printThread.join();

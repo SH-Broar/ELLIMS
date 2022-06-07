@@ -26,6 +26,8 @@ public:
 	static void gameEnded();
 
 	static void setFocusZone(Zone& z, ClearType c);
+	static void setFocusZone(Zone* z);
+	static bool isthisFocused(Zone& z);
 
 	static int myPlayerID;
 	static std::unordered_map<int, int> playerIDMapper;

@@ -1,8 +1,8 @@
 #include "Zone.h"
 #include "Game.h"
 #include <string>
-Zone::Zone() : l(1), r(SCREEN_WIDTH-2), t(SCREEN_HEIGHT-2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), isClickable(ClickableType::NONE), CallbackFunction(nullptr), isActive(true), temperanceActive(true) {};
-Zone::Zone(int _l, int _r, int _b, int _t, ClickableType Clickable) : l(_l), r(_r), b(_b), t(_t), isClickable(Clickable), hovered(false), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), borderCharacter('*'), text(""), CallbackFunction(nullptr), isActive(true), temperanceActive(true)
+Zone::Zone() : l(1), r(SCREEN_WIDTH-2), t(SCREEN_HEIGHT-2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), isClickable(ClickableType::NONE), ClickCallbackFunction(nullptr), isActive(true), temperanceActive(true) {};
+Zone::Zone(int _l, int _r, int _b, int _t, ClickableType Clickable) : l(_l), r(_r), b(_b), t(_t), isClickable(Clickable), hovered(false), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), borderCharacter('*'), text(""), ClickCallbackFunction(nullptr), isActive(true), temperanceActive(true)
 {};
 
 
@@ -48,14 +48,40 @@ void Zone::operator=(const char* data)
 
 void Zone::operator=(std::function<int(int, int)> func)
 {
-	CallbackFunction = func;
+	ClickCallbackFunction = func;
+}
+
+void Zone::operator=(std::function<void(void)> func)
+{
+	EnterCallbackFunction = func;
 }
 
 void Zone::addTyping(char c)
 {
-	std::string t{ c };
-	//Game::printDebug(std::to_string(strlen(text)).c_str(), "length");
-	strcat_s(text, t.c_str());
+	if (c == '\r')
+	{
+		if (EnterCallbackFunction != nullptr)
+		{
+			EnterCallbackFunction();
+		}
+	}
+	else
+	{
+		std::string t{ c };
+		//Game::printDebug(std::to_string(strlen(text)).c_str(), "length");
+		strcat_s(text, t.c_str());
+	}
+}
+
+char* Zone::getText()
+{
+	if (strlen(text) < MESS_SIZE)
+	{
+		strcpy(mess, text);
+		return mess;
+	}
+	strcpy(mess, "text TOO Long");
+	return mess;
 }
 
 void Zone::print()
@@ -213,12 +239,11 @@ bool Zone::MouseInteraction(int mx, int my, bool clicked)
 
 		if (clicked)
 		{
-			if (CallbackFunction != nullptr)
+			if (ClickCallbackFunction != nullptr)
 			{
-				int ret = CallbackFunction(mx, my);
-
+				int ret = ClickCallbackFunction(mx, my);
+				return true;
 			}
-			return true;
 		}
 	}
 	else
@@ -241,3 +266,22 @@ bool Zone::Intersect(int _x, int _y)
 }
 
 
+__int64 Zone::getLegion()
+{
+	if (l >= 1000 || r >= 1000 || b >= 1000 || t >= 1000)
+	{
+		Game::printDebug("getLegion OVERFLOW", "ZONE");
+	}
+		
+	__int64 t;
+	t = l;
+	t *= 1000;
+	t += r;
+	t *= 1000;
+	t += b;
+	t *= 1000;
+	t += t;
+
+	return t;
+
+}

@@ -27,6 +27,7 @@ int Game::GameStart()
 	while (true)
 	{
 		//hover and click
+
 		nowScene.clickScene(mouse_X, mouse_Y, mouse_Left_down_Event);
 
 		if (debugConsole)
@@ -40,7 +41,9 @@ int Game::GameStart()
 		if (newCharInputed)
 		{
 			if (focusedZone != nullptr)
+			{
 				focusedZone->addTyping(inputChar);
+			}
 		}
 		if (ingame)
 		{
@@ -76,9 +79,26 @@ int Game::GameStart()
 void Game::setFocusZone(Zone& z, ClearType c)
 {
 	z.clearZone(c);
-	z = " ";
+	z = "";
 
 	focusedZone = &z;
+}
+
+void Game::setFocusZone(Zone* z)
+{
+	focusedZone = z;
+}
+
+bool Game::isthisFocused(Zone& z)
+{
+	if (focusedZone != nullptr)
+	{
+		if (z.getLegion() == focusedZone->getLegion())
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Game::networkT()

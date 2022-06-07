@@ -48,6 +48,7 @@ private:
 
 public:
 	static void SendMove(int dir);
+	static void SendChat(char* mess);
 
 private:
 	static HANDLE g_h_iocp;

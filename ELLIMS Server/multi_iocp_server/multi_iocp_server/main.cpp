@@ -305,7 +305,35 @@ void process_packet(int c_id, char* packet)
 
 		break;
 	}
+	case CS_CHAT:
+	{
+		CS_CHAT_PACKET* p = reinterpret_cast<CS_CHAT_PACKET*>(packet);
+		
+
+		for (int i = 0; i < 3; ++i)
+		{
+			for (int h = 0; h < 3; ++h)
+			{
+				if (clients[c_id].sectorX - 1 + i < 0 ||
+					clients[c_id].sectorX - 1 + i >= W_WIDTH / SECTOR_WIDTH ||
+					clients[c_id].sectorY - 1 + h < 0 ||
+					clients[c_id].sectorY - 1 + h >= W_HEIGHT / SECTOR_HEIGHT)
+					continue;
+
+				for (auto& pln : sectors[clients[c_id].sectorX - 1 + i][clients[c_id].sectorY - 1 + h])
+				{
+					if (pln.second)
+					{
+						clients[pln.first].send_chat_packet(c_id, p->mess);
+					}
+				}
+			}
+		}
+
+		break;
 	}
+	}
+
 }
 
 void do_worker()
@@ -341,10 +369,10 @@ void do_worker()
 			{
 				//여기서 DB연결해서 가져오기
 
-				printf("%d", client_id);
+				printf("Login : %d\n", client_id);
 				clients[client_id]._id = client_id;
 				clients[client_id].setXY(0, 0);
-				clients[client_id]._name[0] = 0;
+				sprintf_s(clients[client_id]._name,"%d", clients[client_id]._id);
 				clients[client_id]._socket = c_socket;
 				clients[client_id]._prev_remain = 0;
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), g_h_iocp, client_id, 0);

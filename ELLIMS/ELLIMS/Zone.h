@@ -20,9 +20,12 @@ protected:
 	char borderCharacter;
 
 	char text[SCREEN_WIDTH * SCREEN_HEIGHT] = {};
+	char mess[MESS_SIZE];
+
 	ClickableType isClickable;
 	bool hovered;
-	std::function<int(int,int)> CallbackFunction;
+	std::function<int(int,int)> ClickCallbackFunction;
+	std::function<void(void)> EnterCallbackFunction;
 
 public:
 	Zone();
@@ -38,6 +41,7 @@ public:
 
 	void operator= (const char* data);
 	void operator= (std::function<int(int, int)>);
+	void operator= (std::function<void(void)>);
 
 	void addTyping(char c);
 
@@ -46,8 +50,9 @@ public:
 	bool MouseInteraction(int mx, int my, bool clicked);
 	bool Intersect(int _x, int _y);
 
+	char* getText();
 
-
+	__int64 getLegion();
 
 };
 

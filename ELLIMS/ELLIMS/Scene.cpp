@@ -61,13 +61,25 @@ void Scene::changeScene(SceneName sceneName)
 		};
 
 		areas[3] = [&](int mx, int my) -> int {
-			Game::setFocusZone(areas[3], ClearType::TEXT);
+			if (!Game::isthisFocused(areas[3]))
+				Game::setFocusZone(areas[3], ClearType::TEXT);
 			return 0;
+		};
+		areas[3] = [&](void) -> void {
+			if (Game::isthisFocused(areas[3]))
+				Game::setFocusZone(nullptr);
+			return;
 		};
 
 		areas[4] = [&](int mx, int my) -> int {
-			Game::setFocusZone(areas[4], ClearType::TEXT);
+			if (!Game::isthisFocused(areas[3]))
+				Game::setFocusZone(areas[4], ClearType::TEXT);
 			return 0;
+		};
+		areas[4] = [&](void) -> void {
+			if (Game::isthisFocused(areas[4]))
+				Game::setFocusZone(nullptr);
+			return;
 		};
 
 		areas[5] = [&](int mx, int my) -> int {
@@ -101,6 +113,15 @@ void Scene::changeScene(SceneName sceneName)
 		//채팅 입력존 
 		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2, SCREEN_HEIGHT -2, SCREEN_HEIGHT-2, ClickableType::BUTTON);
 		areas[4].setType(FramePrintType::FULL);
+		areas[4] = [&](int mx, int my) -> int {
+			Game::setFocusZone(areas[4], ClearType::TEXT);
+			return 0;
+		};
+		areas[4] = [&](void) -> void {
+			Network::SendChat(areas[4].getText());
+			Game::setFocusZone(areas[4], ClearType::TEXT);
+			return;
+		};
 
 	}
 		break;
@@ -136,10 +157,14 @@ void Scene::printScene()
 
 void Scene::clickScene(int mx, int my, bool clicked)
 {
+	bool catched = false;
 	for (auto& z : areas)
 	{
-		z.MouseInteraction(mx, my, clicked);
+		catched |= z.MouseInteraction(mx, my, clicked);
 	}
+	if (clicked && !catched)
+		Game::setFocusZone(nullptr);
+
 	for (auto& z : areas)
 	{
 		z.setActiveByFrame();

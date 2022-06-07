@@ -137,7 +137,7 @@ void Network::PacketProcess()
 		Game::gameEnded();
 		return;
 	}
-	
+
 	switch (cross_over->_comp_type)
 	{
 	case OP_SEND:
@@ -178,7 +178,6 @@ void Network::PacketProcess()
 			int err_no = WSAGetLastError();
 			if (err_no != WSA_IO_PENDING)
 			{
-				Game::printDebug("FAILED!", "LOGIN");
 				error_display("RECV ERROR", err_no);
 				Game::gameEnded();
 			}
@@ -199,7 +198,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	{
 		SC_LOGIN_INFO_PACKET* login_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
 		Game::myPlayerID = login_packet->id;
-		
+
 		Game::playerIDMapper[login_packet->id] = Game::nowPlayerNums;
 
 		Game::players[Game::playerIDMapper[login_packet->id]] = new Player();
@@ -258,16 +257,33 @@ void Network::RecvPacketProcess(unsigned char packet[])
 			//sprintf(tmp, "%d", move_packet->id);
 			//Game::printDebug("MOVE", tmp);
 		}
-		
+
 	}
 	break;
 	case SC_CHAT:
 	{
-		SC_CHAT_PACKET* move_packet = reinterpret_cast<SC_CHAT_PACKET*>(packet);
+		SC_CHAT_PACKET* chat_packet = reinterpret_cast<SC_CHAT_PACKET*>(packet);
+
+		std::string chat{};
+
+		if (strcmp(Game::players[Game::playerIDMapper[chat_packet->id]]->name, "_SYSTEM"))
+		{
+			chat = chat_packet->mess;
+		}
+		else
+		{
+			chat = Game::players[Game::playerIDMapper[chat_packet->id]]->name;
+			chat += " : ";
+			chat += chat_packet->mess;
+		}
+
+		Game::printDebug(chat.c_str(), "CHAT");
 	}
 	break;
-	default: Game::printDebug("Unknown Packet", "RECV");
-
+	default:
+		char tmp[10];
+		sprintf(tmp, "%d", packet[1]);
+		Game::printDebug(tmp, "Unknown Packet");
 	}
 }
 
@@ -280,4 +296,14 @@ void Network::SendMove(int dir)
 	cs_move_packet.direction = dir;
 	cs_move_packet.client_time = 0;
 	SendPacket(&cs_move_packet);
+}
+
+void Network::SendChat(char* mess)
+{
+	CS_CHAT_PACKET cs_chat_packet;
+
+	cs_chat_packet.size = sizeof(cs_chat_packet) - sizeof(cs_chat_packet.mess) + strlen(mess) +1;
+	cs_chat_packet.type = CS_CHAT;
+	strcpy(cs_chat_packet.mess, mess);
+	SendPacket(&cs_chat_packet);
 }

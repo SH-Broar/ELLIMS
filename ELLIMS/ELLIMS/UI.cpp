@@ -86,6 +86,8 @@ void Game::GameFrameAdvance()
 void Game::gameEnded()
 {
 	//std::cout << "end";
+	printf("Check F1");
+	SleepEx(5000, TRUE);
 	gameEnd = true;
 }
 
@@ -103,7 +105,6 @@ void Game::print(const char* data, int x, int y)
 
 		tracs++;
 	}
-
 }
 
 void Game::printDebug(const char* data, const char* name)
