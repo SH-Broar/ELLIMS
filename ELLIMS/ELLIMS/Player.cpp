@@ -13,6 +13,16 @@ Player::Player()
 	x = 0;
 	y = 0;
 
+	level = 1;
+
+	MaxHP = 50;
+	HP = 50;
+	MaxMP = 10;
+	MP = 10;
+
+	MaxEXP = 100;
+	EXP = 0;
+
 	InitZone();
 }
 

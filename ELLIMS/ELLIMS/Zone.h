@@ -19,6 +19,7 @@ protected:
 	FramePrintType printType;
 	char borderCharacter;
 
+	//std::string text;
 	char text[SCREEN_WIDTH * SCREEN_HEIGHT] = {};
 	char mess[MESS_SIZE];
 

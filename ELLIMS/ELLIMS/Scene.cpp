@@ -24,6 +24,8 @@ void Scene::changeScene(SceneName sceneName)
 	{
 	case SceneName::TITLE:
 	{
+		areas.reserve(6);
+
 		updatable = false;
 		areas.emplace_back(SCREEN_WIDTH / 2 - 6, SCREEN_WIDTH / 2 + 13, 10, 10, ClickableType::NONE);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 19, 19, ClickableType::HOVER);
@@ -98,22 +100,28 @@ void Scene::changeScene(SceneName sceneName)
 	{
 		updatable = true;
 
+		constexpr int sideL = (SCREEN_HEIGHT - 2) * 2 + 2;
+		constexpr int sideR = SCREEN_WIDTH - 2;
+		constexpr int sideLL = (sideL + sideR) / 2 - 1;
+
+		areas.reserve(10);
+
 		//맵
 		areas.emplace_back(1, (SCREEN_HEIGHT-2)*2, 1, SCREEN_HEIGHT-2);
 		areas[0].setType(FramePrintType::FULL);
 
 		//플레이어 정보
-		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH-2, 1, SCREEN_HEIGHT/4-1);
+		areas.emplace_back(sideL, sideR, 1, SCREEN_HEIGHT/4-1);
 		areas[1].setType(FramePrintType::FULL);
 		//뭔가 다른거
-		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2,  SCREEN_HEIGHT/4+1, SCREEN_HEIGHT / 4*2 -2);
+		areas.emplace_back(sideL, sideR, SCREEN_HEIGHT/4+1, SCREEN_HEIGHT / 4*2 -2);
 		areas[2].setType(FramePrintType::FULL);
 		//채팅
-		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2, SCREEN_HEIGHT / 4 * 2, SCREEN_HEIGHT -4);
+		areas.emplace_back(sideL, sideR, SCREEN_HEIGHT / 4 * 2, SCREEN_HEIGHT -4);
 		areas[3].setType(FramePrintType::FULL);
 		Game::chat.setZone(&areas[3]);
 		//채팅 입력존 
-		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2, SCREEN_HEIGHT -2, SCREEN_HEIGHT-2, ClickableType::BUTTON);
+		areas.emplace_back(sideL, sideR, SCREEN_HEIGHT -2, SCREEN_HEIGHT-2, ClickableType::BUTTON);
 		areas[4].setType(FramePrintType::FULL);
 		areas[4] = [&](int mx, int my) -> int {
 			Game::setFocusZone(areas[4], ClearType::TEXT);
@@ -125,6 +133,18 @@ void Scene::changeScene(SceneName sceneName)
 			return;
 		};
 
+		//이름 레벨 //직업
+		areas.emplace_back(sideL +1, sideLL-1, 1, 1, ClickableType::NONE);
+		areas.emplace_back(sideLL + 2, sideR-2, 1, 1, ClickableType::NONE);
+		
+		//areas.emplace_back(SCREEN_WIDTH / 2 - 6, SCREEN_WIDTH / 2 + 13, 10, 10, ClickableType::NONE);
+
+		//HPMP
+		areas.emplace_back(sideL, sideR, 3, 3, ClickableType::NONE);
+		areas.emplace_back(sideL, sideR, 4, 4, ClickableType::NONE);
+
+		//경험치
+		areas.emplace_back(sideL, sideR, 6, 6, ClickableType::NONE);
 	}
 		break;
 	default:
@@ -142,6 +162,21 @@ void Scene::UpdateScene(Player& p)
 		{
 			areas[0] = mapCalc(p.x, p.y);
 
+			char hmp[30]{};
+
+			areas[5] = p.name;
+
+			sprintf(hmp, " Lv. %3d", p.level);
+			areas[6] = hmp;
+			ZeroMemory(hmp, sizeof(hmp));
+			sprintf(hmp, " HP  : %8d / %8d", p.HP, p.MaxHP);
+			areas[7] = hmp;
+			ZeroMemory(hmp, sizeof(hmp));
+			sprintf(hmp, " MP  : %8d / %8d", p.MP, p.MaxMP);
+			areas[8] = hmp;
+			ZeroMemory(hmp, sizeof(hmp));
+			sprintf(hmp, " EXP : %8d / %8d", p.EXP, p.MaxEXP);
+			areas[9] = hmp;
 		}
 			break;
 		default:

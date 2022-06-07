@@ -18,6 +18,15 @@ public:
 	int x;
 	int y;
 
+	int level;
+	int MaxHP;
+	int HP;
+	int MaxMP;
+	int MP;
+
+	int MaxEXP;
+	int EXP;
+
 	void p();
 	void InitZone();
 
