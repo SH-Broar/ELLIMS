@@ -60,6 +60,9 @@
     <ClCompile Include="WorldMap.cpp">
       <Filter>소스 파일\Frames</Filter>
     </ClCompile>
+    <ClCompile Include="ChatDialogue.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Turboc.h">
@@ -85,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="WorldMap.h">
       <Filter>헤더 파일\맵</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatDialogue.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

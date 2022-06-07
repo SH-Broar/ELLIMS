@@ -51,6 +51,7 @@ public:
 	bool Intersect(int _x, int _y);
 
 	char* getText();
+	int getWidth();
 
 	__int64 getLegion();
 

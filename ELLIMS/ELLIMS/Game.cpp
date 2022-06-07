@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Scene.h"
 #include "WorldMap.h"
+#include "ChatDialogue.h"
 
 
 char Game::inputChar;
@@ -14,6 +15,7 @@ std::atomic<bool> Game::newCharInputed;
 std::atomic<PlayerCommand> Game::newCommandInputed;
 bool Game::ingame;
 int Game::nowPlayerNums = 0;
+ChatDialogue Game::chat;
 
 int Game::GameStart()
 {

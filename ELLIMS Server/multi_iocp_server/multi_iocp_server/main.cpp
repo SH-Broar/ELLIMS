@@ -91,7 +91,11 @@ void process_packet(int c_id, char* packet)
 			break;
 		}
 
-		strcpy_s(clients[c_id]._name, p->name);
+		//strcpy_s(clients[c_id]._name, p->name);
+		char name[10];
+		sprintf_s(name, "player %d", c_id);
+		strcpy_s(clients[c_id]._name, name);
+
 		clients[c_id].setXY(50, 50);
 		clients[c_id].send_login_info_packet();
 		clients[c_id]._s_state = ST_INGAME;

@@ -1,6 +1,7 @@
 #include "Network.h"
 #include "Game.h"
 #include "Player.h"
+#include "ChatDialogue.h"
 
 HANDLE Network::g_h_iocp;
 SOCKET Network::g_c_socket;
@@ -266,7 +267,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 
 		std::string chat{};
 
-		if (strcmp(Game::players[Game::playerIDMapper[chat_packet->id]]->name, "_SYSTEM"))
+		if (strcmp(Game::players[Game::playerIDMapper[chat_packet->id]]->name, "_SYSTEM") == 0)
 		{
 			chat = chat_packet->mess;
 		}
@@ -278,6 +279,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		}
 
 		Game::printDebug(chat.c_str(), "CHAT");
+		Game::chat.dialoguePrint(chat);
 	}
 	break;
 	default:

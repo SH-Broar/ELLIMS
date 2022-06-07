@@ -285,3 +285,8 @@ __int64 Zone::getLegion()
 	return t;
 
 }
+
+int Zone::getWidth()
+{
+	return r - l+1;
+}

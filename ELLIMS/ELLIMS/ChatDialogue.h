@@ -8,12 +8,13 @@ class ChatDialogue
 public:
 	ChatDialogue();
 
+	void setZone(Zone* z);
 	void dialoguePrint(char* mess);
-
+	void dialoguePrint(std::string mess);
 private:
 	Zone* dialogueZone;
 
-	std::vector<char*> messages;
-
+	char messages[1000]{};
+	int currented;
 };
 

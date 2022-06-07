@@ -3,6 +3,7 @@
 #include "Zone.h"
 #include "Player.h"
 #include "WorldMap.h"
+#include "ChatDialogue.h"
 
 Scene::Scene()
 {
@@ -110,6 +111,7 @@ void Scene::changeScene(SceneName sceneName)
 		//채팅
 		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2, SCREEN_HEIGHT / 4 * 2, SCREEN_HEIGHT -4);
 		areas[3].setType(FramePrintType::FULL);
+		Game::chat.setZone(&areas[3]);
 		//채팅 입력존 
 		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2, SCREEN_HEIGHT -2, SCREEN_HEIGHT-2, ClickableType::BUTTON);
 		areas[4].setType(FramePrintType::FULL);
@@ -139,6 +141,7 @@ void Scene::UpdateScene(Player& p)
 		case SceneName::INGAME:
 		{
 			areas[0] = mapCalc(p.x, p.y);
+
 		}
 			break;
 		default:

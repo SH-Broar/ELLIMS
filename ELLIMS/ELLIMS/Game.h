@@ -4,6 +4,7 @@
 class Zone;
 class Player;
 class Scene;
+class ChatDialogue;
 
 enum class ClearType;
 
@@ -52,6 +53,7 @@ public:
 	static char FrameBuffer[120][35];
 	static char DoubleFrameBuffer[120][35];
 	static char DebugFrameBuffer[120][35];
+	static ChatDialogue chat;
 
 	static void print(const char* data, int x, int y);
 

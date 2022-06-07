@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ChatDialogue.cpp" />
     <ClCompile Include="ELLIMS.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\ELLIMS Server\multi_iocp_server\multi_iocp_server\protocol.h" />
+    <ClInclude Include="ChatDialogue.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Player.h" />

@@ -1,6 +1,7 @@
 #pragma once
 #include "Turboc.h"
 
+class ChatDialogue;
 class Game;
 class Player;
 
