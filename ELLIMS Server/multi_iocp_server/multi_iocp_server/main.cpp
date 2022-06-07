@@ -95,6 +95,7 @@ void process_packet(int c_id, char* packet)
 		clients[c_id].setXY(50, 50);
 		clients[c_id].send_login_info_packet();
 		clients[c_id]._s_state = ST_INGAME;
+		//clients[c_id]._id = 
 		clients[c_id]._sl.unlock();
 
 
@@ -338,10 +339,11 @@ void do_worker()
 			int client_id = get_new_client_id();
 			if (client_id != -1)
 			{
-				clients[client_id].setXY(0, 0);
-				//clients[client_id].x = 0;
-				//clients[client_id].y = 0;
+				//여기서 DB연결해서 가져오기
+
+				printf("%d", client_id);
 				clients[client_id]._id = client_id;
+				clients[client_id].setXY(0, 0);
 				clients[client_id]._name[0] = 0;
 				clients[client_id]._socket = c_socket;
 				clients[client_id]._prev_remain = 0;

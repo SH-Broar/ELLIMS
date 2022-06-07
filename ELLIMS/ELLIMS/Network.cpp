@@ -199,6 +199,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	{
 		SC_LOGIN_INFO_PACKET* login_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
 		Game::myPlayerID = login_packet->id;
+		
 		Game::playerIDMapper[login_packet->id] = Game::nowPlayerNums;
 
 		Game::players[Game::playerIDMapper[login_packet->id]] = new Player();
@@ -209,7 +210,10 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, "player");
 
 		Game::ingame = true;
-		Game::printDebug("SUCCESS", "LOGIN");
+
+		char num[10];
+		itoa(Game::myPlayerID, num, 10);
+		Game::printDebug(num, "LOGIN SUCCESS");
 
 		Game::nowPlayerNums++;
 	}
@@ -250,9 +254,9 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		{
 			Game::players[Game::playerIDMapper[move_packet->id]]->x = move_packet->x;
 			Game::players[Game::playerIDMapper[move_packet->id]]->y = move_packet->y;
-			char tmp[10];
-			sprintf(tmp, "%d", move_packet->id);
-			Game::printDebug("MOVE", tmp);
+			//char tmp[10];
+			//sprintf(tmp, "%d", move_packet->id);
+			//Game::printDebug("MOVE", tmp);
 		}
 		
 	}

@@ -84,8 +84,24 @@ void Scene::changeScene(SceneName sceneName)
 	case SceneName::INGAME:
 	{
 		updatable = true;
+
+		//맵
 		areas.emplace_back(1, (SCREEN_HEIGHT-2)*2, 1, SCREEN_HEIGHT-2);
 		areas[0].setType(FramePrintType::FULL);
+
+		//플레이어 정보
+		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH-2, 1, SCREEN_HEIGHT/4-1);
+		areas[1].setType(FramePrintType::FULL);
+		//뭔가 다른거
+		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2,  SCREEN_HEIGHT/4+1, SCREEN_HEIGHT / 4*2 -2);
+		areas[2].setType(FramePrintType::FULL);
+		//채팅
+		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2, SCREEN_HEIGHT / 4 * 2, SCREEN_HEIGHT -4);
+		areas[3].setType(FramePrintType::FULL);
+		//채팅 입력존 
+		areas.emplace_back((SCREEN_HEIGHT - 2) * 2 + 2, SCREEN_WIDTH - 2, SCREEN_HEIGHT -2, SCREEN_HEIGHT-2, ClickableType::BUTTON);
+		areas[4].setType(FramePrintType::FULL);
+
 	}
 		break;
 	default:

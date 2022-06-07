@@ -117,6 +117,7 @@ void SESSION::setXY(short _x, short _y)
 
 	if (sectors[sectorX][sectorY][_id] == false)
 	{
+		printf("%d sector f->t",_id);
 		sectors[sectorX][sectorY][_id] = true;
 	}
 
