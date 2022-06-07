@@ -1,29 +1,11 @@
-//***********************************
-// 채팅서버
-//***********************************
+#include "AMBIT.h"
+#include "main.h"
 
-#include <iostream>
-#include <array>
-//#include <concurrent_unordered_map.h>
-#include <WS2tcpip.h>
-#include <MSWSock.h>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <unordered_set>
-#include <concurrent_unordered_map.h>
+array<SESSION, MAX_USER> clients;
+HANDLE g_h_iocp;
+SOCKET g_s_socket;
 
-#pragma comment(lib,"WS2_32.lib")
-#pragma comment(lib,"MSWSock.lib")
-
-#include "protocol.h"
-using namespace std;
-using namespace concurrency;
-
-
-class SESSION;
-constexpr int RANGE = 33;
-
+concurrent_unordered_map<int, concurrent_unordered_map<int, concurrent_unordered_map<int, bool>>> sectors;
 
 void error_display(const char* msg, int err_no)
 {
@@ -40,197 +22,9 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
-enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
-
-enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
-
-class OVER_EXP
-{
-public:
-	WSAOVERLAPPED _over;	//클래스 헤드 주소와 같은 위치의 주소를 가져오게 하기 위해 맨 처음에 씀
-							//원래는 map 써야되는데 너무 복잡하고 오버헤드도 크고 send는 변경도 자주 있기때문에 그냥 이렇게 하셈
-	WSABUF _wsabuf;
-	char _send_buf[BUF_SIZE];
-	COMP_TYPE _comp_type;
-
-	OVER_EXP()
-	{
-		_wsabuf.len = BUF_SIZE;
-		_wsabuf.buf = _send_buf;
-		_comp_type = OP_RECV;
-		ZeroMemory(&_over, sizeof(_over));
-	};
-
-	OVER_EXP(char* packet)
-	{
-		_wsabuf.len = packet[0];
-		_wsabuf.buf = _send_buf;
-		ZeroMemory(&_over, sizeof(_over));
-		_comp_type = OP_SEND;
-		memcpy(_send_buf, packet, packet[0]);
-	};
-};
-
-class SESSION
-{
-	OVER_EXP _recv_over;
-	short x, y;
-
-
-public:
-	mutex _sl;
-	SESSION_STATE _s_state;
-	int _id;
-	SOCKET _socket;
-	short sectorX, sectorY;	//한 사람이 동시에 두번 움직이진 않고, 남의 sector를 바꿀 일이 없으므로 atomic이 아님
-	char _name[NAME_SIZE];
-	int _prev_remain;
-
-	unordered_set <int> view_list;
-	mutex	vl;
-
-public:
-
-	SESSION()
-	{
-		_id = -1;
-		_socket = 0;
-		x = y = 0;
-		sectorX = sectorY = 0;
-		_name[0] = 0;
-		_s_state = ST_FREE;
-		_prev_remain = 0;
-	}
-
-	~SESSION()
-	{
-
-	}
-
-	void do_recv()
-	{
-		DWORD recv_flag = 0;
-		memset(&_recv_over._over, 0, sizeof(_recv_over._over));
-		_recv_over._wsabuf.len = BUF_SIZE - _prev_remain;
-		_recv_over._wsabuf.buf = _recv_over._send_buf + _prev_remain;
-
-		int ret = WSARecv(_socket, &_recv_over._wsabuf, 1, 0, &recv_flag, &_recv_over._over, 0);
-		//if (0 != ret)
-		//{
-		//	int err_no = WSAGetLastError();
-		//	if (err_no != WSA_IO_PENDING)
-		//		error_display("WSARecv : ", err_no);
-		//}
-
-	}
-
-	void do_send(void* packet)
-	{
-
-		OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<char*>(packet) };
-
-		WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, 0);
-	}
-
-	void send_login_info_packet()
-	{
-		SC_LOGIN_INFO_PACKET p;
-		p.id = _id;
-		p.size = sizeof(SC_LOGIN_INFO_PACKET);
-		p.type = SC_LOGIN_INFO;
-		p.x = x;
-		p.y = y;
-		do_send(&p);
-	}
-
-	void send_put_packet(int c_id);
-	void send_move_packet(int c_id, int client_time);
-
-	void send_remove_packet(int c_id)
-	{
-		SC_REMOVE_PLAYER_PACKET p;
-		p.id = c_id;
-		p.size = sizeof(p);
-		p.type = SC_REMOVE_PLAYER;
-		do_send(&p);
-	}
-
-	void setXY(short x, short y);
-
-	short X()
-	{
-		return x;
-	}
-	short Y()
-	{
-		return y;
-	}
-
-	friend int distance(int a, int b);
-};
-
-array<SESSION, MAX_USER> clients;
-HANDLE g_h_iocp;
-SOCKET g_s_socket;
-
-concurrent_unordered_map<int, concurrent_unordered_map<int, concurrent_unordered_map<int, bool>>> sectors;
-constexpr int SECTOR_WIDTH = 20;
-constexpr int SECTOR_HEIGHT = 20;
-
 int distance(int a, int b)
 {
 	return abs(clients[a].x - clients[b].x) + abs(clients[a].y - clients[b].y);
-}
-
-void SESSION::send_move_packet(int c_id, int client_time)
-{
-	SC_MOVE_PLAYER_PACKET p;
-	p.id = c_id;
-	p.size = sizeof(SC_MOVE_PLAYER_PACKET);
-	p.type = SC_MOVE_PLAYER;
-	p.x = clients[c_id].x;
-	p.y = clients[c_id].y;
-	p.client_time = client_time;
-	do_send(&p);
-}
-
-void SESSION::send_put_packet(int c_id)
-{
-	SC_ADD_PLAYER_PACKET put_packet;
-	put_packet.id = c_id;
-	strcpy_s(put_packet.name, clients[c_id]._name);
-	put_packet.size = sizeof(put_packet);
-	put_packet.type = SC_ADD_PLAYER;
-	put_packet.x = clients[c_id].x;
-	put_packet.y = clients[c_id].y;
-	do_send(&put_packet);
-}
-
-void SESSION::setXY(short _x, short _y)
-{
-	sectorX = x / SECTOR_WIDTH;
-	sectorY = y / SECTOR_HEIGHT;
-
-	if (sectorX != _x / SECTOR_WIDTH || sectorY != _y / SECTOR_HEIGHT)
-	{
-		//erase가 thread unsafe이므로 그냥 false로 변환
-		sectors[sectorX][sectorY][_id] = false;
-		//false가 너무 많이 쌓이면 느려지므로 이후 주기적으로 지워줘야함 (how?)
-
-		sectorX = _x / SECTOR_WIDTH;
-		sectorY = _y / SECTOR_HEIGHT;
-
-		sectors[sectorX][sectorY][_id] = true;
-	}
-
-	x = _x;
-	y = _y;
-
-	if (sectors[sectorX][sectorY][_id] == false)
-	{
-		sectors[sectorX][sectorY][_id] == true;
-	}
-
 }
 
 int get_new_client_id()
@@ -357,13 +151,23 @@ void process_packet(int c_id, char* packet)
 
 		short x = clients[c_id].X();
 		short y = clients[c_id].Y();
+
 		switch (p->direction)
 		{
-		case 0: if (y > 0)y--; break;
-		case 1: if (y < W_HEIGHT - 1)y++; break;
-		case 2: if (x > 0)x--; break;
-		case 3: if (x < W_WIDTH - 1)x++; break;
+		case 0:
+			if (y > 0 && s_Map::canMove(x,y - 1))y--;
+		break;
+		case 1:
+			if (y < W_HEIGHT - 1 && s_Map::canMove(x, y + 1))y++;
+			break;
+		case 2:
+			if (x > 0 && s_Map::canMove(x-1, y))x--;
+			break;
+		case 3:
+			if (x < W_WIDTH - 1 && s_Map::canMove(x+1,y))x++;
+			break;
 		}
+
 		clients[c_id].setXY(x, y);
 
 		//clients[c_id].x = x;
@@ -629,6 +433,7 @@ int main()
 	accept_over._wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
 	AcceptEx(g_s_socket, c_socket, accept_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &accept_over._over);
 
+	s_Map::loadMap();
 
 	vector <thread> worker_threads;
 

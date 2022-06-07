@@ -19,6 +19,18 @@
     <ClInclude Include="protocol.h">
       <Filter>헤더</Filter>
     </ClInclude>
+    <ClInclude Include="WorldMap.h">
+      <Filter>헤더</Filter>
+    </ClInclude>
+    <ClInclude Include="SESSION.h">
+      <Filter>헤더</Filter>
+    </ClInclude>
+    <ClInclude Include="AMBIT.h">
+      <Filter>헤더</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>헤더</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="소스">
@@ -41,6 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
+      <Filter>소스</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldMap.cpp">
+      <Filter>소스</Filter>
+    </ClCompile>
+    <ClCompile Include="SESSION.cpp">
       <Filter>소스</Filter>
     </ClCompile>
   </ItemGroup>
