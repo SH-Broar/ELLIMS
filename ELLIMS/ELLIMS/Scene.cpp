@@ -75,7 +75,7 @@ void Scene::changeScene(SceneName sceneName)
 		};
 
 		areas[4] = [&](int mx, int my) -> int {
-			if (!Game::isthisFocused(areas[3]))
+			if (!Game::isthisFocused(areas[4]))
 				Game::setFocusZone(areas[4], ClearType::TEXT);
 			return 0;
 		};
@@ -87,7 +87,7 @@ void Scene::changeScene(SceneName sceneName)
 
 		areas[5] = [&](int mx, int my) -> int {
 			Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
-			Network::NetworkCodex();
+			Network::NetworkCodex(areas[3].getText(),areas[4].getText());
 			while (!Game::networkConnected) { SleepEx(30, TRUE); }
 			changeScene(SceneName::INGAME);
 			

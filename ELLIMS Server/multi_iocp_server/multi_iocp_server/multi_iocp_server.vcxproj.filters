@@ -31,6 +31,9 @@
     <ClInclude Include="main.h">
       <Filter>헤더</Filter>
     </ClInclude>
+    <ClInclude Include="DataBaseManager.h">
+      <Filter>헤더</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="소스">
@@ -59,6 +62,9 @@
       <Filter>소스</Filter>
     </ClCompile>
     <ClCompile Include="SESSION.cpp">
+      <Filter>소스</Filter>
+    </ClCompile>
+    <ClCompile Include="DataBaseManager.cpp">
       <Filter>소스</Filter>
     </ClCompile>
   </ItemGroup>

@@ -40,7 +40,7 @@ public:
 	Network();
 	~Network();
 
-	static void NetworkCodex();
+	static void NetworkCodex(char* id, char* pass);
 	static void PacketProcess();
 
 private:

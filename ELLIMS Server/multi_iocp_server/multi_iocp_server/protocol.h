@@ -27,6 +27,7 @@ struct CS_LOGIN_PACKET {
 	unsigned char size;
 	char	type;
 	char	name[NAME_SIZE];
+	char  pass[NAME_SIZE];
 };
 
 struct CS_MOVE_PACKET {
@@ -46,7 +47,8 @@ struct CS_CHAT_PACKET
 struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
 	char	type;
-	int		id;
+	int 	id;
+	char	name[NAME_SIZE];
 	short	x, y;
 };
 
@@ -54,8 +56,9 @@ struct SC_ADD_PLAYER_PACKET {
 	unsigned char size;
 	char	type;
 	int		id;
-	short	x, y;
 	char	name[NAME_SIZE];
+	short	x, y;
+
 };
 
 struct SC_REMOVE_PLAYER_PACKET {

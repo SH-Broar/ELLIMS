@@ -9,7 +9,7 @@ Player::Player()
 	isActive = false;
 	characterIcon = 'X';
 
-	pID = 0;
+	scID = 0;
 	x = 0;
 	y = 0;
 

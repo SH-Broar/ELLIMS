@@ -11,9 +11,9 @@ public:
 	Player();
 
 public:
-	int pID;
+	int scID;
 	char characterIcon;
-	char name[10];
+	char name[20];
 
 	int x;
 	int y;

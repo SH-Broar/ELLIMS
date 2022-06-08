@@ -40,7 +40,7 @@ Network::~Network()
 	WSACleanup();
 }
 
-void Network::NetworkCodex()
+void Network::NetworkCodex(char* id, char* pass)
 {
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -77,9 +77,12 @@ void Network::NetworkCodex()
 	CS_LOGIN_PACKET l_packet;
 
 	int temp = 1;
-	sprintf_s(l_packet.name, "Player%d", temp);
 
-	l_packet.size = sizeof(l_packet);
+	//¾ÆÀÌµð
+	strcpy_s(l_packet.name, id);
+	strcpy_s(l_packet.pass, pass);
+
+	l_packet.size = sizeof(l_packet) - sizeof(l_packet.pass) + strlen(pass) + 1;
 	l_packet.type = CS_LOGIN;
 	SendPacket(&l_packet);
 
@@ -206,8 +209,8 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		Game::players[Game::playerIDMapper[login_packet->id]]->p();
 		Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
 		Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
-		Game::players[Game::playerIDMapper[login_packet->id]]->pID = login_packet->id;
-		strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, "player");
+		Game::players[Game::playerIDMapper[login_packet->id]]->scID = login_packet->id;
+		strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, login_packet->name);
 
 		Game::ingame = true;
 
@@ -227,7 +230,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		Game::players[Game::playerIDMapper[add_packet->id]]->x = add_packet->x;
 		Game::players[Game::playerIDMapper[add_packet->id]]->y = add_packet->y;
 		strcpy(Game::players[Game::playerIDMapper[add_packet->id]]->name, add_packet->name);
-		Game::players[Game::playerIDMapper[add_packet->id]]->pID = add_packet->id;
+		Game::players[Game::playerIDMapper[add_packet->id]]->scID = add_packet->id;
 		Game::players[Game::playerIDMapper[add_packet->id]]->setPlayerActive(true);
 
 		Game::nowPlayerNums++;

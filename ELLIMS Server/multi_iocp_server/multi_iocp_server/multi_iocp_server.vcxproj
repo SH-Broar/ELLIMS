@@ -127,9 +127,10 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,12 +140,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DataBaseManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SESSION.cpp" />
     <ClCompile Include="WorldMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AMBIT.h" />
+    <ClInclude Include="DataBaseManager.h" />
     <ClInclude Include="include\lauxlib.h" />
     <ClInclude Include="include\lua.h" />
     <ClInclude Include="include\lua.hpp" />

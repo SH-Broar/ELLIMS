@@ -1,5 +1,6 @@
 #include "AMBIT.h"
 #include "main.h"
+#include "DataBaseManager.h"
 
 array<SESSION, MAX_USER> clients;
 HANDLE g_h_iocp;
@@ -24,7 +25,7 @@ void error_display(const char* msg, int err_no)
 
 int distance(int a, int b)
 {
-	return abs(clients[a].x - clients[b].x) + abs(clients[a].y - clients[b].y);
+	return abs(clients[a].X() - clients[b].X()) + abs(clients[a].Y() - clients[b].Y());
 }
 
 int get_new_client_id()
@@ -57,7 +58,7 @@ void disconnect(int c_id)
 
 	for (auto& pl : clients)
 	{
-		if (pl._id == c_id) continue;
+		if (pl.ID() == c_id) continue;
 		pl._sl.lock();
 		if (pl._s_state != ST_INGAME)
 		{
@@ -78,6 +79,7 @@ void process_packet(int c_id, char* packet)
 	case CS_LOGIN:
 	{
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
+
 		clients[c_id]._sl.lock();
 		if (clients[c_id]._s_state == ST_FREE)
 		{
@@ -91,12 +93,18 @@ void process_packet(int c_id, char* packet)
 			break;
 		}
 
+		//사실 굉장히 안좋은 위치
+		LoginData Data = DataBaseManager::getLoginData(p->name, p->pass);
+		Data.sc_id = c_id;
+		if (!Data.isValidLogin)
+		{
+			cout << "data name : " << Data.name;
+			// 아이디 생성
+		}
+		cout << "data name2 : " << Data.name;
 		//strcpy_s(clients[c_id]._name, p->name);
-		char name[10];
-		sprintf_s(name, "player %d", c_id);
-		strcpy_s(clients[c_id]._name, name);
-
-		clients[c_id].setXY(50, 50);
+		//strcpy(clients[c_id].NAME(), Data.name);
+		clients[c_id].setData(Data);
 		clients[c_id].send_login_info_packet();
 		clients[c_id]._s_state = ST_INGAME;
 		//clients[c_id]._id = 
@@ -111,7 +119,7 @@ void process_packet(int c_id, char* packet)
 		//-> pl
 		for (auto& pl : clients)
 		{
-			if (pl._id == c_id) continue;
+			if (pl.ID() == c_id) continue;
 
 			pl._sl.lock();
 			if (pl._s_state != ST_INGAME)
@@ -120,7 +128,7 @@ void process_packet(int c_id, char* packet)
 				continue;
 			}
 
-			if (RANGE >= distance(c_id, pl._id))
+			if (RANGE >= distance(c_id, pl.ID()))
 			{
 				pl.vl.lock();
 				pl.view_list.insert(c_id);
@@ -134,17 +142,17 @@ void process_packet(int c_id, char* packet)
 		//-> c_id
 		for (auto& pl : clients)
 		{
-			if (pl._id == c_id) continue;
+			if (pl.ID() == c_id) continue;
 			lock_guard<mutex> aa{ pl._sl };	//편한 언락
 			if (pl._s_state != ST_INGAME)continue;
 
-			if (RANGE >= distance(c_id, pl._id))
+			if (RANGE >= distance(c_id, pl.ID()))
 			{
 				clients[c_id].vl.lock();
-				clients[c_id].view_list.insert(pl._id);
+				clients[c_id].view_list.insert(pl.ID());
 				clients[c_id].vl.unlock();
 
-				clients[c_id].send_put_packet(pl._id);
+				clients[c_id].send_put_packet(pl.ID());
 			}
 		}
 
@@ -209,17 +217,17 @@ void process_packet(int c_id, char* packet)
 					if (pl._s_state != ST_INGAME)continue;
 
 					//near의 모든 객체에 대해?
-					if (distance(c_id, pl._id) <= RANGE)
+					if (distance(c_id, pl.ID()) <= RANGE)
 					{
 						clients[c_id].vl.lock();
 						//없으면
-						if (clients[c_id].view_list.find(pl._id) == clients[c_id].view_list.end())
+						if (clients[c_id].view_list.find(pl.ID()) == clients[c_id].view_list.end())
 						{
-							clients[c_id].view_list.insert(pl._id);
+							clients[c_id].view_list.insert(pl.ID());
 							clients[c_id].vl.unlock();
 
 							//put
-							clients[c_id].send_put_packet(pl._id);
+							clients[c_id].send_put_packet(pl.ID());
 
 							//pl.vl.lock();
 							//unordered_set<int> o_vlRapper = pl.view_list;
@@ -227,9 +235,9 @@ void process_packet(int c_id, char* packet)
 
 							//내가 상대한테 없으면
 							pl.vl.lock();
-							if (pl.view_list.find(clients[c_id]._id) == pl.view_list.end())
+							if (pl.view_list.find(clients[c_id].ID()) == pl.view_list.end())
 							{
-								pl.view_list.insert(clients[c_id]._id);
+								pl.view_list.insert(clients[c_id].ID());
 								pl.vl.unlock();
 
 								//put
@@ -253,9 +261,9 @@ void process_packet(int c_id, char* packet)
 
 							//내가 상대한테 없으면
 							pl.vl.lock();
-							if (pl.view_list.find(clients[c_id]._id) == pl.view_list.end())
+							if (pl.view_list.find(clients[c_id].ID()) == pl.view_list.end())
 							{
-								pl.view_list.insert(clients[c_id]._id);
+								pl.view_list.insert(clients[c_id].ID());
 								pl.vl.unlock();
 
 								//put
@@ -372,11 +380,12 @@ void do_worker()
 			if (client_id != -1)
 			{
 				//여기서 DB연결해서 가져오기
+				//DataBaseManager:
 
 				printf("Login : %d\n", client_id);
-				clients[client_id]._id = client_id;
+				clients[client_id].ID(1);
 				clients[client_id].setXY(0, 0);
-				sprintf_s(clients[client_id]._name,"%d", clients[client_id]._id);
+				sprintf(clients[client_id].NAME(), "tmp");
 				clients[client_id]._socket = c_socket;
 				clients[client_id]._prev_remain = 0;
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), g_h_iocp, client_id, 0);

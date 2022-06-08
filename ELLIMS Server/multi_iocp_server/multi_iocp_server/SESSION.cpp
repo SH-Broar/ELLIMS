@@ -1,6 +1,5 @@
 #include "SESSION.h"
 
-
 OVER_EXP::OVER_EXP()
 {
 	_wsabuf.len = BUF_SIZE;
@@ -24,8 +23,8 @@ void SESSION::send_move_packet(int c_id, int client_time)
 	p.id = c_id;
 	p.size = sizeof(SC_MOVE_PLAYER_PACKET);
 	p.type = SC_MOVE_PLAYER;
-	p.x = clients[c_id].x;
-	p.y = clients[c_id].y;
+	p.x = clients[c_id].X();
+	p.y = clients[c_id].Y();
 	p.client_time = client_time;
 	do_send(&p);
 }
@@ -55,7 +54,7 @@ void SESSION::send_chat_packet(int c_id, char* mess)
 	}
 	else
 	{
-		strcpy_s(p.name, clients[c_id]._name);
+		strcpy_s(p.name, clients[c_id].NAME());
 		strcpy_s(p.mess, mess);
 		printf("chat : %s\n", p.mess);
 	}
@@ -65,11 +64,11 @@ void SESSION::send_chat_packet(int c_id, char* mess)
 
 SESSION::SESSION()
 {
-	_id = -1;
+	//_id = -1;
 	_socket = 0;
-	x = y = 0;
+	//x = y = 0;
 	sectorX = sectorY = 0;
-	_name[0] = 0;
+	//_name[0] = 0;
 	_s_state = ST_FREE;
 	_prev_remain = 0;
 }
@@ -98,11 +97,12 @@ void SESSION::do_send(void* packet)
 void SESSION::send_login_info_packet()
 {
 	SC_LOGIN_INFO_PACKET p;
-	p.id = _id;
+	p.id = data.sc_id;
+	strcpy(p.name, data.name);
 	p.size = sizeof(SC_LOGIN_INFO_PACKET);
 	p.type = SC_LOGIN_INFO;
-	p.x = x;
-	p.y = y;
+	p.x = data.x;
+	p.y = data.y;
 	do_send(&p);
 }
 
@@ -110,48 +110,68 @@ void SESSION::send_put_packet(int c_id)
 {
 	SC_ADD_PLAYER_PACKET put_packet;
 	put_packet.id = c_id;
-	strcpy_s(put_packet.name, clients[c_id]._name);
+	strcpy(put_packet.name, data.name);
+	strcpy_s(put_packet.name, clients[c_id].NAME());
 	put_packet.size = sizeof(put_packet);
 	put_packet.type = SC_ADD_PLAYER;
-	put_packet.x = clients[c_id].x;
-	put_packet.y = clients[c_id].y;
+	put_packet.x = clients[c_id].X();
+	put_packet.y = clients[c_id].Y();
 	do_send(&put_packet);
 }
 
 void SESSION::setXY(short _x, short _y)
 {
-	sectorX = x / SECTOR_WIDTH;
-	sectorY = y / SECTOR_HEIGHT;
+	sectorX = X() / SECTOR_WIDTH;
+	sectorY = Y() / SECTOR_HEIGHT;
 
 	if (sectorX != _x / SECTOR_WIDTH || sectorY != _y / SECTOR_HEIGHT)
 	{
 		//erase가 thread unsafe이므로 그냥 false로 변환
-		sectors[sectorX][sectorY][_id] = false;
+		sectors[sectorX][sectorY][ID()] = false;
 		//false가 너무 많이 쌓이면 느려지므로 이후 주기적으로 지워줘야함 (how?)
 
 		sectorX = _x / SECTOR_WIDTH;
 		sectorY = _y / SECTOR_HEIGHT;
 
-		sectors[sectorX][sectorY][_id] = true;
+		sectors[sectorX][sectorY][ID()] = true;
 	}
 
-	x = _x;
-	y = _y;
+	data.x = _x;
+	data.y = _y;
 
-	if (sectors[sectorX][sectorY][_id] == false)
+	if (sectors[sectorX][sectorY][ID()] == false)
 	{
 		//printf("%d sector f->t",_id);
-		sectors[sectorX][sectorY][_id] = true;
+		sectors[sectorX][sectorY][ID()] = true;
 	}
 
 }
 
 short SESSION::X()
 {
-	return x;
+	return data.x;
 }
 
 short SESSION::Y()
 {
-	return y;
+	return data.y;
+}
+
+int SESSION::ID()
+{
+	return data.sc_id;
+}
+void SESSION::ID(int a)
+{
+	data.sc_id = a;
+}
+
+void SESSION::setData(LoginData d)
+{
+	data = d;
+}
+
+char* SESSION::NAME()
+{
+	return data.name;
 }

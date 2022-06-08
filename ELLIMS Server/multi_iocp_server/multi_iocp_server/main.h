@@ -2,6 +2,7 @@
 #include "AMBIT.h"
 
 class SESSION;
+class DataBaseManager;
 
 extern array<SESSION, MAX_USER> clients;
 extern HANDLE g_h_iocp;

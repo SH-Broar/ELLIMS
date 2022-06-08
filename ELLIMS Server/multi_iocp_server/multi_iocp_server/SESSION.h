@@ -1,9 +1,11 @@
 #pragma once
 #include "AMBIT.h"
 #include "main.h"
+#include "DataBaseManager.h"
 
 enum SESSION_STATE;
 enum COMP_TYPE;
+struct LoginData;
 
 class OVER_EXP
 {
@@ -22,16 +24,17 @@ public:
 
 class SESSION
 {
+	LoginData data;
 	OVER_EXP _recv_over;
-	short x, y;
+	//short x, y;
 
 public:
 	std::mutex _sl;
 	SESSION_STATE _s_state;
-	int _id;
+	//int _id;
 	SOCKET _socket;
 	short sectorX, sectorY;	//한 사람이 동시에 두번 움직이진 않고, 남의 sector를 바꿀 일이 없으므로 atomic이 아님
-	char _name[NAME_SIZE];
+	//char _name[NAME_SIZE];
 	int _prev_remain;
 
 	std::unordered_set <int> view_list;
@@ -57,6 +60,10 @@ public:
 
 	short X();
 	short Y();
+	void ID(int a);
+	int ID();
+	void setData(LoginData d);
+	char* NAME();
 
 	friend int distance(int a, int b);
 
