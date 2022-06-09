@@ -66,6 +66,7 @@ public:
 	static void networkT();
 
 	static bool networkConnected;
+	static bool DBConnected;
 	static bool ingame;
 
 	//----

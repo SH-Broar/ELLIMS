@@ -85,12 +85,36 @@ void Scene::changeScene(SceneName sceneName)
 			return;
 		};
 
-		areas[5] = [&](int mx, int my) -> int {
-			Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
-			Network::NetworkCodex(areas[3].getText(),areas[4].getText());
-			while (!Game::networkConnected) { SleepEx(30, TRUE); }
-			changeScene(SceneName::INGAME);
-			
+		areas[5] = [&](int mx, int my) -> int
+		{
+			Game::print("                           ", SCREEN_WIDTH / 2 - 11, 26);
+			if (!Game::networkConnected)
+			{
+				Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
+				Network::NetworkCodex(areas[3].getText(), areas[4].getText());
+				//while (!Game::networkConnected) { SleepEx(30, TRUE); }
+				Game::DBConnected = true;
+			}
+			else
+			{
+				Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
+				Network::TryLogin(areas[3].getText(), areas[4].getText());
+				Game::DBConnected = true;
+			}
+
+			int cont = 0;
+			while (cont < 1000 && Game::DBConnected)
+			{
+				cont += 1;
+				if (Game::ingame)
+				{
+					changeScene(SceneName::INGAME);
+					break;
+				}
+				SleepEx(1, TRUE);
+			}
+			Game::print("                           ", SCREEN_WIDTH / 2 - 11, 26);
+			Game::print("LogIn Failed! ", SCREEN_WIDTH / 2 - 6, 26);
 			return 0;
 		};
 

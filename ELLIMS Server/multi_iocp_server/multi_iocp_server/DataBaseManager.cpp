@@ -75,6 +75,7 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 	//}
 
 	LoginData result{};
+	result.level = -1;
 
 	setlocale(LC_ALL, "korean");
 	//std::wcout.imbue(std::locale("korean"));
@@ -135,7 +136,9 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 							for (int i = 0; ; i++) {
 								retcode = SQLFetch(hstmt);
 								if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+								{
 									ShowError(hstmt, SQL_HANDLE_STMT, retcode);
+								}
 								if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
 								{
 									//sprintf_s(result.id, "%S", id);

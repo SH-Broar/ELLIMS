@@ -9,11 +9,12 @@
 
 char Game::inputChar;
 bool Game::networkConnected = false;
+bool Game::DBConnected = false;
 bool Game::gameEnd = false;
 Zone* Game::focusedZone = nullptr;
 std::atomic<bool> Game::newCharInputed;
 std::atomic<PlayerCommand> Game::newCommandInputed;
-bool Game::ingame;
+bool Game::ingame = false;
 int Game::nowPlayerNums = 0;
 ChatDialogue Game::chat;
 

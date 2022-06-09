@@ -41,6 +41,7 @@ public:
 	~Network();
 
 	static void NetworkCodex(char* id, char* pass);
+	static void TryLogin(char* id, char* pass);
 	static void PacketProcess();
 
 private:

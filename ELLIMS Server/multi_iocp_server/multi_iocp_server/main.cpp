@@ -107,44 +107,6 @@ void process_packet(int c_id, char* packet)
 		//clients[c_id].y = 0;
 
 		//-> pl
-		for (auto& pl : clients)
-		{
-			if (pl.ID() == c_id) continue;
-
-			pl._sl.lock();
-			if (pl._s_state != ST_INGAME)
-			{
-				pl._sl.unlock();
-				continue;
-			}
-
-			if (RANGE >= distance(c_id, pl.ID()))
-			{
-				pl.vl.lock();
-				pl.view_list.insert(c_id);
-				pl.vl.unlock();
-
-				pl.send_put_packet(c_id);
-			}
-			pl._sl.unlock();
-		}
-
-		//-> c_id
-		for (auto& pl : clients)
-		{
-			if (pl.ID() == c_id) continue;
-			lock_guard<mutex> aa{ pl._sl };	//편한 언락
-			if (pl._s_state != ST_INGAME)continue;
-
-			if (RANGE >= distance(c_id, pl.ID()))
-			{
-				clients[c_id].vl.lock();
-				clients[c_id].view_list.insert(pl.ID());
-				clients[c_id].vl.unlock();
-
-				clients[c_id].send_put_packet(pl.ID());
-			}
-		}
 
 		break;
 	}
@@ -441,22 +403,68 @@ void do_worker()
 				LoginData Data = db_over->datas;
 				int c_id = key;
 				Data.sc_id = c_id;
-				if (!Data.isValidLogin)
-				{
-					cout << "This is Not ValidLogin" << Data.name;
-					// 아이디 생성
-				}
-				else
-				{
-					cout << "Login Success : " << Data.name;
-				}
 
 				clients[c_id]._sl.lock();
 
 				clients[c_id].setData(Data);
 				clients[c_id].send_login_info_packet();
-				clients[c_id]._s_state = ST_INGAME;
-				clients[c_id]._sl.unlock();
+				if (!Data.isValidLogin)
+				{
+					cout << "This is Not ValidLogin";
+					// 아이디 생성
+					clients[c_id]._sl.unlock();
+				}
+				else
+				{
+					cout << "Login Success : " << Data.name;
+					clients[c_id]._s_state = ST_INGAME;
+					clients[c_id]._sl.unlock();
+
+					//view list
+
+					for (auto& pl : clients)
+					{
+						if (pl.ID() == c_id) continue;
+
+						pl._sl.lock();
+						if (pl._s_state != ST_INGAME)
+						{
+							pl._sl.unlock();
+							continue;
+						}
+
+						if (RANGE >= distance(c_id, pl.ID()))
+						{
+							pl.vl.lock();
+							pl.view_list.insert(c_id);
+							pl.vl.unlock();
+
+							pl.send_put_packet(c_id);
+						}
+						pl._sl.unlock();
+					}
+
+					//-> c_id
+					for (auto& pl : clients)
+					{
+						if (pl.ID() == c_id) continue;
+						lock_guard<mutex> aa{ pl._sl };	//편한 언락
+						if (pl._s_state != ST_INGAME)continue;
+
+						if (RANGE >= distance(c_id, pl.ID()))
+						{
+							clients[c_id].vl.lock();
+							clients[c_id].view_list.insert(pl.ID());
+							clients[c_id].vl.unlock();
+
+							clients[c_id].send_put_packet(pl.ID());
+						}
+					}
+
+				}
+
+				
+				
 				break;
 			}
 			}

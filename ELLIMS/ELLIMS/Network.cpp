@@ -70,8 +70,16 @@ void Network::NetworkCodex(char* id, char* pass)
 	recv_over._wsabuf.buf = reinterpret_cast<CHAR*>(recv_over._overlapped_buf);
 	recv_over._wsabuf.len = sizeof(recv_over._overlapped_buf);
 
-	DWORD recv_flag = 0;
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_c_socket), g_h_iocp, 1, 0);
+
+	TryLogin(id,  pass);
+}
+
+void Network::TryLogin(char* id, char* pass)
+{
+	recv_over._comp_type = OP_RECV;
+	recv_over._wsabuf.buf = reinterpret_cast<CHAR*>(recv_over._overlapped_buf);
+	recv_over._wsabuf.len = sizeof(recv_over._overlapped_buf);
 
 	//SERVER IMMIDIATE LOGIN
 	CS_LOGIN_PACKET l_packet;
@@ -86,6 +94,7 @@ void Network::NetworkCodex(char* id, char* pass)
 	l_packet.type = CS_LOGIN;
 	SendPacket(&l_packet);
 
+	DWORD recv_flag = 0;
 	//RECV LOGIN DATA
 	int ret = WSARecv(g_c_socket, &recv_over._wsabuf, 1, NULL, &recv_flag, &recv_over._over, NULL);
 	if (SOCKET_ERROR == ret) {
@@ -201,31 +210,40 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	case SC_LOGIN_INFO:
 	{
 		SC_LOGIN_INFO_PACKET* login_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
-		Game::myPlayerID = login_packet->id;
 
-		Game::playerIDMapper[login_packet->id] = Game::nowPlayerNums;
+		if (login_packet->level < 0)
+		{
+			Game::printDebug("FAILED", "LOGIN ");
+			Game::DBConnected = false;
+		}
+		else
+		{
+			Game::myPlayerID = login_packet->id;
 
-		Game::players[Game::playerIDMapper[login_packet->id]] = new Player();
-		Game::players[Game::playerIDMapper[login_packet->id]]->p();
-		Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
-		Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
-		Game::players[Game::playerIDMapper[login_packet->id]]->level = login_packet->level;
-		Game::players[Game::playerIDMapper[login_packet->id]]->HP = login_packet->HP;
-		Game::players[Game::playerIDMapper[login_packet->id]]->MaxHP = login_packet->MaxHP;
-		Game::players[Game::playerIDMapper[login_packet->id]]->MP = login_packet->MP;
-		Game::players[Game::playerIDMapper[login_packet->id]]->MaxMP = login_packet->MaxMP;
-		Game::players[Game::playerIDMapper[login_packet->id]]->scID = login_packet->id;
-		Game::players[Game::playerIDMapper[login_packet->id]]->EXP = login_packet->EXP;
-		Game::players[Game::playerIDMapper[login_packet->id]]->MaxEXP = 100 + (login_packet->level*100);
-		strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, login_packet->name);
+			Game::playerIDMapper[login_packet->id] = Game::nowPlayerNums;
 
-		Game::ingame = true;
+			Game::players[Game::playerIDMapper[login_packet->id]] = new Player();
+			Game::players[Game::playerIDMapper[login_packet->id]]->p();
+			Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
+			Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
+			Game::players[Game::playerIDMapper[login_packet->id]]->level = login_packet->level;
+			Game::players[Game::playerIDMapper[login_packet->id]]->HP = login_packet->HP;
+			Game::players[Game::playerIDMapper[login_packet->id]]->MaxHP = login_packet->MaxHP;
+			Game::players[Game::playerIDMapper[login_packet->id]]->MP = login_packet->MP;
+			Game::players[Game::playerIDMapper[login_packet->id]]->MaxMP = login_packet->MaxMP;
+			Game::players[Game::playerIDMapper[login_packet->id]]->scID = login_packet->id;
+			Game::players[Game::playerIDMapper[login_packet->id]]->EXP = login_packet->EXP;
+			Game::players[Game::playerIDMapper[login_packet->id]]->MaxEXP = 100 + (login_packet->level * 100);
+			strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, login_packet->name);
 
-		char num[10];
-		itoa(Game::myPlayerID, num, 10);
-		Game::printDebug(num, "LOGIN SUCCESS");
+			Game::ingame = true;
 
-		Game::nowPlayerNums++;
+			char num[10];
+			itoa(Game::myPlayerID, num, 10);
+			Game::printDebug(num, "LOGIN SUCCESS");
+
+			Game::nowPlayerNums++;
+		}
 	}
 	break;
 	case SC_ADD_PLAYER:
