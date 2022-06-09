@@ -1,4 +1,5 @@
 #include "SESSION.h"
+#include "DataBaseManager.h"
 
 OVER_EXP::OVER_EXP()
 {
@@ -166,9 +167,14 @@ void SESSION::ID(int a)
 	data.sc_id = a;
 }
 
-void SESSION::setData(LoginData d)
+void SESSION::setData(LoginData& d)
 {
 	data = d;
+}
+
+LoginData& SESSION::getData()
+{
+	return data;
 }
 
 char* SESSION::NAME()

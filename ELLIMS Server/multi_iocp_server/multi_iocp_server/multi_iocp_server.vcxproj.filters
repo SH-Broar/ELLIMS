@@ -34,6 +34,15 @@
     <ClInclude Include="DataBaseManager.h">
       <Filter>헤더</Filter>
     </ClInclude>
+    <ClInclude Include="LoginData.h">
+      <Filter>헤더\EVENTS</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerEvent.h">
+      <Filter>헤더\EVENTS</Filter>
+    </ClInclude>
+    <ClInclude Include="DBEvent.h">
+      <Filter>헤더\EVENTS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="소스">
@@ -47,6 +56,9 @@
     </Filter>
     <Filter Include="스크립트\라이브러리">
       <UniqueIdentifier>{437e17ec-13f1-4862-bfc3-ab9f21fa7fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더\EVENTS">
+      <UniqueIdentifier>{6cc0bf82-9e09-4150-8f29-210c202047fd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

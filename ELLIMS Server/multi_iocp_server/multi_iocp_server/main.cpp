@@ -1,6 +1,5 @@
 #include "AMBIT.h"
 #include "main.h"
-#include "DataBaseManager.h"
 
 array<SESSION, MAX_USER> clients;
 HANDLE g_h_iocp;
@@ -93,21 +92,12 @@ void process_packet(int c_id, char* packet)
 			break;
 		}
 
-		//사실 굉장히 안좋은 위치
-		LoginData Data = DataBaseManager::getLoginData(p->name, p->pass);
-		Data.sc_id = c_id;
-		if (!Data.isValidLogin)
-		{
-			cout << "data name : " << Data.name;
-			// 아이디 생성
-		}
-		cout << "data name2 : " << Data.name;
-		//strcpy_s(clients[c_id]._name, p->name);
-		//strcpy(clients[c_id].NAME(), Data.name);
-		clients[c_id].setData(Data);
-		clients[c_id].send_login_info_packet();
-		clients[c_id]._s_state = ST_INGAME;
-		//clients[c_id]._id = 
+		//DB 스레드
+		LoginData dbTMP;
+		strcpy(dbTMP.name, p->name);
+		strcpy(dbTMP.pass, p->pass);
+		DataBaseManager::addDBEvent(c_id,DB_EV_LOGIN, dbTMP);
+
 		clients[c_id]._sl.unlock();
 
 
@@ -168,16 +158,16 @@ void process_packet(int c_id, char* packet)
 		switch (p->direction)
 		{
 		case 0:
-			if (y > 0 && s_Map::canMove(x,y - 1))y--;
-		break;
+			if (y > 0 && s_Map::canMove(x, y - 1))y--;
+			break;
 		case 1:
 			if (y < W_HEIGHT - 1 && s_Map::canMove(x, y + 1))y++;
 			break;
 		case 2:
-			if (x > 0 && s_Map::canMove(x-1, y))x--;
+			if (x > 0 && s_Map::canMove(x - 1, y))x--;
 			break;
 		case 3:
-			if (x < W_WIDTH - 1 && s_Map::canMove(x+1,y))x++;
+			if (x < W_WIDTH - 1 && s_Map::canMove(x + 1, y))x++;
 			break;
 		}
 
@@ -320,7 +310,7 @@ void process_packet(int c_id, char* packet)
 	case CS_CHAT:
 	{
 		CS_CHAT_PACKET* p = reinterpret_cast<CS_CHAT_PACKET*>(packet);
-		
+
 
 		for (int i = 0; i < 3; ++i)
 		{
@@ -379,8 +369,6 @@ void do_worker()
 			int client_id = get_new_client_id();
 			if (client_id != -1)
 			{
-				//여기서 DB연결해서 가져오기
-				//DataBaseManager:
 
 				printf("Login : %d\n", client_id);
 				clients[client_id].ID(1);
@@ -442,6 +430,37 @@ void do_worker()
 			}
 			delete ex_over;
 			break;
+
+		case OP_DB:
+
+			OVER_DB* db_over = reinterpret_cast<OVER_DB*>(ex_over);
+			switch (db_over->_db_type)
+			{
+			case DB_EV_LOGIN:
+			{
+				LoginData Data = db_over->datas;
+				int c_id = key;
+				Data.sc_id = c_id;
+				if (!Data.isValidLogin)
+				{
+					cout << "This is Not ValidLogin" << Data.name;
+					// 아이디 생성
+				}
+				else
+				{
+					cout << "Login Success : " << Data.name;
+				}
+
+				clients[c_id]._sl.lock();
+
+				clients[c_id].setData(Data);
+				clients[c_id].send_login_info_packet();
+				clients[c_id]._s_state = ST_INGAME;
+				clients[c_id]._sl.unlock();
+				break;
+			}
+			}
+			break;
 		}
 
 	}
@@ -485,6 +504,9 @@ int main()
 	{
 		worker_threads.emplace_back(do_worker);
 	}
+	thread db_thread{ DataBaseManager::DBThread };
+
+	db_thread.join();
 	for (auto& th : worker_threads)
 	{
 		th.join();

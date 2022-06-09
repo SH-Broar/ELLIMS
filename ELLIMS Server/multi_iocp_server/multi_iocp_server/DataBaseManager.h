@@ -1,24 +1,18 @@
 #pragma once
+#include "AMBIT.h"
+#include "DBEvent.h"
+#include "LoginData.h"
 
-struct LoginData
-{
-	bool isValidLogin = false;
-	int sc_id;
-	char id[100];
-	char name[100];
-	int level;
-	int x, y;
-	int HP, MaxHP;
-	int MP, MaxMP;
-	int EXP;
-};
+class SESSION;
 
 class DataBaseManager
 {
-private:
-
 public:
 	DataBaseManager();
+
+	static void DBThread();
+	static concurrent_queue<DB_EVENT> dbWorkQueue;
+	static void addDBEvent(int id, DB_EVENT_TYPE type, LoginData& sess);
 
 	static LoginData getLoginData(char* name, char* password);
 };

@@ -1,4 +1,7 @@
 #include "DataBaseManager.h"
+#include "SESSION.h"
+#include "DBEvent.h"
+#include "LoginData.h"
 #include <Windows.h>
 #include <stdio.h>  
 #include <iostream>
@@ -6,12 +9,54 @@
 #include <sqlext.h>  
 
 using namespace std;
+concurrent_queue<DB_EVENT> DataBaseManager::dbWorkQueue;
 
 void ShowError(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode);
 
 DataBaseManager::DataBaseManager()
 {
 
+}
+
+void DataBaseManager::DBThread()
+{
+	while (true)
+	{
+		DB_EVENT ev;
+		
+		while (!dbWorkQueue.try_pop(ev))
+		{
+			SleepEx(1, TRUE);
+		}
+		switch (ev.EVENT)
+		{
+		case DB_EVENT_TYPE::DB_EV_LOGIN:
+		{
+			LoginData d = getLoginData(ev.session.name, ev.session.pass);
+			d.sc_id = ev.id;
+			OVER_DB over;
+			over._db_type = DB_EV_LOGIN;
+			over._comp_type = OP_DB;
+			over.datas = d;
+			PostQueuedCompletionStatus(g_h_iocp, 0, d.sc_id, reinterpret_cast<LPOVERLAPPED>(&over));
+		}
+			break;
+		case DB_EVENT_TYPE::DB_EV_LOGOUT:
+			break;
+		case DB_EVENT_TYPE::DB_EV_DUMMY:
+			break;
+
+		}
+	}
+}
+
+void DataBaseManager::addDBEvent(int id, DB_EVENT_TYPE type, LoginData& sess)
+{
+	DB_EVENT ev;
+	ev.id = id;
+	ev.EVENT = type;
+	ev.session = sess;
+	dbWorkQueue.push(ev);
 }
 
 LoginData DataBaseManager::getLoginData(char* name, char* password)

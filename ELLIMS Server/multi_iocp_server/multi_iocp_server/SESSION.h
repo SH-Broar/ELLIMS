@@ -1,11 +1,11 @@
 #pragma once
 #include "AMBIT.h"
 #include "main.h"
-#include "DataBaseManager.h"
+#include "LoginData.h"
 
 enum SESSION_STATE;
 enum COMP_TYPE;
-struct LoginData;
+
 
 class OVER_EXP
 {
@@ -21,6 +21,12 @@ public:
 	OVER_EXP(unsigned char* packet);
 };
 
+class OVER_DB : public OVER_EXP
+{
+public:
+	LoginData datas;
+	DB_EVENT_TYPE _db_type;
+};
 
 class SESSION
 {
@@ -62,7 +68,8 @@ public:
 	short Y();
 	void ID(int a);
 	int ID();
-	void setData(LoginData d);
+	void setData(LoginData& d);
+	LoginData& getData();
 	char* NAME();
 
 	friend int distance(int a, int b);
