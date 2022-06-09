@@ -209,7 +209,14 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		Game::players[Game::playerIDMapper[login_packet->id]]->p();
 		Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
 		Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
+		Game::players[Game::playerIDMapper[login_packet->id]]->level = login_packet->level;
+		Game::players[Game::playerIDMapper[login_packet->id]]->HP = login_packet->HP;
+		Game::players[Game::playerIDMapper[login_packet->id]]->MaxHP = login_packet->MaxHP;
+		Game::players[Game::playerIDMapper[login_packet->id]]->MP = login_packet->MP;
+		Game::players[Game::playerIDMapper[login_packet->id]]->MaxMP = login_packet->MaxMP;
 		Game::players[Game::playerIDMapper[login_packet->id]]->scID = login_packet->id;
+		Game::players[Game::playerIDMapper[login_packet->id]]->EXP = login_packet->EXP;
+		Game::players[Game::playerIDMapper[login_packet->id]]->MaxEXP = 100 + (login_packet->level*100);
 		strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, login_packet->name);
 
 		Game::ingame = true;

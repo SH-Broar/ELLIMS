@@ -49,7 +49,11 @@ struct SC_LOGIN_INFO_PACKET {
 	char	type;
 	int 	id;
 	char	name[NAME_SIZE];
+	int level;
 	short	x, y;
+	int HP, MaxHP;
+	int MP, MaxMP;
+	int EXP;
 };
 
 struct SC_ADD_PLAYER_PACKET {

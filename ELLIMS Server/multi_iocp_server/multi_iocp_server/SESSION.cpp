@@ -102,6 +102,12 @@ void SESSION::send_login_info_packet()
 	strcpy(p.name, data.name);
 	p.size = sizeof(SC_LOGIN_INFO_PACKET);
 	p.type = SC_LOGIN_INFO;
+	p.level = data.level;
+	p.HP = data.HP;
+	p.MaxHP = data.MaxHP;
+	p.MP = data.MP;
+	p.MaxMP = data.MaxMP;
+	p.EXP = data.EXP;
 	p.x = data.x;
 	p.y = data.y;
 	do_send(&p);
@@ -111,7 +117,7 @@ void SESSION::send_put_packet(int c_id)
 {
 	SC_ADD_PLAYER_PACKET put_packet;
 	put_packet.id = c_id;
-	strcpy(put_packet.name, data.name);
+	//strcpy(put_packet.name, data.name);
 	strcpy_s(put_packet.name, clients[c_id].NAME());
 	put_packet.size = sizeof(put_packet);
 	put_packet.type = SC_ADD_PLAYER;
