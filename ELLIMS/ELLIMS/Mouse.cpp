@@ -83,6 +83,16 @@ void Game::MouseClick()
 							Game::printDebug("RIGHT", "KEY");
 						newCommandInputed = PlayerCommand::RIGHT;
 						break;
+					case VK_ESCAPE:
+						if (debugKeyInput)
+							Game::printDebug("ESCAPE", "KEY");
+						newCommandInputed = PlayerCommand::ESCAPE;
+						break;
+					case VK_BACK:
+						if (debugKeyInput)
+							Game::printDebug("BACKSPACE", "KEY");
+						newCommandInputed = PlayerCommand::BACKSPACE;
+						break;
 					default:
 						if (!rec.Event.KeyEvent.uChar.AsciiChar)
 						{
@@ -97,7 +107,7 @@ void Game::MouseClick()
 						inputChar = rec.Event.KeyEvent.uChar.AsciiChar;
 						newCharInputed = true;
 						if (debugKeyInput)
-							Game::printDebug(&inputChar, "KEY");
+							Game::printDebug(&inputChar, "CHAR");
 					}
 				}
 			}

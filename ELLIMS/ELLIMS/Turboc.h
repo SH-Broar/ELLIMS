@@ -22,7 +22,7 @@
 
 #include <windows.h>
 
-enum class PlayerCommand { NONE, UP, DOWN, LEFT, RIGHT };
+enum class PlayerCommand { NONE, UP, DOWN, LEFT, RIGHT, ESCAPE, BACKSPACE };
 
 #include "..\..\ELLIMS Server\multi_iocp_server\multi_iocp_server\protocol.h"
 

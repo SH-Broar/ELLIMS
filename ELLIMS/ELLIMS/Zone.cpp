@@ -68,11 +68,21 @@ void Zone::addTyping(char c)
 			EnterCallbackFunction();
 		}
 	}
+	else if (c == '\b')	//backspace
+	{
+		if (strlen(text) > 0)
+		{
+
+			text[strlen(text) - 1] = '\b';
+		}
+	}
 	else
 	{
-		std::string t{ c };
+		char cha[2];
+		cha[0] = c;
+		cha[1] = '\0';
 		//Game::printDebug(std::to_string(strlen(text)).c_str(), "length");
-		strcat(text, t.c_str());
+		strcat(text, cha);
 	}
 }
 
@@ -142,6 +152,12 @@ void Zone::print()
 	int tracs = 0;
 	while (strlen(text) > tracs)
 	{
+		if (text[tracs] == '\b')
+		{
+			text[tracs] = '\0';
+			Game::DoubleFrameBuffer[trackerX][trackerY] = ' ';
+			continue;
+		}
 		Game::DoubleFrameBuffer[trackerX][trackerY] = text[tracs];
 		trackerX++;
 
