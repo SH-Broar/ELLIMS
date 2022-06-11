@@ -53,6 +53,7 @@ void disconnect(int c_id)
 	}
 	closesocket(clients[c_id]._socket);
 	clients[c_id]._s_state = ST_FREE;
+	DataBaseManager::addDBEvent(c_id, DB_EV_LOGOUT, clients[c_id].getData());
 	clients[c_id]._sl.unlock();
 
 	for (auto& pl : clients)
@@ -69,6 +70,7 @@ void disconnect(int c_id)
 		pl.send_remove_packet(c_id);
 		pl._sl.unlock();
 	}
+
 }
 
 void process_packet(int c_id, char* packet)
@@ -469,6 +471,7 @@ void do_worker()
 			}
 			}
 			break;
+
 		}
 
 	}

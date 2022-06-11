@@ -11,7 +11,6 @@ class OVER_EXP
 {
 public:
 	WSAOVERLAPPED _over;	//클래스 헤드 주소와 같은 위치의 주소를 가져오게 하기 위해 맨 처음에 씀
-							//원래는 map 써야되는데 너무 복잡하고 오버헤드도 크고 send는 변경도 자주 있기때문에 그냥 이렇게 하셈
 	WSABUF _wsabuf;
 	char _send_buf[BUF_SIZE];
 	COMP_TYPE _comp_type;
