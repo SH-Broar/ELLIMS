@@ -27,6 +27,12 @@ public:
 	DB_EVENT_TYPE _db_type;
 };
 
+class OVER_AI : public OVER_EXP
+{
+public:
+	TIMER_EVENT_TYPE _timer_type;
+};
+
 class SESSION
 {
 	LoginData data;
@@ -36,7 +42,7 @@ class SESSION
 public:
 	std::mutex _sl;
 	SESSION_STATE _s_state;
-	//int _id;
+	int npc_id;
 	SOCKET _socket;
 	short sectorX, sectorY;	//한 사람이 동시에 두번 움직이진 않고, 남의 sector를 바꿀 일이 없으므로 atomic이 아님
 	//char _name[NAME_SIZE];
@@ -60,6 +66,7 @@ public:
 	void send_move_packet(int c_id, int client_time);
 	void send_remove_packet(int c_id);
 	void send_chat_packet(int c_id, char* mess);
+
 
 	void setXY(short x, short y);
 

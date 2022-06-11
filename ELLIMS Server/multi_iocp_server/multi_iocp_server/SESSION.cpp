@@ -176,6 +176,7 @@ void SESSION::ID(int a)
 void SESSION::setData(LoginData& d)
 {
 	data = d;
+	setXY(d.x, d.y);
 }
 
 LoginData& SESSION::getData()

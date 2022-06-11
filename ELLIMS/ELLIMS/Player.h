@@ -28,6 +28,7 @@ public:
 	int EXP;
 
 	void p();
+	void m(bool boss);
 	void InitZone();
 
 	virtual void print() override;

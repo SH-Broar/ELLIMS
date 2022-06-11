@@ -16,5 +16,8 @@ void s_Map::loadMap()
 
 bool s_Map::canMove(int x, int y)
 {
-	return !s_basemap[x][y];
+	if (x > 0 && x < W_WIDTH && y > 0 && y < W_HEIGHT)
+		return true;
+	else
+		return false;
 }

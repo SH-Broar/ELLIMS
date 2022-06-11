@@ -7,7 +7,7 @@
 Player::Player()
 {
 	isActive = false;
-	characterIcon = 'X';
+	characterIcon = 'T';
 
 	scID = 0;
 	x = 0;
@@ -29,7 +29,16 @@ Player::Player()
 
 void Player::p()
 {
-	characterIcon = 'T';
+	characterIcon = 'P';
+	isActive = true;
+}
+
+void Player::m(bool boss)
+{
+	if (boss)
+		characterIcon = 'X';
+	else
+		characterIcon = 'x';
 	isActive = true;
 }
 

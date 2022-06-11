@@ -5,7 +5,7 @@ struct TIMER_EVENT
 {
 public:
 	int object_id;
-	EVENT_TYPE ev;
+	TIMER_EVENT_TYPE ev;
 	chrono::system_clock::time_point act_time;
 	int target_id;
 

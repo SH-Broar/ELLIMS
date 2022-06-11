@@ -63,19 +63,6 @@ void DataBaseManager::addDBEvent(int id, DB_EVENT_TYPE type, LoginData& sess)
 
 LoginData DataBaseManager::getLoginData(char* name, char* password)
 {
-	//string tmp{ name };
-	//string tmp2{ password };
-
-	////SQL Injection ¹æÁö
-
-	//if (tmp.find('-') == string::npos || tmp.find('\'') == string::npos || tmp.find('/') == string::npos || tmp.find('\\') == string::npos ||
-	//	tmp2.find('-') == string::npos || tmp2.find('\'') == string::npos || tmp2.find('/') == string::npos || tmp2.find('\\') == string::npos)
-	//{
-	//	result.level = -1;
-	//	std::cout << "Don't SQL INJECTION!" << std::endl;
-	//	return result;
-	//}
-
 	LoginData result{};
 	result.level = -1;
 

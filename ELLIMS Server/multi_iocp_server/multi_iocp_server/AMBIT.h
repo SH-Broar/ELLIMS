@@ -9,6 +9,7 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include <vector>
+#include <queue>
 #include <thread>
 #include <mutex>
 #include <unordered_set>
@@ -22,12 +23,13 @@ using namespace std;
 using namespace concurrency;
 enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_DB, OP_AI };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
-enum EVENT_TYPE { EV_MOVE, EV_HEAL, EV_ATTACK };
+enum TIMER_EVENT_TYPE { EV_MOVE, EV_HEAL, EV_ATTACK };
 enum DB_EVENT_TYPE { DB_EV_LOGIN, DB_EV_LOGOUT, DB_EV_DUMMY };
 
 #include "protocol.h"
 #include "SESSION.h"
 #include "DataBaseManager.h"
+#include "HeartManager.h"
 #include "WorldMap.h"
 
 

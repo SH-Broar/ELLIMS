@@ -3,8 +3,9 @@
 
 class SESSION;
 class DataBaseManager;
+class HeartManager;
 
-extern array<SESSION, MAX_USER> clients;
+extern array<SESSION, MAX_USER+ NUM_NPC> clients;
 extern HANDLE g_h_iocp;
 extern SOCKET g_s_socket;
 

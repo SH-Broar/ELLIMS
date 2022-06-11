@@ -1,7 +1,7 @@
 #include "AMBIT.h"
 #include "main.h"
 
-array<SESSION, MAX_USER> clients;
+array<SESSION, MAX_USER + NUM_NPC> clients;
 HANDLE g_h_iocp;
 SOCKET g_s_socket;
 
@@ -59,6 +59,7 @@ void disconnect(int c_id)
 	for (auto& pl : clients)
 	{
 		if (pl.ID() == c_id) continue;
+		if (pl.ID() >= MAX_USER) continue;
 		pl._sl.lock();
 		if (pl._s_state != ST_INGAME)
 		{
@@ -67,7 +68,15 @@ void disconnect(int c_id)
 		} //읽기만 하는데요?
 		//쓰기 작업의 원인이 되는 조건이잖아
 
-		pl.send_remove_packet(c_id);
+		pl.vl.lock();
+		if (0 != pl.view_list.count(c_id))
+		{
+			pl.view_list.erase(c_id);
+			pl.vl.unlock();
+			pl.send_remove_packet(c_id);
+		}
+		else
+			pl.vl.unlock();
 		pl._sl.unlock();
 	}
 
@@ -102,14 +111,6 @@ void process_packet(int c_id, char* packet)
 
 		clients[c_id]._sl.unlock();
 
-
-		//clients[c_id].x = rand() % W_WIDTH;
-		//clients[c_id].y = rand() % W_HEIGHT;
-		//clients[c_id].x = 0;
-		//clients[c_id].y = 0;
-
-		//-> pl
-
 		break;
 	}
 	case CS_MOVE:
@@ -137,12 +138,6 @@ void process_packet(int c_id, char* packet)
 
 		clients[c_id].setXY(x, y);
 
-		//clients[c_id].x = x;
-		//clients[c_id].y = y;
-
-		//clients[c_id].vl.lock();
-		//unordered_set<int> p_vlRapper = clients[c_id].view_list;
-		//clients[c_id].vl.unlock();
 
 		//-> 섹터 내의 모든 클라이언트에게 (자신 포함)
 		for (int i = 0; i < 3; ++i)
@@ -183,9 +178,6 @@ void process_packet(int c_id, char* packet)
 							//put
 							clients[c_id].send_put_packet(pl.ID());
 
-							//pl.vl.lock();
-							//unordered_set<int> o_vlRapper = pl.view_list;
-							//pl.vl.unlock();
 
 							//내가 상대한테 없으면
 							pl.vl.lock();
@@ -479,6 +471,8 @@ void do_worker()
 
 int main()
 {
+	HeartManager::initialize_npc();
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
@@ -511,11 +505,12 @@ int main()
 	vector <thread> worker_threads;
 
 	//이거 1로 하면 싱글 스레드로
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		worker_threads.emplace_back(do_worker);
 	}
 	thread db_thread{ DataBaseManager::DBThread };
+	thread ai_thread{ HeartManager::ai_thread };
 
 	db_thread.join();
 	for (auto& th : worker_threads)
