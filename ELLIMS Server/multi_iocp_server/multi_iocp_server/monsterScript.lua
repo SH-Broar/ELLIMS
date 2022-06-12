@@ -6,7 +6,7 @@ name = ""
 type = 0 --0 boss 1 2 3 4 monster
 level = 1 --attack = level*3
 
-function set_object_id (id, move, x, y, t, l, n) --나중에 파라미터로 안 받고 그냥 여기서 처리
+function set_object_id (id, move, x, y, t, l) --나중에 파라미터로 안 받고 그냥 여기서 처리
 	my_id = id
 	movestate = move
 	initX = x

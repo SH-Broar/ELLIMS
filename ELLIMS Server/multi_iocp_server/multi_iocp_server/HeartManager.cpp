@@ -42,7 +42,7 @@ void HeartManager::initialize_npc()
 		lua_pushnumber(clients[npc_id].L, rand()%5);
 		lua_pushnumber(clients[npc_id].L, rand()%20);
 		//lua_pushstring(clients[npc_id].L, "monster");
-		lua_pcall(clients[npc_id].L, 7, 0, 0);
+		lua_pcall(clients[npc_id].L, 6, 0, 0);
 
 
 		clients[npc_id]._s_state = ST_NPC_SLEEP;
@@ -54,7 +54,7 @@ void HeartManager::add_timer(int obj_id, int act_time, TIMER_EVENT_TYPE e_type, 
 {
 	using namespace chrono;
 	TIMER_EVENT ev;
-	ev.act_time = system_clock::now() + milliseconds(act_time);
+	ev.act_time = system_clock::now() + milliseconds(1000);
 	ev.object_id = obj_id;
 	ev.ev = e_type;
 	ev.target_id = target_id;
@@ -75,22 +75,12 @@ void HeartManager::move_npc(int npc_id, int target_id)
 
 	//lua에 길찾기 넘기기
 	clients[npc_id].ll.lock();
-	clients[npc_id].L = luaL_newstate();
-	luaL_openlibs(clients[npc_id].L);
-	luaL_loadfile(clients[npc_id].L, "monsterScript.lua");
-	lua_pcall(clients[npc_id].L, 0, 0, 0);
-
-	lua_register(clients[npc_id].L, "astar", A_Star_Pathfinding);
-	lua_register(clients[npc_id].L, "roam", Roaming);
-
 	lua_getglobal(clients[npc_id].L, "npc_move");
 	lua_pushnumber(clients[npc_id].L, x);
 	lua_pushnumber(clients[npc_id].L, y);
 	lua_pushnumber(clients[npc_id].L, clients[target_id].X());
 	lua_pushnumber(clients[npc_id].L, clients[target_id].Y());
 	int error = lua_pcall(clients[npc_id].L, 4, 2, 0);
-
-
 	if (error) {
 		cout << "Error:" << lua_tostring(clients[npc_id].L, -1);
 		lua_pop(clients[npc_id].L, 1);
@@ -174,7 +164,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 
 int HeartManager::Roaming(lua_State* L)
 {
-	printf("  RAND  ");
+	//printf("  RAND  ");
 	int x = lua_tonumber(L, -2);
 	int y = lua_tonumber(L, -1);
 	lua_pop(L, 2);
@@ -190,16 +180,17 @@ void HeartManager::ai_thread()
 	{
 		if (timer_queue.empty())
 		{
+			//printf("empty\n");
 			SleepEx(1, TRUE);
 			continue;
 		}
-		while (timer_queue.top().act_time < chrono::system_clock::now())
+		TIMER_EVENT t = timer_queue.top();
+		while (t.act_time > chrono::system_clock::now())
 		{
 			//auto p = std::chrono::duration_cast<std::chrono::milliseconds>(timer_queue.top().act_time - chrono::system_clock::now());
-			//std::cout << p;
+			//std::cout << p <<endl;
 			SleepEx(1, TRUE);
 		}
-		TIMER_EVENT t = timer_queue.top();
 		timer_queue.pop();
 
 		switch (t.ev)
@@ -224,5 +215,6 @@ void HeartManager::ai_thread()
 			break;
 
 		}
+		SleepEx(1, TRUE);
 	}
 }
