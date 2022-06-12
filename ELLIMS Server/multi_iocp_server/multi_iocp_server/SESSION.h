@@ -54,6 +54,7 @@ public:
 	std::mutex	vl;
 
 	lua_State* L;
+	std::mutex	ll;
 
 public:
 

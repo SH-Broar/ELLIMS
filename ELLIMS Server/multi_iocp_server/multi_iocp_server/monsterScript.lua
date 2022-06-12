@@ -1,5 +1,5 @@
 my_id = 9999
-movestate = -4 --state 0 : fix, 1 : roaming peace, 2 : roaming aggro, 11 : aggro
+movestate = 0  --state 0 : fix, 1 : roaming peace, 2 : roaming aggro, 11 : aggro
 initX = 0
 initY = 0
 name = ""
@@ -37,34 +37,36 @@ function event_self_revive(player_id)
 end
 
 function npc_move(x, y, tx, ty)
-	dir = 0
+	dir = 1
 
-	if(movestate == 11) then
+	if movestate == 11 then
 		dir = astar(x,y,tx,ty)
-	elseif (movestate == 1 or movestate == 2) then
+	elseif movestate == 1 or movestate == 2 then
 		dir = roam(x,y)
 	end
 
-	if (dir == 1) then
-		if (x-1 > initX-20) then
-			return x-1, y
-		end
-	end
-	if (dir == 2) then
-		if (x+1 < initX+20) then
-			return x+1, y
-		end
-	end
-	if (dir == 3) then
-		if (y-1 > initY-20) then
-			return x, y-1
-		end
-	end
-	if (dir == 4) then
-		if (y+1 < initY+20) then
-			return x, y+1
+	if dir == 1 then
+		if x-1 > initX-20 then
+			x = x-1
 		end
 	end
 
-	return x,y
+	if dir == 2 then
+		if x+1 < initX+20 then
+			x = x+1
+		end
+	end
+
+	if dir == 3 then
+		if y-1 > initY-20 then
+			y = y-1
+		end
+	end
+	if dir == 4 then
+		if y+1 < initY+20 then
+			y = y+1
+		end
+	end
+
+	return x, y
 end

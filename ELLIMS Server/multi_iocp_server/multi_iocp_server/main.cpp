@@ -172,6 +172,7 @@ void process_packet(int c_id, char* packet)
 						}
 					}
 
+					if (pl.ID() >= MAX_USER) continue;
 					lock_guard<mutex> aa{ pl._sl };	//편한 언락
 
 					if (pl._s_state != ST_INGAME)continue;

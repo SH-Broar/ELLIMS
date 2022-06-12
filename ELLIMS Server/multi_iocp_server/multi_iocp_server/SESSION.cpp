@@ -115,6 +115,7 @@ void SESSION::send_login_info_packet()
 
 void SESSION::send_put_packet(int c_id)
 {
+	printf("ADD player : %d",c_id);
 	SC_ADD_PLAYER_PACKET put_packet;
 	put_packet.id = c_id;
 	//strcpy(put_packet.name, data.name);

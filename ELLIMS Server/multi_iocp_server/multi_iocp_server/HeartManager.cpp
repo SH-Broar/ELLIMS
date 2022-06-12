@@ -15,6 +15,7 @@ void HeartManager::initialize_npc()
 		ld.y = rand() % W_HEIGHT;
 		sprintf_s(ld.name, "M-%d", i);
 		int npc_id = i + MAX_USER;
+		clients[npc_id].npc_id = npc_id;
 		ld.sc_id = npc_id;
 
 		clients[npc_id].setData(ld);
@@ -35,7 +36,7 @@ void HeartManager::initialize_npc()
 		//나중에 lua에게 일임
 		lua_getglobal(clients[npc_id].L, "set_object_id");
 		lua_pushnumber(clients[npc_id].L, npc_id);
-		lua_pushnumber(clients[npc_id].L, rand()%3);
+		lua_pushnumber(clients[npc_id].L, 1);
 		lua_pushnumber(clients[npc_id].L, ld.x);
 		lua_pushnumber(clients[npc_id].L, ld.y);
 		lua_pushnumber(clients[npc_id].L, rand()%5);
@@ -44,7 +45,7 @@ void HeartManager::initialize_npc()
 		lua_pcall(clients[npc_id].L, 7, 0, 0);
 
 
-		clients[npc_id]._s_state = ST_INGAME;
+		clients[npc_id]._s_state = ST_NPC_SLEEP;
 	}
 	printf("NPC Setting End");
 }
@@ -73,20 +74,32 @@ void HeartManager::move_npc(int npc_id, int target_id)
 
 
 	//lua에 길찾기 넘기기
+	clients[npc_id].ll.lock();
+	clients[npc_id].L = luaL_newstate();
+	luaL_openlibs(clients[npc_id].L);
+	luaL_loadfile(clients[npc_id].L, "monsterScript.lua");
+	lua_pcall(clients[npc_id].L, 0, 0, 0);
+
+	lua_register(clients[npc_id].L, "astar", A_Star_Pathfinding);
+	lua_register(clients[npc_id].L, "roam", Roaming);
 
 	lua_getglobal(clients[npc_id].L, "npc_move");
 	lua_pushnumber(clients[npc_id].L, x);
 	lua_pushnumber(clients[npc_id].L, y);
 	lua_pushnumber(clients[npc_id].L, clients[target_id].X());
 	lua_pushnumber(clients[npc_id].L, clients[target_id].Y());
-	lua_pcall(clients[npc_id].L, 4, 2, 0);
+	int error = lua_pcall(clients[npc_id].L, 4, 2, 0);
+
+
+	if (error) {
+		cout << "Error:" << lua_tostring(clients[npc_id].L, -1);
+		lua_pop(clients[npc_id].L, 1);
+	}
 
 	x = lua_tonumber(clients[npc_id].L, -2);
 	y = lua_tonumber(clients[npc_id].L, -1);
-
 	lua_pop(clients[npc_id].L, 2);
-
-
+	clients[npc_id].ll.unlock();
 
 	if (x > 0 && x < W_WIDTH - 1 && y > 0 && y < W_HEIGHT - 1 && s_Map::canMove(x, y))
 	{
@@ -113,6 +126,7 @@ void HeartManager::move_npc(int npc_id, int target_id)
 		if (0 == clients[p_id].view_list.count(npc_id)) {
 			clients[p_id].view_list.insert(npc_id);
 			clients[p_id].vl.unlock();
+			//printf("후보 1");
 			clients[p_id].send_put_packet(npc_id);
 		}
 		else {
@@ -153,18 +167,20 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 	// astar
 	//
 
-	lua_pushnumber(L, rand() % 4);
+	lua_pushnumber(L, rand() % 4 + 1);
 	return 1;
 
 }
 
 int HeartManager::Roaming(lua_State* L)
 {
+	printf("  RAND  ");
 	int x = lua_tonumber(L, -2);
 	int y = lua_tonumber(L, -1);
 	lua_pop(L, 2);
 
-	lua_pushnumber(L, rand() % 4);
+
+	lua_pushnumber(L, rand() % 4 + 1);
 	return 1;
 }
 
@@ -177,8 +193,10 @@ void HeartManager::ai_thread()
 			SleepEx(1, TRUE);
 			continue;
 		}
-		while (timer_queue.top().act_time > chrono::system_clock::now())
+		while (timer_queue.top().act_time < chrono::system_clock::now())
 		{
+			//auto p = std::chrono::duration_cast<std::chrono::milliseconds>(timer_queue.top().act_time - chrono::system_clock::now());
+			//std::cout << p;
 			SleepEx(1, TRUE);
 		}
 		TIMER_EVENT t = timer_queue.top();
@@ -193,6 +211,7 @@ void HeartManager::ai_thread()
 		break;
 		case TIMER_EVENT_TYPE::EV_MOVE:
 		{
+			//printf("EV_MOVE");
 			OVER_AI over;
 			over.object_id = t.object_id;
 			over.target_id = t.target_id;
