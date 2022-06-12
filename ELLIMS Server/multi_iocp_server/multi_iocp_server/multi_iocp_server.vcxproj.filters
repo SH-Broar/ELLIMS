@@ -87,5 +87,8 @@
     <None Include="hello.lua">
       <Filter>스크립트</Filter>
     </None>
+    <None Include="monsterScript.lua">
+      <Filter>스크립트</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -53,6 +53,8 @@ public:
 	std::unordered_set <int> view_list;
 	std::mutex	vl;
 
+	lua_State* L;
+
 public:
 
 	SESSION();

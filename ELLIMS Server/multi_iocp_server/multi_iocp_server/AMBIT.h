@@ -17,6 +17,14 @@
 #include <concurrent_unordered_map.h>
 #include <concurrent_queue.h>
 
+extern "C"
+{
+#include "include/lua.h"
+#include "include/lauxlib.h"
+#include "include/lualib.h"
+}
+
+#pragma comment(lib, "lua54.lib")
 #pragma comment(lib,"WS2_32.lib")
 #pragma comment(lib,"MSWSock.lib")
 

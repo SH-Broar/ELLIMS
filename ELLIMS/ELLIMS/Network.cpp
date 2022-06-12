@@ -267,7 +267,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		tmpPlayer->scID = add_packet->id;
 		tmpPlayer->setPlayerActive(true);
 		strcpy(tmpPlayer->name, add_packet->name);
-		if (add_packet->id > MAX_USER)
+		if (add_packet->id >= MAX_USER)
 		{
 			if (add_packet->id >= MAX_USER + NUM_NPC - 10)
 				tmpPlayer->m(true);
