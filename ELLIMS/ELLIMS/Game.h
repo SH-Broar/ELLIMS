@@ -32,7 +32,7 @@ public:
 
 	static int myPlayerID;
 	static std::unordered_map<int, int> playerIDMapper;
-	static std::array<Player*, 5000> players;
+	static std::array<Player*, (MAX_USER+NUM_NPC)*3> players;
 	static int nowPlayerNums;
 
 

@@ -222,19 +222,21 @@ void Network::RecvPacketProcess(unsigned char packet[])
 
 			Game::playerIDMapper[login_packet->id] = Game::nowPlayerNums;
 
-			Game::players[Game::playerIDMapper[login_packet->id]] = new Player();
-			Game::players[Game::playerIDMapper[login_packet->id]]->p();
-			Game::players[Game::playerIDMapper[login_packet->id]]->x = login_packet->x;
-			Game::players[Game::playerIDMapper[login_packet->id]]->y = login_packet->y;
-			Game::players[Game::playerIDMapper[login_packet->id]]->level = login_packet->level;
-			Game::players[Game::playerIDMapper[login_packet->id]]->HP = login_packet->HP;
-			Game::players[Game::playerIDMapper[login_packet->id]]->MaxHP = login_packet->MaxHP;
-			Game::players[Game::playerIDMapper[login_packet->id]]->MP = login_packet->MP;
-			Game::players[Game::playerIDMapper[login_packet->id]]->MaxMP = login_packet->MaxMP;
-			Game::players[Game::playerIDMapper[login_packet->id]]->scID = login_packet->id;
-			Game::players[Game::playerIDMapper[login_packet->id]]->EXP = login_packet->EXP;
-			Game::players[Game::playerIDMapper[login_packet->id]]->MaxEXP = 100 + (login_packet->level * 100);
-			strcpy(Game::players[Game::playerIDMapper[login_packet->id]]->name, login_packet->name);
+			Player* tmpPlayer = new Player();
+			tmpPlayer->p();
+			tmpPlayer->x = login_packet->x;
+			tmpPlayer->y = login_packet->y;
+			tmpPlayer->level = login_packet->level;
+			tmpPlayer->HP = login_packet->HP;
+			tmpPlayer->MaxHP = login_packet->MaxHP;
+			tmpPlayer->MP = login_packet->MP;
+			tmpPlayer->MaxMP = login_packet->MaxMP;
+			tmpPlayer->scID = login_packet->id;
+			tmpPlayer->EXP = login_packet->EXP;
+			tmpPlayer->MaxEXP = 100 + (login_packet->level * 100);
+			strcpy(tmpPlayer->name, login_packet->name);
+
+			Game::players[Game::playerIDMapper[login_packet->id]] = tmpPlayer;
 
 			Game::ingame = true;
 
@@ -251,12 +253,29 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		SC_ADD_PLAYER_PACKET* add_packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet);
 		Game::playerIDMapper[add_packet->id] = Game::nowPlayerNums;
 
-		Game::players[Game::playerIDMapper[add_packet->id]] = new Player();
-		Game::players[Game::playerIDMapper[add_packet->id]]->x = add_packet->x;
-		Game::players[Game::playerIDMapper[add_packet->id]]->y = add_packet->y;
-		strcpy(Game::players[Game::playerIDMapper[add_packet->id]]->name, add_packet->name);
-		Game::players[Game::playerIDMapper[add_packet->id]]->scID = add_packet->id;
-		Game::players[Game::playerIDMapper[add_packet->id]]->setPlayerActive(true);
+		Player* tmpPlayer = nullptr;
+		if (Game::players[Game::playerIDMapper[add_packet->id]] == nullptr)
+		{
+			tmpPlayer = new Player();
+		}
+		else
+		{
+			tmpPlayer = Game::players[Game::playerIDMapper[add_packet->id]];
+		}
+		tmpPlayer->x = add_packet->x;
+		tmpPlayer->y = add_packet->y;
+		tmpPlayer->scID = add_packet->id;
+		tmpPlayer->setPlayerActive(true);
+		strcpy(tmpPlayer->name, add_packet->name);
+		if (add_packet->id > MAX_USER)
+		{
+			if (add_packet->id >= MAX_USER + NUM_NPC - 10)
+				tmpPlayer->m(true);
+			else
+				tmpPlayer->m(false);
+		}
+
+		Game::players[Game::playerIDMapper[add_packet->id]] = tmpPlayer;
 
 		Game::nowPlayerNums++;
 		char tmp[10];
@@ -270,7 +289,9 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		if (Game::playerIDMapper.contains(remove_packet->id))
 		{
 			Game::players[Game::playerIDMapper[remove_packet->id]]->setPlayerActive(false);
-			Game::printDebug("REMOVE", "SERVER");
+			char tmp[10];
+			sprintf(tmp, "%d", remove_packet->id);
+			Game::printDebug("REMOVE", tmp);
 		}
 	}
 	break;
@@ -282,9 +303,6 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		{
 			Game::players[Game::playerIDMapper[move_packet->id]]->x = move_packet->x;
 			Game::players[Game::playerIDMapper[move_packet->id]]->y = move_packet->y;
-			//char tmp[10];
-			//sprintf(tmp, "%d", move_packet->id);
-			//Game::printDebug("MOVE", tmp);
 		}
 
 	}

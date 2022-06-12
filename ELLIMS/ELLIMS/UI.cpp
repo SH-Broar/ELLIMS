@@ -16,7 +16,7 @@ int Game::debugNum = 0;
 Scene Game::nowScene;
 int Game::myPlayerID;
 std::unordered_map<int, int>  Game::playerIDMapper;
-std::array<Player*,5000>  Game::players;
+std::array<Player*,(MAX_USER+NUM_NPC)*3>  Game::players;
 
 Game::Game()
 {
