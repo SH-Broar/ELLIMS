@@ -293,7 +293,8 @@ void process_packet(int c_id, char* packet)
 				{
 					if (pln.second)
 					{
-						clients[pln.first].send_chat_packet(c_id, p->mess);
+						if (pln.first < MAX_USER)
+							clients[pln.first].send_chat_packet(c_id, p->mess);
 					}
 				}
 			}

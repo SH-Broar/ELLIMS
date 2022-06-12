@@ -18,6 +18,7 @@ DataBaseManager::DataBaseManager()
 
 }
 
+//#define STRESSTEST
 void DataBaseManager::DBThread()
 {
 	while (true)
@@ -32,8 +33,25 @@ void DataBaseManager::DBThread()
 		{
 		case DB_EVENT_TYPE::DB_EV_LOGIN:
 		{
-			LoginData d = getLoginData(ev.session.name, ev.session.pass);
+			LoginData d;
+#ifdef STRESSTEST
+			strcpy(d.name, "_DUMMY");
+			d.x = rand() % W_WIDTH;
+			d.y = rand() % W_HEIGHT;
+			d.isValidLogin = true;
+			sprintf_s(d.id, "%S", "DUMMY");
+			sprintf_s(d.name, "%S", "DUMMY");
+			d.level = 1;
+			d.HP = 1;
+			d.MaxHP = 1;
+			d.MP = 2;
+			d.MaxMP = 2;
+			d.EXP = 1;
+#else
+			d = getLoginData(ev.session.name, ev.session.pass);
+#endif
 			d.sc_id = ev.id;
+
 			OVER_DB over;
 			over._db_type = DB_EV_LOGIN;
 			over._comp_type = OP_DB;
@@ -42,7 +60,11 @@ void DataBaseManager::DBThread()
 		}
 			break;
 		case DB_EVENT_TYPE::DB_EV_LOGOUT:
-			setLoginData(ev.session);
+			if (strcmp(ev.session.name, "_DUMMY") != 0)
+			{
+				setLoginData(ev.session);
+			}
+
 
 			break;
 		case DB_EVENT_TYPE::DB_EV_DUMMY:
