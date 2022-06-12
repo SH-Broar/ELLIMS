@@ -24,7 +24,8 @@ class HeartManager
 public:
     static void initialize_npc();
     static void add_timer(int obj_id, int act_time, TIMER_EVENT_TYPE e_type, int target_id);
-    static void move_npc(int npc_id);
+    static void move_npc(int npc_id,int target_id);
+    static void A_Star_Pathfinding (int& x, int& y, int target_id);
     static void ai_thread();
 };
 

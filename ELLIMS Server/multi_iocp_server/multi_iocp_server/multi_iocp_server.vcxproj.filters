@@ -37,11 +37,11 @@
     <ClInclude Include="LoginData.h">
       <Filter>헤더\EVENTS</Filter>
     </ClInclude>
-    <ClInclude Include="TimerEvent.h">
-      <Filter>헤더\EVENTS</Filter>
-    </ClInclude>
     <ClInclude Include="DBEvent.h">
       <Filter>헤더\EVENTS</Filter>
+    </ClInclude>
+    <ClInclude Include="HeartManager.h">
+      <Filter>헤더</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +77,9 @@
       <Filter>소스</Filter>
     </ClCompile>
     <ClCompile Include="DataBaseManager.cpp">
+      <Filter>소스</Filter>
+    </ClCompile>
+    <ClCompile Include="HeartManager.cpp">
       <Filter>소스</Filter>
     </ClCompile>
   </ItemGroup>

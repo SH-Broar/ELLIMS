@@ -9,7 +9,7 @@ constexpr int W_WIDTH = 400;
 constexpr int W_HEIGHT = 400;
 
 constexpr int MAX_USER = 1000;
-constexpr int NUM_NPC = 20000;
+constexpr int NUM_NPC = 200;
 
 // Packet ID
 constexpr char CS_LOGIN = 0;

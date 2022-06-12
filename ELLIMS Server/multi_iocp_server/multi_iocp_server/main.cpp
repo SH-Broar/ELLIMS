@@ -22,7 +22,7 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
-int distance(int a, int b)
+int distance_cell(int a, int b)
 {
 	return abs(clients[a].X() - clients[b].X()) + abs(clients[a].Y() - clients[b].Y());
 }
@@ -162,15 +162,26 @@ void process_packet(int c_id, char* packet)
 
 					auto& pl = clients[pln.first];
 
+					//범위 내의 NPC 깨우기
+					if (i==0&&h==0&&pl._s_state == ST_NPC_SLEEP)
+					{
+						SESSION_STATE sst = ST_NPC_SLEEP;
+						if (atomic_compare_exchange_weak(&(pl._s_state), &sst, ST_INGAME))
+						{
+							HeartManager::add_timer(pl.npc_id, 1000, EV_MOVE, c_id);
+						}
+					}
+
 					lock_guard<mutex> aa{ pl._sl };	//편한 언락
+
 					if (pl._s_state != ST_INGAME)continue;
 
 					//near의 모든 객체에 대해?
-					if (distance(c_id, pl.ID()) <= RANGE)
+					if (distance_cell(c_id, pl.ID()) <= RANGE)
 					{
 						clients[c_id].vl.lock();
 						//없으면
-						if (clients[c_id].view_list.find(pl.ID()) == clients[c_id].view_list.end())
+						if (!clients[c_id].view_list.contains(pl.ID()))
 						{
 							clients[c_id].view_list.insert(pl.ID());
 							clients[c_id].vl.unlock();
@@ -181,7 +192,7 @@ void process_packet(int c_id, char* packet)
 
 							//내가 상대한테 없으면
 							pl.vl.lock();
-							if (pl.view_list.find(clients[c_id].ID()) == pl.view_list.end())
+							if (!pl.view_list.contains(clients[c_id].ID()))
 							{
 								pl.view_list.insert(clients[c_id].ID());
 								pl.vl.unlock();
@@ -207,7 +218,7 @@ void process_packet(int c_id, char* packet)
 
 							//내가 상대한테 없으면
 							pl.vl.lock();
-							if (pl.view_list.find(clients[c_id].ID()) == pl.view_list.end())
+							if (!pl.view_list.contains(clients[c_id].ID()))
 							{
 								pl.view_list.insert(clients[c_id].ID());
 								pl.vl.unlock();
@@ -236,7 +247,7 @@ void process_packet(int c_id, char* packet)
 
 		for (auto ids : r_view_list)
 		{
-			if (distance(ids, c_id) > RANGE)
+			if (distance_cell(ids, c_id) > RANGE)
 			{
 				clients[c_id].vl.lock();
 				clients[c_id].view_list.erase(ids);
@@ -388,7 +399,7 @@ void do_worker()
 			break;
 
 		case OP_DB:
-
+		{
 			OVER_DB* db_over = reinterpret_cast<OVER_DB*>(ex_over);
 			switch (db_over->_db_type)
 			{
@@ -427,7 +438,7 @@ void do_worker()
 							continue;
 						}
 
-						if (RANGE >= distance(c_id, pl.ID()))
+						if (RANGE >= distance_cell(c_id, pl.ID()))
 						{
 							pl.vl.lock();
 							pl.view_list.insert(c_id);
@@ -445,7 +456,7 @@ void do_worker()
 						lock_guard<mutex> aa{ pl._sl };	//편한 언락
 						if (pl._s_state != ST_INGAME)continue;
 
-						if (RANGE >= distance(c_id, pl.ID()))
+						if (RANGE >= distance_cell(c_id, pl.ID()))
 						{
 							clients[c_id].vl.lock();
 							clients[c_id].view_list.insert(pl.ID());
@@ -457,13 +468,29 @@ void do_worker()
 
 				}
 
-				
-				
+
+
 				break;
 			}
 			}
 			break;
+		}
+		case OP_AI:
+		{
+			OVER_AI* ai_over = reinterpret_cast<OVER_AI*>(ex_over);
 
+			switch (ai_over->_timer_type)
+			{
+			case TIMER_EVENT_TYPE::EV_ATTACK:
+				break;
+			case TIMER_EVENT_TYPE::EV_MOVE:
+				HeartManager::move_npc(ai_over->object_id, ai_over->target_id);
+				break;
+			case TIMER_EVENT_TYPE::EV_HEAL:
+				break;
+			}
+		}
+			break;
 		}
 
 	}

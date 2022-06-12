@@ -30,6 +30,8 @@ public:
 class OVER_AI : public OVER_EXP
 {
 public:
+	int object_id;
+	int target_id;
 	TIMER_EVENT_TYPE _timer_type;
 };
 
@@ -41,7 +43,7 @@ class SESSION
 
 public:
 	std::mutex _sl;
-	SESSION_STATE _s_state;
+	std::atomic<SESSION_STATE> _s_state;
 	int npc_id;
 	SOCKET _socket;
 	short sectorX, sectorY;	//한 사람이 동시에 두번 움직이진 않고, 남의 sector를 바꿀 일이 없으므로 atomic이 아님
@@ -78,6 +80,6 @@ public:
 	LoginData& getData();
 	char* NAME();
 
-	friend int distance(int a, int b);
+	friend int distance_cell(int a, int b);
 
 };

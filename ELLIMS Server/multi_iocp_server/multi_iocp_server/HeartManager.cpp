@@ -10,13 +10,13 @@ void HeartManager::initialize_npc()
     for (int i = 0; i < NUM_NPC; ++i)
     {
         LoginData ld;
+        ld.x = rand() % W_WIDTH;
+        ld.y = rand() % W_HEIGHT;
         sprintf_s(ld.name, "M-%d", i);
         int npc_id = i + MAX_USER;
         ld.sc_id = npc_id;
         clients[npc_id].setData(ld);
         clients[npc_id]._s_state = ST_INGAME;
-
-        HeartManager::add_timer(npc_id, 1000, TIMER_EVENT_TYPE::EV_MOVE, 0);
     }
     printf("NPC Setting End");
 }
@@ -33,30 +33,48 @@ void HeartManager::add_timer(int obj_id, int act_time, TIMER_EVENT_TYPE e_type, 
 }
 
 
-void HeartManager::move_npc(int npc_id)
+void HeartManager::move_npc(int npc_id,int target_id)
 {
-    short x = clients[npc_id].X();
-    short y = clients[npc_id].Y();
+    int x = clients[npc_id].X();
+    int y = clients[npc_id].Y();
     unordered_set<int> old_vl;
     for (int i = 0; i < MAX_USER; ++i) {
         if (clients[i]._s_state != ST_INGAME) continue;
-        if (distance(npc_id, i) <= RANGE) old_vl.insert(i);
+        if (distance_cell(npc_id, i) <= RANGE) old_vl.insert(i);
     }
-    switch (rand() % 4) {
-    case 0: if (y > 0) y--; break;
-    case 1: if (y < W_HEIGHT - 1) y++; break;
-    case 2: if (x > 0) x--; break;
-    case 3: if (x < W_WIDTH - 1) x++; break;
+
+    if (npc_id == target_id)
+    {
+        switch (rand() % 4)
+        {
+        case 0: if (y > 0 && s_Map::canMove(x, y - 1)) y--; break;
+        case 1: if (y < W_HEIGHT - 1 && s_Map::canMove(x, y + 1)) y++; break;
+        case 2: if (x > 0 && s_Map::canMove(x - 1, y)) x--; break;
+        case 3: if (x < W_WIDTH - 1 && s_Map::canMove(x + 1, y)) x++; break;
+        }
     }
+    else
+    {
+        //A*로 길찾기
+        A_Star_Pathfinding(x, y, target_id);
+    }
+
 
     clients[npc_id].setXY(x,y);
 
     //나중에 섹터처리좀
 
     unordered_set<int> new_vl;
+    bool is_player_exist = false;
+    int targ = npc_id;
     for (int i = 0; i < MAX_USER; ++i) {
         if (clients[i]._s_state != ST_INGAME) continue;
-        if (distance(npc_id, i) <= RANGE) new_vl.insert(i);
+        if (distance_cell(npc_id, i) <= RANGE)
+        {
+            new_vl.insert(i);
+            is_player_exist |= true;
+            targ = i;
+        }
     }
 
     for (auto p_id : new_vl) {
@@ -83,12 +101,36 @@ void HeartManager::move_npc(int npc_id)
                 clients[p_id].vl.unlock();
         }
     }
+    if (is_player_exist)
+    {
+        add_timer(npc_id, 1000, EV_MOVE, targ);
+    }
+    else
+    {
+        clients[npc_id]._s_state = ST_NPC_SLEEP;
+    }
+}
+
+void HeartManager::A_Star_Pathfinding(int& x, int& y, int target_id)
+{
+    switch (rand() % 4)
+    {
+    case 0: if (y > 0 && s_Map::canMove(x, y - 1)) y--; break;
+    case 1: if (y < W_HEIGHT - 1 && s_Map::canMove(x, y + 1)) y++; break;
+    case 2: if (x > 0 && s_Map::canMove(x - 1, y)) x--; break;
+    case 3: if (x < W_WIDTH - 1 && s_Map::canMove(x + 1, y)) x++; break;
+    }
 }
 
 void HeartManager::ai_thread()
 {
     while (true)
     {
+        if (timer_queue.empty())
+        {
+            SleepEx(1, TRUE);
+            continue;
+        }
         while (timer_queue.top().act_time > chrono::system_clock::now())
         {
             SleepEx(1, TRUE);
@@ -104,12 +146,14 @@ void HeartManager::ai_thread()
         }
         break;
         case TIMER_EVENT_TYPE::EV_MOVE:
-
+        {
             OVER_AI over;
+            over.object_id = t.object_id;
+            over.target_id = t.target_id;
             over._timer_type = EV_MOVE;
             over._comp_type = OP_AI;
             PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
-
+        }
             break;
         case TIMER_EVENT_TYPE::EV_HEAL:
             break;

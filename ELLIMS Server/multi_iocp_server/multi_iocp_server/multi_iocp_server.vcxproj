@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DataBaseManager.cpp" />
+    <ClCompile Include="HeartManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SESSION.cpp" />
     <ClCompile Include="WorldMap.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="AMBIT.h" />
     <ClInclude Include="DataBaseManager.h" />
     <ClInclude Include="DBEvent.h" />
+    <ClInclude Include="HeartManager.h" />
     <ClInclude Include="include\lauxlib.h" />
     <ClInclude Include="include\lua.h" />
     <ClInclude Include="include\lua.hpp" />
@@ -158,7 +160,6 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="SESSION.h" />
-    <ClInclude Include="TimerEvent.h" />
     <ClInclude Include="WorldMap.h" />
   </ItemGroup>
   <ItemGroup>
