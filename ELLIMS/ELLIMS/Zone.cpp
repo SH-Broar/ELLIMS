@@ -105,12 +105,12 @@ char* Zone::getText()
 	return mess;
 }
 
-void Zone::print()
+bool Zone::print()
 {
 	if (!isActive)
-		return;
+		return false;
 	if (!ZoneChanged)
-		return;
+		return false;
 
 	int x = l - 1;
 	int y = b - 1;
@@ -193,6 +193,7 @@ void Zone::print()
 	}
 
 	zoneChanged();
+	return false;
 }
 
 void Zone::clearZone(ClearType c)

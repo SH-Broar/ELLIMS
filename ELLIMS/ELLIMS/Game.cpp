@@ -58,8 +58,11 @@ int Game::GameStart()
 				if (players[i] != nullptr)
 				{
 					players[i]->MouseInteraction(mouse_X, mouse_Y, mouse_Left_down_Event);
-					players[i]->SetPlayersRegion(players[playerIDMapper[myPlayerID]]->x, players[playerIDMapper[myPlayerID]]->y);
-					players[i]->print();
+					if (players[i]->SetPlayersRegion(players[playerIDMapper[myPlayerID]]->x, players[playerIDMapper[myPlayerID]]->y)
+						|| players[i]->print())
+					{
+						nowScene.GameZoneInvalid();
+					}
 				}
 			}
 			if (newCommandInputed != PlayerCommand::NONE)

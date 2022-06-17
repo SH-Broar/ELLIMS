@@ -22,6 +22,7 @@ public:
 	void UpdateScene(Player& p);
 	void printScene();
 	void clickScene(int mx, int my, bool clicked);
+	void GameZoneInvalid();
 
 	void printDebugConsole();
 	const char* mapCalc(int px, int py);

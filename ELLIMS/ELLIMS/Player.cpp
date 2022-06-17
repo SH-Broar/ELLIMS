@@ -23,6 +23,10 @@ Player::Player()
 	MaxEXP = 100;
 	EXP = 0;
 
+	thisIsPlayer = false;
+	ZoneChanged = true;
+	deleteDataTicket = false;
+
 	InitZone();
 }
 
@@ -31,6 +35,7 @@ void Player::p()
 {
 	characterIcon = 'P';
 	isActive = true;
+	thisIsPlayer = true;
 }
 
 void Player::m(bool boss)
@@ -53,13 +58,13 @@ void Player::InitZone()
 	isClickable = ClickableType::HOVER;
 }
 
-void Player::print()
+bool Player::print()
 {
 	if (!isActive)
-		return;
+		return false;
 
 	if (l <= 0 || l >= SCREEN_WIDTH - 1 || b <= 0 || b >= SCREEN_HEIGHT - 1)
-		return;
+		return false;
 
 	Game::DoubleFrameBuffer[l][b] = characterIcon;
 
@@ -72,16 +77,40 @@ void Player::print()
 				Game::DoubleFrameBuffer[l - (strlen(name) / 2) + i][b - 1] = name[i];
 			}
 		}
+		zoneChanged();
+		deleteDataTicket = false;
 	}
-
+	else
+	{
+		if (!deleteDataTicket)
+		{
+			zoneChanged();
+			deleteDataTicket = true;
+			return true;
+		}
+	}
+	return false;
 }
 
-void Player::SetPlayersRegion(int px, int py)
+bool Player::SetPlayersRegion(int px, int py)
 {
+	bool ret = false;
+	if (l != (SCREEN_HEIGHT / 2) * 2 - (px - x))
+	{
+		ZoneChanged = true;
+		ret = true;
+	}
 	l = (SCREEN_HEIGHT / 2)*2 - (px - x);
 	r = l;
+	if (t != SCREEN_HEIGHT / 2 - (py - y))
+	{
+		ZoneChanged = true;
+		ret = true;
+	}
 	t = SCREEN_HEIGHT / 2 - (py - y);
 	b = t;
+
+	return ret;
 }
 
 void Player::setPlayerActive(bool active)

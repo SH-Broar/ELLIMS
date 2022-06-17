@@ -27,13 +27,16 @@ public:
 	int MaxEXP;
 	int EXP;
 
+	bool thisIsPlayer;
+	bool deleteDataTicket;
+
 	void p();
 	void m(bool boss);
 	void InitZone();
 
-	virtual void print() override;
+	virtual bool print() override;
 
 	void setPlayerActive(bool active);
-	void SetPlayersRegion(int px, int py);
+	bool SetPlayersRegion(int px, int py);
 	void ProcessCommand(PlayerCommand c);
 };

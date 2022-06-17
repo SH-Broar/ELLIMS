@@ -233,6 +233,14 @@ void Scene::clickScene(int mx, int my, bool clicked)
 	}
 }
 
+void Scene::GameZoneInvalid()
+{
+	for (auto& z : areas)
+	{
+		z.ZoneChanged = true;
+	}
+}
+
 void Scene::printDebugConsole()
 {
 #ifdef DEBUG

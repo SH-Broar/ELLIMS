@@ -48,7 +48,7 @@ public:
 
 	void addTyping(char c);
 
-	virtual void print();
+	virtual bool print();
 	void clearZone(ClearType c);
 	bool MouseInteraction(int mx, int my, bool clicked);
 	bool Intersect(int _x, int _y);
