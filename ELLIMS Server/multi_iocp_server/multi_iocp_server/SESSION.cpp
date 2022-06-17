@@ -1,5 +1,6 @@
 #include "SESSION.h"
 #include "DataBaseManager.h"
+#include "AMBIT.h"
 
 OVER_EXP::OVER_EXP()
 {
@@ -14,6 +15,7 @@ OVER_EXP::OVER_EXP(unsigned char* packet)
 	_wsabuf.len = packet[0];
 	_wsabuf.buf = _send_buf;
 	ZeroMemory(&_over, sizeof(_over));
+
 	_comp_type = OP_SEND;
 	memcpy(_send_buf, packet, packet[0]);
 };
@@ -45,16 +47,18 @@ void SESSION::send_chat_packet(int c_id, char* mess)
 	p.id = c_id;
 	p.size = sizeof(SC_CHAT_PACKET) - sizeof(p.mess) + strlen(mess) + 1;
 	p.type = SC_CHAT;
-
+	
 	//System Message
 	if (c_id < 0)
 	{
+		p.chat_type = 3;
 		strcpy_s(p.name, "_SYSTEM");
 		strcpy_s(p.mess, mess);
 		printf(" : %s", p.mess);
 	}
 	else
 	{
+		p.chat_type = 0;
 		strcpy_s(p.name, clients[c_id].NAME());
 		strcpy_s(p.mess, mess);
 		printf("chat : %s\n", p.mess);
@@ -62,6 +66,24 @@ void SESSION::send_chat_packet(int c_id, char* mess)
 
 	do_send(&p);
 }
+
+void SESSION::send_stat_change_packet(int c_id)
+{
+	SC_STAT_CHANGE_PACKET p;
+	p.id = c_id;
+	p.size = sizeof(SC_STAT_CHANGE_PACKET);
+	p.type = SC_CHAT;
+
+	p.level = clients[c_id].getData().level;
+	p.exp = clients[c_id].getData().EXP;
+	p.hp = clients[c_id].getData().HP;
+	p.hpmax = clients[c_id].getData().MaxHP;
+	p.mp = clients[c_id].getData().MP;
+	p.mpmax = clients[c_id].getData().MaxMP;
+
+	do_send(&p);
+}
+
 
 SESSION::SESSION()
 {
@@ -128,13 +150,19 @@ void SESSION::send_put_packet(int c_id)
 {
 	printf("ADD player : %d",c_id);
 	SC_ADD_OBJECT_PACKET put_packet;
-	put_packet.id = c_id;
-	//strcpy(put_packet.name, data.name);
-	strcpy_s(put_packet.name, clients[c_id].NAME());
 	put_packet.size = sizeof(put_packet);
 	put_packet.type = SC_ADD_OBJECT;
+	put_packet.id = c_id;
+	//strcpy(put_packet.name, data.name);
 	put_packet.x = clients[c_id].X();
 	put_packet.y = clients[c_id].Y();
+
+	strcpy_s(put_packet.name, clients[c_id].NAME());
+	put_packet.level = clients[c_id].getData().level;
+	put_packet.hp = clients[c_id].getData().HP;
+	put_packet.hp = clients[c_id].getData().MaxHP;
+	put_packet.mp = clients[c_id].getData().MP;
+	put_packet.mpmax = clients[c_id].getData().MaxMP;
 	do_send(&put_packet);
 }
 

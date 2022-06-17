@@ -2,6 +2,7 @@
 #include "SESSION.h"
 #include "DBEvent.h"
 #include "LoginData.h"
+#include "AMBIT.h"
 #include <Windows.h>
 #include <stdio.h>  
 #include <iostream>

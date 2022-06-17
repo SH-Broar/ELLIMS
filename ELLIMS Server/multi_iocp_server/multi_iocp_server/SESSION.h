@@ -71,6 +71,7 @@ public:
 	void send_move_packet(int c_id, int client_time);
 	void send_remove_packet(int c_id);
 	void send_chat_packet(int c_id, char* mess);
+	void send_stat_change_packet(int c_id);
 
 
 	void setXY(short x, short y);

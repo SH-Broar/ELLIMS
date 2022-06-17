@@ -82,6 +82,9 @@
     <ClCompile Include="HeartManager.cpp">
       <Filter>소스</Filter>
     </ClCompile>
+    <ClCompile Include="AMBIT.cpp">
+      <Filter>소스</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="hello.lua">

@@ -1,5 +1,5 @@
 #include "HeartManager.h"
-
+#include "AMBIT.h"
 
 array<chrono::system_clock::time_point, NUM_NPC> HeartManager::next_move_times;
 priority_queue<TIMER_EVENT> HeartManager::timer_queue;

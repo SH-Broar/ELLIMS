@@ -1,5 +1,5 @@
 #include "WorldMap.h"
-
+#include "AMBIT.h"
 bool s_Map::s_basemap[W_WIDTH][W_HEIGHT];
 
 void s_Map::loadMap()

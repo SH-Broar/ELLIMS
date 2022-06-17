@@ -36,10 +36,7 @@ enum class PlayerCommand { NONE, UP, DOWN, LEFT, RIGHT, ESCAPE, BACKSPACE };
 enum class CURSOR_TYPE { NOCURSOR, SOLIDCURSOR, NORMALCURSOR } ;
 
 
-void clrscr();
 void gotoxy(int x, int y);
-int wherex();
-int wherey();
 void setcursortype(CURSOR_TYPE c);
 void CClear();
 

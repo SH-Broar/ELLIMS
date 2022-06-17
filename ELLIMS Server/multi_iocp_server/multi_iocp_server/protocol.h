@@ -54,6 +54,7 @@ struct CS_CHAT_PACKET
 	char	mess[MESS_SIZE];
 };
 
+//ok
 struct SC_LOGIN_OK_PACKET {
 	unsigned char size;
 	char	type;
@@ -67,6 +68,7 @@ struct SC_LOGIN_OK_PACKET {
 	int MP, MaxMP;
 };
 
+//reason
 struct SC_LOGIN_FAIL_PACKET {
 	unsigned char size;
 	char	type;
@@ -87,6 +89,7 @@ struct SC_LOGIN_FAIL_PACKET {
 //	int EXP;
 //};
 
+
 struct SC_ADD_OBJECT_PACKET {
 	unsigned char size;
 	char	type;
@@ -98,6 +101,7 @@ struct SC_ADD_OBJECT_PACKET {
 	char	name[NAME_SIZE];
 	short	level;
 	int		hp, hpmax;
+	int		mp, mpmax;
 };
 
 //struct SC_ADD_PLAYER_PACKET {
@@ -156,6 +160,7 @@ struct SC_STAT_CHANGE_PACKET {
 	short	level;
 	int		exp;
 	int		hp, hpmax;
+	int		mp, mpmax;
 };
 
 #pragma pack (pop)
