@@ -20,10 +20,10 @@ OVER_EXP::OVER_EXP(unsigned char* packet)
 
 void SESSION::send_move_packet(int c_id, int client_time)
 {
-	SC_MOVE_PLAYER_PACKET p;
+	SC_MOVE_OBJECT_PACKET p;
 	p.id = c_id;
-	p.size = sizeof(SC_MOVE_PLAYER_PACKET);
-	p.type = SC_MOVE_PLAYER;
+	p.size = sizeof(SC_MOVE_OBJECT_PACKET);
+	p.type = SC_MOVE_OBJECT;
 	p.x = clients[c_id].X();
 	p.y = clients[c_id].Y();
 	p.client_time = client_time;
@@ -32,10 +32,10 @@ void SESSION::send_move_packet(int c_id, int client_time)
 
 void SESSION::send_remove_packet(int c_id)
 {
-	SC_REMOVE_PLAYER_PACKET p;
+	SC_REMOVE_OBJECT_PACKET p;
 	p.id = c_id;
 	p.size = sizeof(p);
-	p.type = SC_REMOVE_PLAYER;
+	p.type = SC_REMOVE_OBJECT;
 	do_send(&p);
 }
 
@@ -97,31 +97,42 @@ void SESSION::do_send(void* packet)
 
 void SESSION::send_login_info_packet()
 {
-	SC_LOGIN_INFO_PACKET p;
-	p.id = data.sc_id;
-	strcpy(p.name, data.name);
-	p.size = sizeof(SC_LOGIN_INFO_PACKET);
-	p.type = SC_LOGIN_INFO;
-	p.level = data.level;
-	p.HP = data.HP;
-	p.MaxHP = data.MaxHP;
-	p.MP = data.MP;
-	p.MaxMP = data.MaxMP;
-	p.EXP = data.EXP;
-	p.x = data.x;
-	p.y = data.y;
-	do_send(&p);
+	if (data.isValidLogin)
+	{
+		SC_LOGIN_OK_PACKET p;
+		p.id = data.sc_id;
+		strcpy(p.name, data.name);
+		p.size = sizeof(SC_LOGIN_OK_PACKET);
+		p.type = SC_LOGIN_OK;
+		p.level = data.level;
+		p.HP = data.HP;
+		p.MaxHP = data.MaxHP;
+		p.MP = data.MP;
+		p.MaxMP = data.MaxMP;
+		p.EXP = data.EXP;
+		p.x = data.x;
+		p.y = data.y;
+		do_send(&p);
+	}
+	else
+	{
+		SC_LOGIN_FAIL_PACKET p;
+		p.size = sizeof(SC_LOGIN_FAIL_PACKET);
+		p.type = SC_LOGIN_FAIL;
+		p.reason = 0;
+		do_send(&p);
+	}
 }
 
 void SESSION::send_put_packet(int c_id)
 {
 	printf("ADD player : %d",c_id);
-	SC_ADD_PLAYER_PACKET put_packet;
+	SC_ADD_OBJECT_PACKET put_packet;
 	put_packet.id = c_id;
 	//strcpy(put_packet.name, data.name);
 	strcpy_s(put_packet.name, clients[c_id].NAME());
 	put_packet.size = sizeof(put_packet);
-	put_packet.type = SC_ADD_PLAYER;
+	put_packet.type = SC_ADD_OBJECT;
 	put_packet.x = clients[c_id].X();
 	put_packet.y = clients[c_id].Y();
 	do_send(&put_packet);

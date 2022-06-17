@@ -40,6 +40,8 @@ public:
 	void setActive(bool active);
 	void setActiveByFrame();
 
+	bool ZoneChanged;
+
 	void operator= (const char* data);
 	void operator= (std::function<int(int, int)>);
 	void operator= (std::function<void(void)>);
@@ -50,6 +52,8 @@ public:
 	void clearZone(ClearType c);
 	bool MouseInteraction(int mx, int my, bool clicked);
 	bool Intersect(int _x, int _y);
+
+	void zoneChanged();
 
 	char* getText();
 	int getWidth();

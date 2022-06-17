@@ -4,19 +4,20 @@
 #include "Scene.h"
 #include "Zone.h"
 
-
 #define DEBUG
 
 char Game::FrameBuffer[120][35] = {};
 char Game::DoubleFrameBuffer[120][35] = {};
 char Game::DebugFrameBuffer[120][35] = {};
 
+std::atomic<bool> Game::FrameChanged = true;
+
 int Game::debugNum = 0;
 
 Scene Game::nowScene;
 int Game::myPlayerID;
 std::unordered_map<int, int>  Game::playerIDMapper;
-std::array<Player*,(MAX_USER+NUM_NPC)*3>  Game::players;
+std::array<Player*, (MAX_USER + NUM_NPC) * 3>  Game::players;
 
 Game::Game()
 {
@@ -36,7 +37,7 @@ void Game::InitUISetting()
 		}
 		std::cout << FrameBuffer[i];
 	}
-	
+
 	GameFrameAdvance();
 }
 
@@ -62,6 +63,11 @@ void Game::GameFrameAdvance()
 				}
 				else
 				{
+					while (!FrameChanged)
+					{
+						SleepEx(50, TRUE);
+					}
+
 					if (FrameBuffer[i][j] != DoubleFrameBuffer[i][j])
 					{
 						FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
@@ -70,6 +76,11 @@ void Game::GameFrameAdvance()
 					}
 				}
 #else
+				while (!FrameChanged)
+				{
+					SleepEx(50, TRUE);
+				}
+
 				if (FrameBuffer[i][j] != DoubleFrameBuffer[i][j])
 				{
 					FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
@@ -78,10 +89,11 @@ void Game::GameFrameAdvance()
 				}
 #endif
 			}
-		}
+			}
+		FrameChanged = false;
 		SleepEx(50, TRUE);
+		}
 	}
-}
 
 void Game::gameEnded()
 {
@@ -98,6 +110,7 @@ void Game::print(const char* data, int x, int y)
 	int trackerY = y;
 
 	int tracs = 0;
+
 	while (strlen(data) > tracs)
 	{
 		Game::DoubleFrameBuffer[trackerX][trackerY] = data[tracs];
@@ -105,13 +118,14 @@ void Game::print(const char* data, int x, int y)
 
 		tracs++;
 	}
+	FrameChanged = true;
 }
 
 void Game::printDebug(const char* data, const char* name)
 {
 #ifdef DEBUG
-	int trackerX = 5 + (debugNum%64)/(SCREEN_HEIGHT / 2 - 1) * 30;
-	int trackerY = 2 + ((debugNum%64)%(SCREEN_HEIGHT / 2 - 1))*2;
+	int trackerX = 5 + (debugNum % 64) / (SCREEN_HEIGHT / 2 - 1) * 30;
+	int trackerY = 2 + ((debugNum % 64) % (SCREEN_HEIGHT / 2 - 1)) * 2;
 
 	int tracs = 0;
 

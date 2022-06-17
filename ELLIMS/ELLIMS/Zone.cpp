@@ -4,9 +4,11 @@
 
 Zone::Zone() : l(1), r(SCREEN_WIDTH-2), t(SCREEN_HEIGHT-2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), mess(""), isClickable(ClickableType::NONE), ClickCallbackFunction(nullptr), isActive(true), temperanceActive(true)
 {
+	ZoneChanged = true;
 };
 Zone::Zone(int _l, int _r, int _b, int _t, ClickableType Clickable) : l(_l), r(_r), b(_b), t(_t), isClickable(Clickable), hovered(false), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), borderCharacter('*'), text(""), mess(""), ClickCallbackFunction(nullptr), isActive(true), temperanceActive(true)
 {
+	ZoneChanged = true;
 };
 
 void Zone::setRegion(int _l, int _r, int _b, int _t)
@@ -46,7 +48,11 @@ void Zone::setActiveByFrame()
 
 void Zone::operator=(const char* data)
 {
-	strcpy(text, data);
+	if (strcmp(data, text) != 0)
+	{
+		strcpy(text, data);
+		ZoneChanged = true;
+	}
 }
 
 void Zone::operator=(std::function<int(int, int)> func)
@@ -84,6 +90,7 @@ void Zone::addTyping(char c)
 		//Game::printDebug(std::to_string(strlen(text)).c_str(), "length");
 		strcat(text, cha);
 	}
+	ZoneChanged = true;
 }
 
 char* Zone::getText()
@@ -91,6 +98,7 @@ char* Zone::getText()
 	if (strlen(text) < MESS_SIZE)
 	{
 		strcpy(mess, text);
+		ZoneChanged = true;
 		return mess;
 	}
 	strcpy(mess, "text TOO Long");
@@ -100,6 +108,8 @@ char* Zone::getText()
 void Zone::print()
 {
 	if (!isActive)
+		return;
+	if (!ZoneChanged)
 		return;
 
 	int x = l - 1;
@@ -182,6 +192,7 @@ void Zone::print()
 			Game::DoubleFrameBuffer[trackerX + 1][trackerY] = ' ';
 	}
 
+	zoneChanged();
 }
 
 void Zone::clearZone(ClearType c)
@@ -210,6 +221,7 @@ void Zone::clearZone(ClearType c)
 				}
 			}
 		}
+		zoneChanged();
 		return;
 	}
 	
@@ -240,6 +252,8 @@ void Zone::clearZone(ClearType c)
 		Game::DoubleFrameBuffer[trackerX - 2][trackerY] = ' ';
 		Game::DoubleFrameBuffer[trackerX + 1][trackerY] = ' ';
 	}
+
+	zoneChanged();
 }
 
 bool Zone::MouseInteraction(int mx, int my, bool clicked)
@@ -269,9 +283,10 @@ bool Zone::MouseInteraction(int mx, int my, bool clicked)
 	{
 		hovered = false;
 	}
-
+	ZoneChanged = true;
 	return false;
 }
+
 bool Zone::Intersect(int _x, int _y)
 {
 	if (l <= _x && _x <= r)
@@ -308,4 +323,10 @@ __int64 Zone::getLegion()
 int Zone::getWidth()
 {
 	return r - l+1;
+}
+
+void Zone::zoneChanged()
+{
+	ZoneChanged = false;
+	Game::FrameChanged = true;
 }

@@ -57,6 +57,8 @@ void Player::print()
 {
 	if (!isActive)
 		return;
+	if (!ZoneChanged)
+		return;
 
 	if (l <= 0 || l >= SCREEN_WIDTH - 1 || b <= 0 || b >= SCREEN_HEIGHT - 1)
 		return;
@@ -73,6 +75,8 @@ void Player::print()
 			}
 		}
 	}
+
+	zoneChanged();
 }
 
 void Player::SetPlayersRegion(int px, int py)

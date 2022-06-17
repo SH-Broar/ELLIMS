@@ -54,6 +54,7 @@ public:
 	static char DoubleFrameBuffer[120][35];
 	static char DebugFrameBuffer[120][35];
 	static ChatDialogue chat;
+	static std::atomic<bool> FrameChanged;
 
 	static void print(const char* data, int x, int y);
 
