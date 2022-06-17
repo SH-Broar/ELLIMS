@@ -56,6 +56,7 @@ void Game::MouseClick()
 					{
 					case VK_F1:
 						Game::debugConsole = true;
+						Game::FrameChanged = true;
 						break;
 					case VK_F5:
 						Game::clearDebug();
@@ -117,6 +118,7 @@ void Game::MouseClick()
 				{
 				case VK_F1:
 					Game::debugConsole = false;
+					Game::FrameChanged = true;
 					break;
 				}
 			}

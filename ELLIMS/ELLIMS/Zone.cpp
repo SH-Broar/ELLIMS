@@ -267,6 +267,8 @@ bool Zone::MouseInteraction(int mx, int my, bool clicked)
 	{
 		if (isClickable == ClickableType::HOVER)
 		{
+			if (!hovered)
+				ZoneChanged = true;
 			hovered = true;
 		}
 
@@ -275,15 +277,17 @@ bool Zone::MouseInteraction(int mx, int my, bool clicked)
 			if (ClickCallbackFunction != nullptr)
 			{
 				int ret = ClickCallbackFunction(mx, my);
+				ZoneChanged = true;
 				return true;
 			}
 		}
 	}
 	else
 	{
+		if (hovered)
+			ZoneChanged = true;
 		hovered = false;
 	}
-	ZoneChanged = true;
 	return false;
 }
 

@@ -50,9 +50,9 @@ public:
 	static void MouseClick();
 	static COORD getMouseXY();
 
-	static char FrameBuffer[120][35];
-	static char DoubleFrameBuffer[120][35];
-	static char DebugFrameBuffer[120][35];
+	static std::string FrameBuffer[SCREEN_HEIGHT];
+	static char DoubleFrameBuffer[SCREEN_WIDTH][SCREEN_HEIGHT];
+	static char DebugFrameBuffer[SCREEN_WIDTH][SCREEN_HEIGHT];
 	static ChatDialogue chat;
 	static std::atomic<bool> FrameChanged;
 

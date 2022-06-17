@@ -6,9 +6,9 @@
 
 #define DEBUG
 
-char Game::FrameBuffer[120][35] = {};
-char Game::DoubleFrameBuffer[120][35] = {};
-char Game::DebugFrameBuffer[120][35] = {};
+std::string Game::FrameBuffer[SCREEN_HEIGHT] = {};
+char Game::DoubleFrameBuffer[SCREEN_WIDTH][SCREEN_HEIGHT] = {};
+char Game::DebugFrameBuffer[SCREEN_WIDTH][SCREEN_HEIGHT] = {};
 
 std::atomic<bool> Game::FrameChanged = true;
 
@@ -27,15 +27,15 @@ void Game::InitUISetting()
 {
 	setcursortype(CURSOR_TYPE::NOCURSOR);
 
-
-	for (int i = 0; i < SCREEN_WIDTH; i++)
+	for (int j = 0; j < SCREEN_HEIGHT; j++)
 	{
-		for (int j = 0; j < SCREEN_HEIGHT; j++)
+		for (int i = 0; i < SCREEN_WIDTH; i++)
 		{
-			FrameBuffer[i][j] = ' ';
+			
+			//FrameBuffer[i][j] = ' ';
 			DoubleFrameBuffer[i][j] = ' ';
 		}
-		std::cout << FrameBuffer[i];
+		FrameBuffer[j].resize(SCREEN_WIDTH,'\0');
 	}
 
 	GameFrameAdvance();
@@ -47,53 +47,61 @@ void Game::GameFrameAdvance()
 	{
 		if (gameEnd)
 			break;
-		for (int i = 0; i < SCREEN_WIDTH; i++)
+		if (!FrameChanged)
 		{
-			for (int j = 0; j < SCREEN_HEIGHT; j++)
+			SleepEx(50, TRUE);
+			continue;
+		}
+
+		for (int j = 0; j < SCREEN_HEIGHT; j++)
+		{
+			for (int i = 0; i < SCREEN_WIDTH; i++)
 			{
 #ifdef DEBUG
 				if (debugConsole)
 				{
-					if (FrameBuffer[i][j] != DebugFrameBuffer[i][j])
+					if (FrameBuffer[j].at(i) != DebugFrameBuffer[i][j])
 					{
-						FrameBuffer[i][j] = DebugFrameBuffer[i][j];
-						gotoxy(i, j);
-						std::cout << DebugFrameBuffer[i][j];
+						FrameBuffer[j].at(i) = DebugFrameBuffer[i][j];
+						//FrameBuffer[j].replace(i, 1, &DebugFrameBuffer[i][j]);
+						//gotoxy(i, j);
+						//std::cout << DebugFrameBuffer[i][j];
 					}
 				}
 				else
 				{
-					while (!FrameChanged)
+					if (FrameBuffer[j].at(i) != DoubleFrameBuffer[i][j])
 					{
-						SleepEx(50, TRUE);
-					}
-
-					if (FrameBuffer[i][j] != DoubleFrameBuffer[i][j])
-					{
-						FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
-						gotoxy(i, j);
-						std::cout << DoubleFrameBuffer[i][j];
+						FrameBuffer[j].at(i) = DoubleFrameBuffer[i][j];
+						//FrameBuffer[j].replace(i, 1, &DoubleFrameBuffer[i][j]);
+						//FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
+						//gotoxy(i, j);
+						//std::cout << DoubleFrameBuffer[i][j];
 					}
 				}
 #else
-				while (!FrameChanged)
+				if (FrameBuffer[j].at(i) != DoubleFrameBuffer[i][j])
 				{
-					SleepEx(50, TRUE);
-				}
-
-				if (FrameBuffer[i][j] != DoubleFrameBuffer[i][j])
-				{
-					FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
-					gotoxy(i, j);
-					std::cout << DoubleFrameBuffer[i][j];
+					FrameBuffer[j].at(i) = DoubleFrameBuffer[i][j];
+					//FrameBuffer[j].replace(i, 1, &DoubleFrameBuffer[i][j]);
+					//FrameBuffer[i][j] = DoubleFrameBuffer[i][j];
+					//gotoxy(i, j);
+					//std::cout << DoubleFrameBuffer[i][j];
 				}
 #endif
 			}
-			}
+			
+		}
+		gotoxy(0, 0);
+		for (int j = 0; j < SCREEN_HEIGHT; j++)
+		{
+			std::cout << FrameBuffer[j];
+		}
+
 		FrameChanged = false;
 		SleepEx(50, TRUE);
-		}
 	}
+}
 
 void Game::gameEnded()
 {
@@ -176,5 +184,6 @@ void Game::clearDebug()
 	}
 
 	debugNum = 0;
+	Game::FrameChanged = true;
 #endif
 }
