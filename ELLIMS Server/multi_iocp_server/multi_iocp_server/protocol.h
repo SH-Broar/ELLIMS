@@ -43,6 +43,7 @@ struct CS_MOVE_PACKET {
 struct CS_ATTACK_PACKET {
 	unsigned char size;
 	char	type;
+	char  skilltype;
 };
 
 struct CS_CHAT_PACKET
@@ -50,7 +51,7 @@ struct CS_CHAT_PACKET
 	unsigned char size;
 	char	type;
 	int		target_id;
-	char	chat_type;			// 1 : say,  2 : tell, 3 : shout
+	char	chat_type;			// 0 : say,  1 : tell, 2 : shout
 	char	mess[MESS_SIZE];
 };
 
@@ -59,13 +60,13 @@ struct SC_LOGIN_OK_PACKET {
 	unsigned char size;
 	char	type;
 	int 	id;
-	char	name[NAME_SIZE];
 	short race;
 	short x, y;
 	short level;
 	int	 EXP;
 	int HP, MaxHP;
 	int MP, MaxMP;
+	char	name[NAME_SIZE];
 };
 
 //reason

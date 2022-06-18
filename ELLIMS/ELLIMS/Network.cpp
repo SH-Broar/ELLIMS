@@ -1,3 +1,4 @@
+#include "Turboc.h"
 #include "Network.h"
 #include "Game.h"
 #include "Player.h"
@@ -226,6 +227,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 			tmpPlayer->p();
 			tmpPlayer->x = login_packet->x;
 			tmpPlayer->y = login_packet->y;
+			tmpPlayer->race = login_packet->race;
 			tmpPlayer->level = login_packet->level;
 			tmpPlayer->HP = login_packet->HP;
 			tmpPlayer->MaxHP = login_packet->MaxHP;
@@ -249,9 +251,27 @@ void Network::RecvPacketProcess(unsigned char packet[])
 	}
 	break;
 	case SC_LOGIN_FAIL:
+	{
+		SC_LOGIN_FAIL_PACKET* login_packet = reinterpret_cast<SC_LOGIN_FAIL_PACKET*>(packet);
 		Game::printDebug("FAILED", "LOGIN ");
 		Game::DBConnected = false;
-		break;
+		switch (login_packet->reason)
+		{
+		case 0:
+			Game::print("                           ", SCREEN_WIDTH / 2 - 11, 26);
+			Game::print("ID / Password Invaild... ", SCREEN_WIDTH / 2 - 12, 26);
+			break;
+		case 1:
+			Game::print("                           ", SCREEN_WIDTH / 2 - 11, 26);
+			Game::print("Already Playing ID. ", SCREEN_WIDTH / 2 - 10, 26);
+			break;
+		case 2:
+			Game::print("                           ", SCREEN_WIDTH / 2 - 11, 26);
+			Game::print("Server Full. Please Wait. ", SCREEN_WIDTH / 2 - 13, 26);
+			break;
+		}
+	}
+	break;
 	case SC_ADD_OBJECT:
 	{
 		SC_ADD_OBJECT_PACKET* add_packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet);
@@ -271,13 +291,12 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		tmpPlayer->scID = add_packet->id;
 		tmpPlayer->setPlayerActive(true);
 		strcpy(tmpPlayer->name, add_packet->name);
-		if (add_packet->id >= MAX_USER)
-		{
-			if (add_packet->id >= MAX_USER + NUM_NPC - 10)
-				tmpPlayer->m(true);
-			else
-				tmpPlayer->m(false);
-		}
+		tmpPlayer->HP = add_packet->hp;
+		tmpPlayer->MaxHP = add_packet->hpmax;
+		tmpPlayer->MP = add_packet->mp;
+		tmpPlayer->MaxMP = add_packet->mpmax;
+		tmpPlayer->race = add_packet->race;
+		tmpPlayer->m();
 
 		Game::players[Game::playerIDMapper[add_packet->id]] = tmpPlayer;
 
@@ -317,7 +336,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 
 		std::string chat{};
 
-		if (strcmp(Game::players[Game::playerIDMapper[chat_packet->id]]->name, "_SYSTEM") == 0)
+		if (chat_packet->type == 3)
 		{
 			chat = chat_packet->mess;
 		}
@@ -332,6 +351,21 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		Game::chat.dialoguePrint(chat);
 	}
 	break;
+	case SC_STAT_CHANGE:
+	{
+		SC_STAT_CHANGE_PACKET* stat_change_packet = reinterpret_cast<SC_STAT_CHANGE_PACKET*>(packet);
+
+		if (Game::playerIDMapper.contains(stat_change_packet->id))
+		{
+			Game::players[Game::playerIDMapper[stat_change_packet->id]]->level = stat_change_packet->level;
+			Game::players[Game::playerIDMapper[stat_change_packet->id]]->EXP = stat_change_packet->exp;
+			Game::players[Game::playerIDMapper[stat_change_packet->id]]->HP = stat_change_packet->hp;
+			Game::players[Game::playerIDMapper[stat_change_packet->id]]->MaxHP = stat_change_packet->hpmax;
+			Game::players[Game::playerIDMapper[stat_change_packet->id]]->MP = stat_change_packet->mp;
+			Game::players[Game::playerIDMapper[stat_change_packet->id]]->MaxMP = stat_change_packet->mpmax;
+		}
+	}
+		break;
 	default:
 		char tmp[10];
 		sprintf(tmp, "%d", packet[1]);
@@ -354,8 +388,31 @@ void Network::SendChat(char* mess)
 {
 	CS_CHAT_PACKET cs_chat_packet;
 
+	if (mess[0] == '1')
+	{
+		cs_chat_packet.chat_type = 1;
+	}
+	else if (mess[0] == '2')
+	{
+		cs_chat_packet.chat_type = 2;
+	}
+	else
+	{
+		cs_chat_packet.chat_type = 0;
+	}
+
 	cs_chat_packet.size = sizeof(cs_chat_packet) - sizeof(cs_chat_packet.mess) + strlen(mess) +1;
 	cs_chat_packet.type = CS_CHAT;
 	strcpy(cs_chat_packet.mess, mess);
 	SendPacket(&cs_chat_packet);
+}
+
+void Network::SendAttack()
+{
+	CS_ATTACK_PACKET cs_attack_packet;
+
+	cs_attack_packet.size = sizeof(cs_attack_packet);
+	cs_attack_packet.type = CS_ATTACK;
+	cs_attack_packet.skilltype = 0;
+	SendPacket(&cs_attack_packet);
 }

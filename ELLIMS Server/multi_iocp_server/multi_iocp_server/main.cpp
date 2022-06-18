@@ -98,6 +98,7 @@ void process_packet(int c_id, char* packet)
 		}
 		if (clients[c_id]._s_state == ST_INGAME)
 		{
+			clients[c_id].send_login_fail_packet(1);
 			clients[c_id]._sl.unlock();
 			disconnect(c_id);
 			break;
@@ -110,6 +111,13 @@ void process_packet(int c_id, char* packet)
 		DataBaseManager::addDBEvent(c_id,DB_EV_LOGIN, dbTMP);
 
 		clients[c_id]._sl.unlock();
+
+		break;
+	}
+	case CS_ATTACK:
+	{
+		CS_ATTACK_PACKET* p = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
+
 
 		break;
 	}
@@ -352,6 +360,7 @@ void do_worker()
 			}
 			else
 			{
+				clients[client_id].send_login_fail_packet(2);
 				cout << "Max user exceeded.\n";
 			}
 			ZeroMemory(&ex_over->_over, sizeof(ex_over->_over));

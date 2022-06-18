@@ -13,6 +13,13 @@ void HeartManager::initialize_npc()
 		LoginData ld;
 		ld.x = rand() % W_WIDTH;
 		ld.y = rand() % W_HEIGHT;
+		ld.isPlayer = false;
+		ld.level = rand() % 3;
+		ld.MaxHP = rand() % 200 + 50;
+		ld.HP = ld.MaxHP;
+		ld.MaxMP = rand() % 100 + 10;
+		ld.MP = ld.MaxMP;
+		ld.EXP = ld.MaxHP / 10;
 		sprintf_s(ld.name, "M-%d", i);
 		int npc_id = i + MAX_USER;
 		clients[npc_id].npc_id = npc_id;

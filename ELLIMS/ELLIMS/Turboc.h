@@ -12,7 +12,10 @@
 #include <functional>
 #include <vector>
 #include <array>
+#include <thread>
+#include <string>
 #include <unordered_map>
+#include <iostream>
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>

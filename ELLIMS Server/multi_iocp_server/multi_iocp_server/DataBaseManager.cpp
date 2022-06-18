@@ -40,6 +40,7 @@ void DataBaseManager::DBThread()
 			d.x = rand() % W_WIDTH;
 			d.y = rand() % W_HEIGHT;
 			d.isValidLogin = true;
+			d.isPlayer = true;
 			sprintf_s(d.id, "%S", "DUMMY");
 			sprintf_s(d.name, "%S", "DUMMY");
 			d.level = 1;
@@ -156,6 +157,7 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 									sprintf_s(result.id, "%S", Nname);
 									sprintf_s(result.name, "%S", Nname);
 									result.level = level;
+									result.isPlayer = true;
 									result.x = x;
 									result.y = y;
 									result.HP = HP;

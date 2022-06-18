@@ -24,6 +24,8 @@ public:
 	int MaxMP;
 	int MP;
 
+	int race;
+
 	int MaxEXP;
 	int EXP;
 
@@ -31,7 +33,7 @@ public:
 	bool deleteDataTicket;
 
 	void p();
-	void m(bool boss);
+	void m();
 	void InitZone();
 
 	virtual bool print() override;

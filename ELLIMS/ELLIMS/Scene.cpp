@@ -1,3 +1,4 @@
+#include "Turboc.h"
 #include "Scene.h"
 #include "Game.h"
 #include "Zone.h"
@@ -113,8 +114,8 @@ void Scene::changeScene(SceneName sceneName)
 				}
 				SleepEx(1, TRUE);
 			}
-			Game::print("                           ", SCREEN_WIDTH / 2 - 11, 26);
-			Game::print("LogIn Failed! ", SCREEN_WIDTH / 2 - 6, 26);
+			//Game::print("                           ", SCREEN_WIDTH / 2 - 11, 26);
+			//Game::print("LogIn Failed! ", SCREEN_WIDTH / 2 - 6, 26);
 			return 0;
 		};
 

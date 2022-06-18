@@ -124,7 +124,7 @@ void SESSION::send_login_info_packet()
 		SC_LOGIN_OK_PACKET p;
 		p.id = data.sc_id;
 		strcpy(p.name, data.name);
-		p.size = sizeof(SC_LOGIN_OK_PACKET);
+		p.size = sizeof(SC_LOGIN_OK_PACKET) - sizeof(p.name) + strlen(p.name) + 1;
 		p.type = SC_LOGIN_OK;
 		p.level = data.level;
 		p.HP = data.HP;
@@ -138,12 +138,17 @@ void SESSION::send_login_info_packet()
 	}
 	else
 	{
-		SC_LOGIN_FAIL_PACKET p;
-		p.size = sizeof(SC_LOGIN_FAIL_PACKET);
-		p.type = SC_LOGIN_FAIL;
-		p.reason = 0;
-		do_send(&p);
+		send_login_fail_packet(0);
 	}
+}
+
+void SESSION::send_login_fail_packet(int reason)
+{
+	SC_LOGIN_FAIL_PACKET p;
+	p.size = sizeof(SC_LOGIN_FAIL_PACKET);
+	p.type = SC_LOGIN_FAIL;
+	p.reason = reason;
+	do_send(&p);
 }
 
 void SESSION::send_put_packet(int c_id)
@@ -153,6 +158,14 @@ void SESSION::send_put_packet(int c_id)
 	put_packet.size = sizeof(put_packet);
 	put_packet.type = SC_ADD_OBJECT;
 	put_packet.id = c_id;
+	if (clients[c_id].getData().isPlayer)
+	{
+		put_packet.race = 0;
+	}
+	else
+	{
+		put_packet.race = clients[c_id].getData().level + 1;
+	}
 	//strcpy(put_packet.name, data.name);
 	put_packet.x = clients[c_id].X();
 	put_packet.y = clients[c_id].Y();
@@ -160,7 +173,7 @@ void SESSION::send_put_packet(int c_id)
 	strcpy_s(put_packet.name, clients[c_id].NAME());
 	put_packet.level = clients[c_id].getData().level;
 	put_packet.hp = clients[c_id].getData().HP;
-	put_packet.hp = clients[c_id].getData().MaxHP;
+	put_packet.hpmax = clients[c_id].getData().MaxHP;
 	put_packet.mp = clients[c_id].getData().MP;
 	put_packet.mpmax = clients[c_id].getData().MaxMP;
 	do_send(&put_packet);

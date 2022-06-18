@@ -67,6 +67,7 @@ public:
 	void do_send(void* packet);
 
 	void send_login_info_packet();
+	void send_login_fail_packet(int reason);
 	void send_put_packet(int c_id);
 	void send_move_packet(int c_id, int client_time);
 	void send_remove_packet(int c_id);

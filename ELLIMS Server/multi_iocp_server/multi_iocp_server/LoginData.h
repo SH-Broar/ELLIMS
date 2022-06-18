@@ -8,6 +8,7 @@ public:
 	char id[100];
 	char pass[100];
 	char name[100];
+	bool isPlayer;
 	int level;
 	int x, y;
 	int HP, MaxHP;

@@ -1,6 +1,7 @@
+#include "Turboc.h"
 #include "Zone.h"
 #include "Game.h"
-#include <string>
+
 
 Zone::Zone() : l(1), r(SCREEN_WIDTH-2), t(SCREEN_HEIGHT-2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), mess(""), isClickable(ClickableType::NONE), ClickCallbackFunction(nullptr), isActive(true), temperanceActive(true)
 {

@@ -1,3 +1,4 @@
+#include "Turboc.h"
 #include "WorldMap.h"
 
 char c_Map::c_basemap[W_WIDTH][W_HEIGHT];

@@ -1,7 +1,10 @@
+#include "Turboc.h"
 #include "Player.h"
 #include "Game.h"
 #include "Zone.h"
 #include "Network.h"
+
+
 
 
 Player::Player()
@@ -38,12 +41,27 @@ void Player::p()
 	thisIsPlayer = true;
 }
 
-void Player::m(bool boss)
+void Player::m()
 {
-	if (boss)
-		characterIcon = 'X';
-	else
+	switch (race)
+	{
+		//player
+	case 0:
+		characterIcon = 'T';
+		break;
+
+		//monster
+	case 1:
 		characterIcon = 'x';
+		break;
+	case 2:
+		characterIcon = 'o';
+		break;
+	case 3:
+		characterIcon = 'z';
+		break;
+	}
+
 	isActive = true;
 }
 
@@ -75,6 +93,14 @@ bool Player::print()
 			for (int i = 0; i < strlen(name); i++)
 			{
 				Game::DoubleFrameBuffer[l - (strlen(name) / 2) + i][b - 1] = name[i];
+			}
+			std::string hpstatus;
+			hpstatus = std::to_string(HP);
+			hpstatus += " / ";
+			hpstatus += std::to_string(MaxHP);
+			for (int i = 0; i < hpstatus.length(); i++)
+			{
+				Game::DoubleFrameBuffer[l - hpstatus.length() / 2 + i][b + 1] = hpstatus[i];
 			}
 		}
 		zoneChanged();
