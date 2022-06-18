@@ -9,7 +9,7 @@ public:
 		float g;
 		float h;
 		float f;
-		NODE* parent;
+		shared_ptr<NODE> parent;
 
 		bool operator<(NODE l) const
 		{
@@ -27,7 +27,6 @@ public:
 public:
 	static bool s_basemap[W_WIDTH][W_HEIGHT];
 	static std::atomic<bool> s_movemap[W_WIDTH][W_HEIGHT];
-	static NODE nodeMap[W_WIDTH][W_HEIGHT];
 	static void loadMap();
 
 	static bool canMove(int x, int y);

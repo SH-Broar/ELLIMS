@@ -2,7 +2,6 @@
 #include "AMBIT.h"
 bool s_Map::s_basemap[W_WIDTH][W_HEIGHT];
 std::atomic<bool> s_Map::s_movemap[W_WIDTH][W_HEIGHT];
-s_Map::NODE s_Map::nodeMap[W_WIDTH][W_HEIGHT];
 
 void s_Map::loadMap()
 {
@@ -12,8 +11,6 @@ void s_Map::loadMap()
 		{
 			s_basemap[i][j] = false;
 			if ((i * 5 + j) % 7 == 0) s_basemap[i][j] = true;
-			nodeMap[i][j].x = i;
-			nodeMap[i][j].x = j;
 		}
 	}
 }

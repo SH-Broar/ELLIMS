@@ -78,6 +78,11 @@ void HeartManager::move_npc(int npc_id, int target_id)
 		if (clients[i]._s_state != ST_INGAME) continue;
 		if (distance_cell(npc_id, i) <= RANGE) old_vl.insert(i);
 	}
+	if (clients[npc_id]._s_state == ST_NPC_DEAD)
+	{
+		s_Map::s_movemap[clients[npc_id].getData().x][clients[npc_id].getData().y] = false;
+		return;
+	}
 
 
 	//lua에 길찾기 넘기기
@@ -153,7 +158,7 @@ void HeartManager::move_npc(int npc_id, int target_id)
 	}
 }
 
-float est(s_Map::NODE n, s_Map::NODE g)
+float est(s_Map::NODE& n, s_Map::NODE& g)
 {
 	return sqrt(pow(g.x - n.x, 2) + pow(g.y - n.y, 2));
 }
@@ -234,7 +239,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 		{
 			s_Map::NODE rear = current;
 			rear.x--;
-			//if (s_Map::canMove(rear.x, rear.y))
+			if (s_Map::canMove(rear.x, rear.y))
 			{
 				float newG = current.g + 1;
 				auto closedIter = find(Closed.begin(), Closed.end(), rear);
@@ -245,8 +250,8 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 					rear.h = est(rear, g);
 					rear.f = rear.g + rear.h;
 
-					//rear.parent = &s_Map::nodeMap[current.x][current.y];
-					rear.parent = new s_Map::NODE(current);
+					//rear.parent = &s_Map::nodeMap.[current.x][current.y];
+					rear.parent = make_shared<s_Map::NODE>(current);
 					//rear.parent = new NODE(tmp);
 					if (closedIter != Closed.end())
 					{
@@ -263,7 +268,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 		{
 			s_Map::NODE rear = current;
 			rear.x++;
-			//if (s_Map::canMove(rear.x, rear.y))
+			if (s_Map::canMove(rear.x, rear.y))
 			{
 				float newG = current.g + 1;
 				auto closedIter = find(Closed.begin(), Closed.end(), rear);
@@ -275,7 +280,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 					rear.f = rear.g + rear.h;
 
 					//rear.parent = &s_Map::nodeMap[current.x][current.y];
-					rear.parent = new s_Map::NODE(current);
+					rear.parent = make_shared<s_Map::NODE>(current);
 					//rear.parent = new NODE(tmp);
 					if (closedIter != Closed.end())
 					{
@@ -292,7 +297,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 		{
 			s_Map::NODE rear = current;
 			rear.y--;
-			//if (s_Map::canMove(rear.x, rear.y))
+			if (s_Map::canMove(rear.x, rear.y))
 			{
 				float newG = current.g + 1;
 				auto closedIter = find(Closed.begin(), Closed.end(), rear);
@@ -304,7 +309,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 					rear.f = rear.g + rear.h;
 
 					//rear.parent = &s_Map::nodeMap[current.x][current.y];
-					rear.parent = new s_Map::NODE(current);
+					rear.parent = make_shared<s_Map::NODE>(current);
 					//rear.parent = new NODE(tmp);
 					if (closedIter != Closed.end())
 					{
@@ -333,7 +338,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 					rear.f = rear.g + rear.h;
 
 					//rear.parent = &s_Map::nodeMap[current.x][current.y];
-					rear.parent = new s_Map::NODE(current);
+					rear.parent = make_shared<s_Map::NODE>(current);
 					//rear.parent = new NODE(tmp);
 					if (closedIter != Closed.end())
 					{
