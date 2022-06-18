@@ -140,7 +140,7 @@ void process_packet(int c_id, char* packet)
 
 		for (auto& pln : r_view_list)
 		{
-			cout << "\nGET";
+			//cout << "\nGET";
 			if (clients[c_id].getData().isPlayer == clients[pln].getData().isPlayer)
 				continue;
 
@@ -155,7 +155,7 @@ void process_packet(int c_id, char* packet)
 					if (pl._s_state != ST_NPC_DEAD)
 					{
 						//피격
-						cout << "\nHITTED";
+						//cout << "\nHITTED";
 						hitted = rand() % 5 + clients[c_id].getData().level;
 						pl._sl.lock();
 						pl.setDamage(hitted);
@@ -167,7 +167,7 @@ void process_packet(int c_id, char* packet)
 
 			if (hitted > 0)
 			{
-				cout << "\nCATCHED";
+				//cout << "\nCATCHED";
 				for (auto& every : sectors[pl.sectorX][pl.sectorY])
 				{
 					if (every.second == false)
@@ -175,7 +175,7 @@ void process_packet(int c_id, char* packet)
 					if (!clients[every.first].getData().isPlayer)
 						continue;
 
-					cout << "\nSENDED";
+					//cout << "\nSENDED";
 					clients[every.first].send_stat_change_packet(pln);
 
 					string mess;
@@ -276,7 +276,7 @@ void process_packet(int c_id, char* packet)
 					auto& pl = clients[pln.first];
 
 					//범위 내의 NPC 깨우기
-					if (i==0&&h==0&&pl._s_state == ST_NPC_SLEEP)
+					if (pl._s_state == ST_NPC_SLEEP)
 					{
 						SESSION_STATE sst = ST_NPC_SLEEP;
 						if (atomic_compare_exchange_weak(&(pl._s_state), &sst, ST_INGAME))
@@ -530,6 +530,7 @@ void do_worker()
 					cout << "This is Not ValidLogin";
 					// 아이디 생성
 					clients[c_id]._sl.unlock();
+					break;
 				}
 				else
 				{
@@ -580,8 +581,7 @@ void do_worker()
 
 				}
 
-
-
+				HeartManager::add_timer(c_id, 5000, EV_HEAL, c_id);
 				break;
 			}
 			}
@@ -599,6 +599,18 @@ void do_worker()
 				HeartManager::move_npc(ai_over->object_id, ai_over->target_id);
 				break;
 			case TIMER_EVENT_TYPE::EV_HEAL:
+				clients[ai_over->object_id]._sl.lock();
+				clients[ai_over->object_id].autoHeal();
+				clients[ai_over->object_id]._sl.unlock();
+				for (auto& every : sectors[clients[ai_over->object_id].sectorX][clients[ai_over->object_id].sectorY])
+				{
+					if (every.second == false)
+						continue;
+
+					//cout << "\nSENDED";
+					clients[every.first].send_stat_change_packet(ai_over->object_id);
+				}
+				HeartManager::add_timer(ai_over->object_id, 5000, EV_HEAL, ai_over->object_id);
 				break;
 			}
 		}

@@ -36,6 +36,14 @@ function event_self_revive(player_id)
 	--return¿∏∑Œ initX initY
 end
 
+function set_state(move)
+	movestate = move
+end
+
+function get_state()
+	return movestate
+end
+
 function npc_move(x, y, tx, ty)
 	dir = 1
 

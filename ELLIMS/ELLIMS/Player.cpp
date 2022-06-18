@@ -87,29 +87,31 @@ bool Player::print()
 
 	Game::DoubleFrameBuffer[l][b] = characterIcon;
 
-	if (!thisIsPlayer)
+	if (hovered || Game::monsterStatus)
 	{
-		static std::string hpstatus;
-		int len = hpstatus.length();
-		hpstatus = std::to_string(HP);
-		hpstatus += " / ";
-		hpstatus += std::to_string(MaxHP);
-		if (len != hpstatus.length())
-			zoneChanged();
-		for (int i = 0; i < hpstatus.length(); i++)
-		{
-			Game::DoubleFrameBuffer[l - hpstatus.length() / 2 + i][b + 1] = hpstatus[i];
-		}
-	}
-
-
-	if (hovered)
-	{
-		if (b > 0)
+		if (b > 1)
 		{
 			for (int i = 0; i < strlen(name); i++)
 			{
-				Game::DoubleFrameBuffer[l - (strlen(name) / 2) + i][b - 1] = name[i];
+				int s = l - (strlen(name) / 2) + i;
+				if (s < (SCREEN_HEIGHT - 2) * 2 && s>0)
+					Game::DoubleFrameBuffer[l - (strlen(name) / 2) + i][b - 1] = name[i];
+			}
+		}
+		if (b < SCREEN_HEIGHT - 2)
+		{
+			static std::string hpstatus;
+			int len = hpstatus.length();
+			hpstatus = std::to_string(HP);
+			hpstatus += " / ";
+			hpstatus += std::to_string(MaxHP);
+			if (len != hpstatus.length())
+				zoneChanged();
+			for (int i = 0; i < hpstatus.length(); i++)
+			{
+				int s = l - (hpstatus.length() / 2) + i;
+				if (s< (SCREEN_HEIGHT - 2) * 2 && s>0)
+					Game::DoubleFrameBuffer[l - hpstatus.length() / 2 + i][b + 1] = hpstatus[i];
 			}
 		}
 		zoneChanged();

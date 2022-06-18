@@ -9,7 +9,7 @@ struct TIMER_EVENT {
 
     constexpr bool operator < (const TIMER_EVENT& _Left) const
     {
-        return (act_time < _Left.act_time);
+        return (act_time > _Left.act_time);
     }
 
 };

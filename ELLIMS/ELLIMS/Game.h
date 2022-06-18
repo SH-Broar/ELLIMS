@@ -71,11 +71,13 @@ public:
 	static bool DBConnected;
 	static bool ingame;
 
+	static bool monsterStatus;
 	//----
 private:
 	static int debugNum;
 	static bool debugConsole;
 	static bool debugKeyInput;
+
 
 };
 
