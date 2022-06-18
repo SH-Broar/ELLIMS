@@ -153,6 +153,11 @@ void HeartManager::move_npc(int npc_id, int target_id)
 	}
 }
 
+float est(s_Map::NODE n, s_Map::NODE g)
+{
+	return sqrt(pow(g.x - n.x, 2) + pow(g.y - n.y, 2));
+}
+
 int HeartManager::A_Star_Pathfinding(lua_State* L)
 {
 	int x = lua_tonumber(L, -4);
@@ -162,6 +167,188 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 	lua_pop(L, 4);
 
 	// astar
+	cout << "\nastar " << x << ", " << y << " " << tx << ", " << ty << endl;
+	vector<s_Map::NODE> OpenFinder;
+	vector<s_Map::NODE> Closed;
+
+	s_Map::NODE s;
+	s.x = x;
+	s.y = y;
+
+	s_Map::NODE g;
+	g.x = tx;
+	g.y = ty;
+
+	s.g = 0;
+	s.h = est(s, g);
+	s.f = s.g + s.h;
+	OpenFinder.push_back(s);
+
+	while (!OpenFinder.empty())
+	{
+		auto tmp = max_element(OpenFinder.begin(), OpenFinder.end(), [](s_Map::NODE& rhs, s_Map::NODE& lhs) {
+			return rhs.f > lhs.f;
+			});
+		s_Map::NODE current = *tmp;
+		OpenFinder.erase(tmp);
+
+		if (current.x == g.x && current.y == g.y)
+		{
+			//end
+			auto contruct = current;
+			cout << "end" << endl;
+			while (contruct.parent->x != s.x || contruct.parent->y != s.y)
+			{
+				cout << contruct.x << ", " << contruct.y << endl;
+				contruct = *contruct.parent;
+			}
+			if (contruct.x - contruct.parent->x == 0)
+			{
+				if (contruct.y - contruct.parent->y < 0)
+				{
+					lua_pushnumber(L, 3);
+					return 1;
+				}
+				else
+				{
+					lua_pushnumber(L, 4);
+					return 1;
+				}
+			}
+			else
+			{
+				if (contruct.x - contruct.parent->x < 0)
+				{
+					lua_pushnumber(L, 1);
+					return 1;
+				}
+				else
+				{
+					lua_pushnumber(L, 2);
+					return 1;
+				}
+			}
+			break;
+		}
+
+		{
+			s_Map::NODE rear = current;
+			rear.x--;
+			//if (s_Map::canMove(rear.x, rear.y))
+			{
+				float newG = current.g + 1;
+				auto closedIter = find(Closed.begin(), Closed.end(), rear);
+				auto openIter = find(OpenFinder.begin(), OpenFinder.end(), rear);
+				if (!((openIter != OpenFinder.end() || closedIter != Closed.end()) && rear.g <= newG))
+				{
+					rear.g = newG;
+					rear.h = est(rear, g);
+					rear.f = rear.g + rear.h;
+
+					//rear.parent = &s_Map::nodeMap[current.x][current.y];
+					rear.parent = new s_Map::NODE(current);
+					//rear.parent = new NODE(tmp);
+					if (closedIter != Closed.end())
+					{
+						Closed.erase(closedIter);
+					}
+					if (openIter == OpenFinder.end())
+					{
+						OpenFinder.push_back(rear);
+					}
+				}
+			}
+		}
+
+		{
+			s_Map::NODE rear = current;
+			rear.x++;
+			//if (s_Map::canMove(rear.x, rear.y))
+			{
+				float newG = current.g + 1;
+				auto closedIter = find(Closed.begin(), Closed.end(), rear);
+				auto openIter = find(OpenFinder.begin(), OpenFinder.end(), rear);
+				if (!((openIter != OpenFinder.end() || closedIter != Closed.end()) && rear.g <= newG))
+				{
+					rear.g = newG;
+					rear.h = est(rear, g);
+					rear.f = rear.g + rear.h;
+
+					//rear.parent = &s_Map::nodeMap[current.x][current.y];
+					rear.parent = new s_Map::NODE(current);
+					//rear.parent = new NODE(tmp);
+					if (closedIter != Closed.end())
+					{
+						Closed.erase(closedIter);
+					}
+					if (openIter == OpenFinder.end())
+					{
+						OpenFinder.push_back(rear);
+					}
+				}
+			}
+		}
+
+		{
+			s_Map::NODE rear = current;
+			rear.y--;
+			//if (s_Map::canMove(rear.x, rear.y))
+			{
+				float newG = current.g + 1;
+				auto closedIter = find(Closed.begin(), Closed.end(), rear);
+				auto openIter = find(OpenFinder.begin(), OpenFinder.end(), rear);
+				if (!((openIter != OpenFinder.end() || closedIter != Closed.end()) && rear.g <= newG))
+				{
+					rear.g = newG;
+					rear.h = est(rear, g);
+					rear.f = rear.g + rear.h;
+
+					//rear.parent = &s_Map::nodeMap[current.x][current.y];
+					rear.parent = new s_Map::NODE(current);
+					//rear.parent = new NODE(tmp);
+					if (closedIter != Closed.end())
+					{
+						Closed.erase(closedIter);
+					}
+					if (openIter == OpenFinder.end())
+					{
+						OpenFinder.push_back(rear);
+					}
+				}
+			}
+		}
+
+		{
+			s_Map::NODE rear = current;
+			rear.y++;
+			//if (s_Map::canMove(rear.x, rear.y))
+			{
+				float newG = current.g + 1;
+				auto closedIter = find(Closed.begin(), Closed.end(), rear);
+				auto openIter = find(OpenFinder.begin(), OpenFinder.end(), rear);
+				if (!((openIter != OpenFinder.end() || closedIter != Closed.end()) && rear.g <= newG))
+				{
+					rear.g = newG;
+					rear.h = est(rear, g);
+					rear.f = rear.g + rear.h;
+
+					//rear.parent = &s_Map::nodeMap[current.x][current.y];
+					rear.parent = new s_Map::NODE(current);
+					//rear.parent = new NODE(tmp);
+					if (closedIter != Closed.end())
+					{
+						Closed.erase(closedIter);
+					}
+					if (openIter == OpenFinder.end())
+					{
+						OpenFinder.push_back(rear);
+					}
+				}
+			}
+		}
+
+		Closed.push_back(current);
+	}
 	//
 
 	lua_pushnumber(L, rand() % 4 + 1);

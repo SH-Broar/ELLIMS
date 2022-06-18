@@ -14,6 +14,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <memory>
 #include <unordered_set>
 #include <concurrent_unordered_map.h>
 #include <concurrent_queue.h>
@@ -48,6 +49,8 @@ constexpr int SECTOR_WIDTH = 20;
 constexpr int SECTOR_HEIGHT = 20;
 
 int distance_cell(int a, int b);
+
+
 
 #endif // !DEFINE_AMBIT
 
