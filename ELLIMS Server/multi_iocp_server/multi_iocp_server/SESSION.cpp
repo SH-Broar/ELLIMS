@@ -275,8 +275,15 @@ void SESSION::adaptDeath()
 	else
 	{
 		//부활 티켓 걸어놓기
-
-		_s_state = ST_NPC_DEAD;
+		if (_s_state == ST_INGAME)
+		{
+			SESSION_STATE sst = ST_INGAME;
+			if (atomic_compare_exchange_strong(&_s_state, &sst, ST_NPC_DEAD))
+			{
+				data.HP = data.MaxHP;
+				HeartManager::add_timer(npc_id, 30000, EV_RESURRECTION, npc_id);
+			}
+		}
 	}
 }
 

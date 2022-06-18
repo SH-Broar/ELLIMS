@@ -61,7 +61,7 @@ void HeartManager::add_timer(int obj_id, int act_time, TIMER_EVENT_TYPE e_type, 
 {
 	using namespace chrono;
 	TIMER_EVENT ev;
-	ev.act_time = system_clock::now() + milliseconds(1000);
+	ev.act_time = system_clock::now() + milliseconds(act_time);
 	ev.object_id = obj_id;
 	ev.ev = e_type;
 	ev.target_id = target_id;
@@ -221,6 +221,15 @@ void HeartManager::ai_thread()
 		case TIMER_EVENT_TYPE::EV_HEAL:
 			break;
 
+		case TIMER_EVENT_TYPE::EV_RESURRECTION:
+			if (clients[t.object_id]._s_state == ST_NPC_DEAD)
+			{
+				SESSION_STATE sst = ST_NPC_DEAD;
+				if (atomic_compare_exchange_strong(&(clients[t.object_id]._s_state), &sst, ST_NPC_SLEEP))
+				{
+				}
+			}
+			break;
 		}
 		SleepEx(1, TRUE);
 	}
