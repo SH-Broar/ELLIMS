@@ -117,7 +117,108 @@ void process_packet(int c_id, char* packet)
 	case CS_ATTACK:
 	{
 		CS_ATTACK_PACKET* p = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
+		//
+		std::vector<COORD> range;
+		range.reserve(10);
+		switch (p->skilltype)
+		{
+		case 0:
+			range.emplace_back(1, 0);
+			range.emplace_back(0, 1);
+			range.emplace_back(0, -1);
+			range.emplace_back(-1, 0);
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		}
 
+		clients[c_id].vl.lock();
+		unordered_set<int> r_view_list = clients[c_id].view_list;
+		clients[c_id].vl.unlock();
+
+		for (auto& pln : r_view_list)
+		{
+			cout << "\nGET";
+			if (clients[c_id].getData().isPlayer == clients[pln].getData().isPlayer)
+				continue;
+
+			int hitted = 0;
+
+			auto& pl = clients[pln];
+
+			for (auto cd : range)
+			{
+				if (pl.X() == clients[c_id].X() + cd.X && pl.Y() == clients[c_id].Y() + cd.Y)
+				{
+					if (pl._s_state != ST_NPC_DEAD)
+					{
+						//피격
+						cout << "\nHITTED";
+						hitted = rand() % 5 + clients[c_id].getData().level;
+						pl._sl.lock();
+						pl.setDamage(hitted);
+						pl._sl.unlock();
+						break;
+					}
+				}
+			}
+
+			if (hitted > 0)
+			{
+				cout << "\nCATCHED";
+				for (auto& every : sectors[pl.sectorX][pl.sectorY])
+				{
+					if (every.second == false)
+						continue;
+					if (!clients[every.first].getData().isPlayer)
+						continue;
+
+					cout << "\nSENDED";
+					clients[every.first].send_stat_change_packet(pln);
+
+					string mess;
+					mess = clients[c_id].getData().name;
+					mess += " attack ";
+					mess += pl.getData().name;
+					mess += " by ";
+					mess += to_string(hitted);
+					clients[every.first].send_chat_packet(-1, mess.c_str());
+				}
+			}
+			else if (hitted < 0)
+			{
+				clients[c_id]._sl.lock();
+				bool levelup = clients[c_id].appendEXP((pl.getData().level + 3) * pl.getData().level * 2);
+				clients[c_id]._sl.unlock();
+				for (auto& every : sectors[pl.sectorX][pl.sectorY])
+				{
+					if (every.second == false)
+						continue;
+					if (!clients[every.first].getData().isPlayer)
+						continue;
+
+
+					clients[every.first].send_remove_packet(pln);
+					clients[every.first].send_stat_change_packet(c_id);
+
+					string mess;
+					mess = pl.getData().name;
+					mess += " collapsed!";
+					clients[every.first].send_chat_packet(-1, mess.c_str());
+
+					if (levelup)
+					{
+						string lmess;
+						lmess = clients[c_id].getData().name;
+						lmess += " level up to ";
+						lmess += clients[c_id].getData().level;
+						clients[every.first].send_chat_packet(-1, lmess.c_str());
+					}
+				}
+			}
+		}
 
 		break;
 	}
@@ -130,6 +231,10 @@ void process_packet(int c_id, char* packet)
 
 		switch (p->direction)
 		{
+		case -1:
+			x = W_WIDTH / 2;
+			y = W_HEIGHT / 2;
+			break;
 		case 0:
 			if (y > 0 && s_Map::canMove(x, y - 1))y--;
 			break;
@@ -220,10 +325,6 @@ void process_packet(int c_id, char* packet)
 						else // 있으면
 						{
 							clients[c_id].vl.unlock();
-							//pl.vl.lock
-							// 
-							//unordered_set<int> o_vlRapper = pl.view_list;
-							//pl.vl.unlock();
 
 							//내가 상대한테 없으면
 							pl.vl.lock();

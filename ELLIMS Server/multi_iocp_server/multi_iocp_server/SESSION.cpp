@@ -41,13 +41,13 @@ void SESSION::send_remove_packet(int c_id)
 	do_send(&p);
 }
 
-void SESSION::send_chat_packet(int c_id, char* mess)
+void SESSION::send_chat_packet(int c_id, const char* mess)
 {
 	SC_CHAT_PACKET p;
 	p.id = c_id;
 	p.size = sizeof(SC_CHAT_PACKET) - sizeof(p.mess) + strlen(mess) + 1;
 	p.type = SC_CHAT;
-	
+
 	//System Message
 	if (c_id < 0)
 	{
@@ -72,7 +72,7 @@ void SESSION::send_stat_change_packet(int c_id)
 	SC_STAT_CHANGE_PACKET p;
 	p.id = c_id;
 	p.size = sizeof(SC_STAT_CHANGE_PACKET);
-	p.type = SC_CHAT;
+	p.type = SC_STAT_CHANGE;
 
 	p.level = clients[c_id].getData().level;
 	p.exp = clients[c_id].getData().EXP;
@@ -100,7 +100,7 @@ SESSION::~SESSION()
 {
 }
 
-void SESSION::	do_recv()
+void SESSION::do_recv()
 {
 	DWORD recv_flag = 0;
 	memset(&_recv_over._over, 0, sizeof(_recv_over._over));
@@ -153,7 +153,7 @@ void SESSION::send_login_fail_packet(int reason)
 
 void SESSION::send_put_packet(int c_id)
 {
-	printf("ADD player : %d",c_id);
+	printf("ADD player : %d", c_id);
 	SC_ADD_OBJECT_PACKET put_packet;
 	put_packet.size = sizeof(put_packet);
 	put_packet.type = SC_ADD_OBJECT;
@@ -240,4 +240,59 @@ LoginData& SESSION::getData()
 char* SESSION::NAME()
 {
 	return data.name;
+}
+
+void SESSION::setDamage(int& damage)
+{
+	data.HP -= damage;
+
+	if (data.HP <= 0)
+	{
+		damage = -1;
+		data.HP = 0;
+		adaptDeath();
+	}
+}
+
+void SESSION::adaptDeath()
+{
+	if (data.isPlayer)
+	{
+		data.EXP = data.EXP / 2;
+		data.HP = data.MaxHP;
+		send_stat_change_packet(data.sc_id);
+
+		CS_MOVE_PACKET p;
+		p.direction = -1;
+		p.client_time = 0;
+		p.size = sizeof(CS_MOVE_PACKET);
+		p.type = CS_MOVE;
+
+		OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<unsigned char*>(reinterpret_cast<void *>(&p)) };
+		sdata->_comp_type = OP_RECV;
+		PostQueuedCompletionStatus(g_h_iocp, 0, data.sc_id, reinterpret_cast<LPOVERLAPPED>(&sdata));
+	}
+	else
+	{
+		//부활 티켓 걸어놓기
+
+		_s_state = ST_NPC_DEAD;
+	}
+}
+
+bool SESSION::appendEXP(int exp)
+{
+	data.EXP += exp;
+	if (data.EXP >= 100 + 100 * data.level)
+	{
+		data.EXP -= 100 + 100 * data.level;
+		data.level++;
+		data.MaxHP += 50;
+		data.MaxMP += 10;
+		data.HP = data.MaxHP;
+		data.MP = data.MaxMP;
+
+		return true;
+	}
+	return false;
 }

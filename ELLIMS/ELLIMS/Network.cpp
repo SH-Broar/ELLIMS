@@ -326,6 +326,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 		{
 			Game::players[Game::playerIDMapper[move_packet->id]]->x = move_packet->x;
 			Game::players[Game::playerIDMapper[move_packet->id]]->y = move_packet->y;
+			Game::players[Game::playerIDMapper[move_packet->id]]->ZoneChanged = true;
 			//Game::printDebug("MOVE");
 		}
 	}
@@ -336,7 +337,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 
 		std::string chat{};
 
-		if (chat_packet->type == 3)
+		if (chat_packet->chat_type == 3)
 		{
 			chat = chat_packet->mess;
 		}
@@ -347,7 +348,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 			chat += chat_packet->mess;
 		}
 
-		Game::printDebug(chat.c_str(), "CHAT");
+		//Game::printDebug(chat.c_str(), "CHAT");
 		Game::chat.dialoguePrint(chat);
 	}
 	break;
@@ -363,6 +364,7 @@ void Network::RecvPacketProcess(unsigned char packet[])
 			Game::players[Game::playerIDMapper[stat_change_packet->id]]->MaxHP = stat_change_packet->hpmax;
 			Game::players[Game::playerIDMapper[stat_change_packet->id]]->MP = stat_change_packet->mp;
 			Game::players[Game::playerIDMapper[stat_change_packet->id]]->MaxMP = stat_change_packet->mpmax;
+			Game::players[Game::playerIDMapper[stat_change_packet->id]]->ZoneChanged = true;
 		}
 	}
 		break;
@@ -407,12 +409,14 @@ void Network::SendChat(char* mess)
 	SendPacket(&cs_chat_packet);
 }
 
-void Network::SendAttack()
+void Network::SendAttack(int skilltype)
 {
 	CS_ATTACK_PACKET cs_attack_packet;
 
 	cs_attack_packet.size = sizeof(cs_attack_packet);
 	cs_attack_packet.type = CS_ATTACK;
-	cs_attack_packet.skilltype = 0;
+	cs_attack_packet.skilltype = skilltype;
 	SendPacket(&cs_attack_packet);
+
+	Game::printDebug("P", "Attack");
 }

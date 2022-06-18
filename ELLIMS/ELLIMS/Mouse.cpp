@@ -8,6 +8,8 @@ int Game::mouse_Y = 0;
 bool Game::debugConsole;
 bool Game::debugKeyInput;
 
+std::atomic<bool> Game::oncedPress = false;
+
 std::atomic<bool> Game::mouse_Left_down;
 std::atomic<bool> Game::mouse_Left_down_Event;
 
@@ -108,6 +110,7 @@ void Game::MouseClick()
 					{
 						inputChar = rec.Event.KeyEvent.uChar.AsciiChar;
 						newCharInputed = true;
+
 						if (debugKeyInput)
 							Game::printDebug(&inputChar, "CHAR");
 					}
@@ -122,6 +125,7 @@ void Game::MouseClick()
 					Game::FrameChanged = true;
 					break;
 				}
+				oncedPress = false;
 			}
 			SleepEx(10, TRUE);
 		}

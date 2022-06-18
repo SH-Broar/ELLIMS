@@ -71,11 +71,14 @@ public:
 	void send_put_packet(int c_id);
 	void send_move_packet(int c_id, int client_time);
 	void send_remove_packet(int c_id);
-	void send_chat_packet(int c_id, char* mess);
+	void send_chat_packet(int c_id, const char* mess);
 	void send_stat_change_packet(int c_id);
 
 
 	void setXY(short x, short y);
+	void setDamage(int& damage);
+	bool appendEXP(int exp);
+	void adaptDeath();
 
 	short X();
 	short Y();

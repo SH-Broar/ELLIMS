@@ -41,4 +41,5 @@ public:
 	void setPlayerActive(bool active);
 	bool SetPlayersRegion(int px, int py);
 	void ProcessCommand(PlayerCommand c);
+	void ProcessCommand(char c);
 };

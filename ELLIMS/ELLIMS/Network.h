@@ -51,7 +51,7 @@ private:
 public:
 	static void SendMove(int dir);
 	static void SendChat(char* mess);
-	static void SendAttack();
+	static void SendAttack(int skilltype);
 
 private:
 	static HANDLE g_h_iocp;

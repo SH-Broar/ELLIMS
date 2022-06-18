@@ -44,6 +44,7 @@ private:
 	static std::atomic<bool> mouse_Left_down;
 	static std::atomic<bool> mouse_Left_down_Event;
 	static std::atomic<bool> newCharInputed;
+	static std::atomic<bool> oncedPress;
 	static std::atomic<PlayerCommand> newCommandInputed;
 
 public:

@@ -48,6 +48,7 @@ void Player::m()
 		//player
 	case 0:
 		characterIcon = 'T';
+		thisIsPlayer = true;
 		break;
 
 		//monster
@@ -86,6 +87,22 @@ bool Player::print()
 
 	Game::DoubleFrameBuffer[l][b] = characterIcon;
 
+	if (!thisIsPlayer)
+	{
+		static std::string hpstatus;
+		int len = hpstatus.length();
+		hpstatus = std::to_string(HP);
+		hpstatus += " / ";
+		hpstatus += std::to_string(MaxHP);
+		if (len != hpstatus.length())
+			zoneChanged();
+		for (int i = 0; i < hpstatus.length(); i++)
+		{
+			Game::DoubleFrameBuffer[l - hpstatus.length() / 2 + i][b + 1] = hpstatus[i];
+		}
+	}
+
+
 	if (hovered)
 	{
 		if (b > 0)
@@ -93,14 +110,6 @@ bool Player::print()
 			for (int i = 0; i < strlen(name); i++)
 			{
 				Game::DoubleFrameBuffer[l - (strlen(name) / 2) + i][b - 1] = name[i];
-			}
-			std::string hpstatus;
-			hpstatus = std::to_string(HP);
-			hpstatus += " / ";
-			hpstatus += std::to_string(MaxHP);
-			for (int i = 0; i < hpstatus.length(); i++)
-			{
-				Game::DoubleFrameBuffer[l - hpstatus.length() / 2 + i][b + 1] = hpstatus[i];
 			}
 		}
 		zoneChanged();
@@ -159,6 +168,22 @@ void Player::ProcessCommand(PlayerCommand c)
 		break;
 	case PlayerCommand::RIGHT:
 		Network::SendMove(3);
+		break;
+	}
+}
+
+void Player::ProcessCommand(char c)
+{
+	switch (c)
+	{
+		//일반 공격
+	case 'z':
+		Network::SendAttack(0);
+		//이펙트 처리
+		break;
+	case 'x':
+		break;
+	case 'c':
 		break;
 	}
 }

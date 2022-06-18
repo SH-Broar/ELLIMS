@@ -68,6 +68,11 @@ int Game::GameStart()
 			{
 				players[playerIDMapper[myPlayerID]]->ProcessCommand(newCommandInputed);
 			}
+			if (newCharInputed && !oncedPress)
+			{
+				players[playerIDMapper[myPlayerID]]->ProcessCommand(inputChar);
+				oncedPress = true;
+			}
 		}
 
 
