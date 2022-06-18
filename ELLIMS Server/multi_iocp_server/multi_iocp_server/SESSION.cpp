@@ -196,8 +196,10 @@ void SESSION::setXY(short _x, short _y)
 		sectors[sectorX][sectorY][ID()] = true;
 	}
 
+	s_Map::s_movemap[data.x][data.y] = false;
 	data.x = _x;
 	data.y = _y;
+	s_Map::s_movemap[data.x][data.y] = true;
 
 	if (sectors[sectorX][sectorY][ID()] == false)
 	{
@@ -245,6 +247,18 @@ char* SESSION::NAME()
 void SESSION::setDamage(int& damage)
 {
 	data.HP -= damage;
+	if (!data.isPlayer)
+	{
+		ll.lock();
+		lua_getglobal(clients[npc_id].L, "set_state");
+		lua_pushnumber(clients[npc_id].L, 11);
+		int error = lua_pcall(clients[npc_id].L, 1, 0, 0);
+		if (error) {
+			cout << "Error:" << lua_tostring(clients[npc_id].L, -1);
+			lua_pop(clients[npc_id].L, 1);
+		}
+		ll.unlock();
+	}
 
 	if (data.HP <= 0)
 	{
@@ -278,7 +292,7 @@ void SESSION::adaptDeath()
 		if (_s_state == ST_INGAME)
 		{
 			SESSION_STATE sst = ST_INGAME;
-			if (atomic_compare_exchange_strong(&_s_state, &sst, ST_NPC_DEAD))
+			if (atomic_compare_exchange_weak(&_s_state, &sst, ST_NPC_DEAD))
 			{
 				data.HP = data.MaxHP;
 				HeartManager::add_timer(npc_id, 30000, EV_RESURRECTION, npc_id);
@@ -302,4 +316,14 @@ bool SESSION::appendEXP(int exp)
 		return true;
 	}
 	return false;
+}
+
+void SESSION::autoHeal()
+{
+	data.HP += data.MaxHP / 10;
+	if (data.HP > data.MaxHP)
+		data.HP = data.MaxHP;
+	data.MP += data.MaxMP / 10;
+	if (data.MP > data.MaxMP)
+		data.MP = data.MaxMP;
 }

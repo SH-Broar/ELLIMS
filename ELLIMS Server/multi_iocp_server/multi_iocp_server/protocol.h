@@ -9,7 +9,7 @@ constexpr int W_WIDTH = 400;	//나중에 2000으로
 constexpr int W_HEIGHT = 400;
 
 constexpr int MAX_USER = 10000;
-constexpr int NUM_NPC = 2000; //나중에 20만으로
+constexpr int NUM_NPC = 1600; //나중에 20만으로
 
 // Packet ID
 constexpr char CS_LOGIN = 0;

@@ -219,9 +219,18 @@ void HeartManager::ai_thread()
 		}
 		break;
 		case TIMER_EVENT_TYPE::EV_HEAL:
+		{
+			OVER_AI over;
+			over.object_id = t.object_id;
+			over.target_id = t.target_id;
+			over._timer_type = EV_HEAL;
+			over._comp_type = OP_AI;
+			PostQueuedCompletionStatus(g_h_iocp, 0, t.target_id, reinterpret_cast<LPOVERLAPPED>(&over));
+		}
 			break;
 
 		case TIMER_EVENT_TYPE::EV_RESURRECTION:
+		{
 			if (clients[t.object_id]._s_state == ST_NPC_DEAD)
 			{
 				SESSION_STATE sst = ST_NPC_DEAD;
@@ -230,6 +239,7 @@ void HeartManager::ai_thread()
 				}
 			}
 			break;
+		}
 		}
 		SleepEx(1, TRUE);
 	}

@@ -7,6 +7,7 @@ int Game::mouse_Y = 0;
 
 bool Game::debugConsole;
 bool Game::debugKeyInput;
+bool Game::monsterStatus;
 
 std::atomic<bool> Game::oncedPress = false;
 
@@ -97,6 +98,11 @@ void Game::MouseClick()
 							Game::printDebug("BACKSPACE", "KEY");
 						newCommandInputed = PlayerCommand::BACKSPACE;
 						break;
+					case VK_MENU:
+						if (debugKeyInput)
+							Game::printDebug("ALT", "KEY");
+						Game::monsterStatus = true;
+						break;
 					default:
 						if (!rec.Event.KeyEvent.uChar.AsciiChar)
 						{
@@ -123,6 +129,9 @@ void Game::MouseClick()
 				case VK_F1:
 					Game::debugConsole = false;
 					Game::FrameChanged = true;
+					break;
+				case VK_MENU:
+					Game::monsterStatus = false;
 					break;
 				}
 				oncedPress = false;

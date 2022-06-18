@@ -6,7 +6,6 @@
 enum SESSION_STATE;
 enum COMP_TYPE;
 
-
 class OVER_EXP
 {
 public:
@@ -77,6 +76,7 @@ public:
 
 	void setXY(short x, short y);
 	void setDamage(int& damage);
+	void autoHeal();
 	bool appendEXP(int exp);
 	void adaptDeath();
 
