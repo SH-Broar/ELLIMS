@@ -153,7 +153,7 @@ void SESSION::send_login_fail_packet(int reason)
 
 void SESSION::send_put_packet(int c_id)
 {
-	printf("ADD player : %d", c_id);
+	//printf("ADD player : %d", c_id);
 	SC_ADD_OBJECT_PACKET put_packet;
 	put_packet.size = sizeof(put_packet);
 	put_packet.type = SC_ADD_OBJECT;

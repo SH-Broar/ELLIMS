@@ -538,46 +538,143 @@ void do_worker()
 					clients[c_id]._s_state = ST_INGAME;
 					clients[c_id]._sl.unlock();
 
-					//view list
-
-					for (auto& pl : clients)
+					//-> 섹터 내의 모든 클라이언트에게 (자신 포함)
+					for (int i = 0; i < 3; ++i)
 					{
-						if (pl.ID() == c_id) continue;
-
-						pl._sl.lock();
-						if (pl._s_state != ST_INGAME)
+						for (int h = 0; h < 3; ++h)
 						{
-							pl._sl.unlock();
-							continue;
-						}
+							if (clients[c_id].sectorX - 1 + i < 0 ||
+								clients[c_id].sectorX - 1 + i >= W_WIDTH / SECTOR_WIDTH ||
+								clients[c_id].sectorY - 1 + h < 0 ||
+								clients[c_id].sectorY - 1 + h >= W_HEIGHT / SECTOR_HEIGHT)
+								continue;
 
-						if (RANGE >= distance_cell(c_id, pl.ID()))
-						{
-							pl.vl.lock();
-							pl.view_list.insert(c_id);
-							pl.vl.unlock();
+							for (auto& pln : sectors[clients[c_id].sectorX - 1 + i][clients[c_id].sectorY - 1 + h])
+							{
+								if (pln.second == false)
+									continue;
+								if (pln.first == c_id)
+								{
+									clients[c_id].send_move_packet(c_id, 0);
+									continue;
+								}
 
-							pl.send_put_packet(c_id);
+								auto& pl = clients[pln.first];
+
+								//범위 내의 NPC 깨우기
+								if (pl._s_state == ST_NPC_SLEEP)
+								{
+									SESSION_STATE sst = ST_NPC_SLEEP;
+									if (atomic_compare_exchange_weak(&(pl._s_state), &sst, ST_INGAME))
+									{
+										HeartManager::add_timer(pl.npc_id, 1000, EV_MOVE, c_id);
+									}
+								}
+
+								if (pl.ID() >= MAX_USER) continue;
+								lock_guard<mutex> aa{ pl._sl };	//편한 언락
+
+								if (pl._s_state != ST_INGAME)continue;
+
+								//near의 모든 객체에 대해?
+								if (distance_cell(c_id, pl.ID()) <= RANGE)
+								{
+									clients[c_id].vl.lock();
+									//없으면
+									if (!clients[c_id].view_list.contains(pl.ID()))
+									{
+										clients[c_id].view_list.insert(pl.ID());
+										clients[c_id].vl.unlock();
+
+										//put
+										clients[c_id].send_put_packet(pl.ID());
+
+
+										//내가 상대한테 없으면
+										pl.vl.lock();
+										if (!pl.view_list.contains(clients[c_id].ID()))
+										{
+											pl.view_list.insert(clients[c_id].ID());
+											pl.vl.unlock();
+
+											//put
+											pl.send_put_packet(c_id);
+										}
+										else
+										{
+											pl.vl.unlock();
+
+											//move
+											pl.send_move_packet(c_id, 0);
+										}
+									}
+									else // 있으면
+									{
+										clients[c_id].vl.unlock();
+
+										//내가 상대한테 없으면
+										pl.vl.lock();
+										if (!pl.view_list.contains(clients[c_id].ID()))
+										{
+											pl.view_list.insert(clients[c_id].ID());
+											pl.vl.unlock();
+
+											//put
+											pl.send_put_packet(c_id);
+										}
+										else
+										{
+											pl.vl.unlock();
+
+											//move
+											pl.send_move_packet(c_id, 0);
+										}
+									}
+								}
+							}
 						}
-						pl._sl.unlock();
 					}
 
-					//-> c_id
-					for (auto& pl : clients)
-					{
-						if (pl.ID() == c_id) continue;
-						lock_guard<mutex> aa{ pl._sl };	//편한 언락
-						if (pl._s_state != ST_INGAME)continue;
+					////view list
 
-						if (RANGE >= distance_cell(c_id, pl.ID()))
-						{
-							clients[c_id].vl.lock();
-							clients[c_id].view_list.insert(pl.ID());
-							clients[c_id].vl.unlock();
+					//for (auto& pl : clients)
+					//{
+					//	if (pl.ID() == c_id) continue;
 
-							clients[c_id].send_put_packet(pl.ID());
-						}
-					}
+					//	pl._sl.lock();
+					//	if (pl._s_state != ST_INGAME)
+					//	{
+					//		pl._sl.unlock();
+					//		continue;
+					//	}
+
+					//	if (RANGE >= distance_cell(c_id, pl.ID()))
+					//	{
+					//		pl.vl.lock();
+					//		pl.view_list.insert(c_id);
+					//		pl.vl.unlock();
+
+					//		pl.send_put_packet(c_id);
+					//	}
+					//	pl._sl.unlock();
+					//}
+
+					////-> c_id
+					//for (auto& pl : clients)
+					//{
+					//	if (pl.ID() == c_id) continue;
+					//	lock_guard<mutex> aa{ pl._sl };	//편한 언락
+					//	if (pl._s_state != ST_INGAME)continue;
+
+					//	if (RANGE >= distance_cell(c_id, pl.ID()))
+					//	{
+					//		clients[c_id].vl.lock();
+					//		clients[c_id].view_list.insert(pl.ID());
+					//		clients[c_id].vl.unlock();
+
+					//		clients[c_id].send_put_packet(pl.ID());
+					//	}
+					//}
 
 				}
 
