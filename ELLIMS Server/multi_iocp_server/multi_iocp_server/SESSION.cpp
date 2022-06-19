@@ -397,6 +397,7 @@ void SESSION::adaptDeath()
 			{
 				data.HP = data.MaxHP;
 				HeartManager::add_timer(npc_id, 30000, EV_RESURRECTION, npc_id);
+
 			}
 		}
 	}

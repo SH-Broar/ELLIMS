@@ -243,6 +243,9 @@ void process_packet(int c_id, char* packet)
 				clients[c_id].send_chat_packet(-1, mess.c_str());
 				clients[c_id].send_stat_change_packet(c_id);
 				clients[c_id].send_remove_packet(pln);
+				clients[c_id].vl.lock();
+				clients[c_id].view_list.erase(pln);
+				clients[c_id].vl.unlock();
 				for (auto& every : r_view_list)
 				{
 					if (!clients[every].getData().isPlayer)
@@ -250,6 +253,9 @@ void process_packet(int c_id, char* packet)
 
 					clients[every].send_stat_change_packet(c_id);
 					clients[every].send_remove_packet(pln);
+					clients[every].vl.lock();
+					clients[every].view_list.erase(pln);
+					clients[every].vl.unlock();
 
 					if (levelup)
 					{

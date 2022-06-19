@@ -450,6 +450,9 @@ void HeartManager::ai_thread()
 				SESSION_STATE sst = ST_NPC_DEAD;
 				if (atomic_compare_exchange_strong(&(clients[t.object_id]._s_state), &sst, ST_NPC_SLEEP))
 				{
+					lua_getglobal(clients[t.object_id].L, "set_state");
+					lua_pushnumber(clients[t.object_id].L, 1);
+					lua_pcall(clients[t.object_id].L, 1, 0, 0);
 				}
 			}
 			break;
