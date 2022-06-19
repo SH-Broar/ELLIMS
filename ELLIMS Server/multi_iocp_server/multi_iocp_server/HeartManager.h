@@ -25,6 +25,7 @@ public:
     static void initialize_npc();
     static void add_timer(int obj_id, int act_time, TIMER_EVENT_TYPE e_type, int target_id);
     static void move_npc(int npc_id,int target_id);
+    static int Attack(lua_State* L);
     static int A_Star_Pathfinding(lua_State* state);
     static int Roaming(lua_State* L);
     static void ai_thread();

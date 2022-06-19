@@ -48,10 +48,15 @@ function npc_move(x, y, tx, ty)
 	dir = 1
 
 	if movestate == 11 then
-		dir = astar(x,y,tx,ty)
+		dir = astar(my_id,x,y,tx,ty)
 	elseif movestate == 1 or movestate == 2 then
 		dir = roam(x,y)
 	end
+	
+	if dir == -1 then
+		movestate = 11
+	end
+
 
 	if dir == 1 then
 		if x-1 > initX-20 then

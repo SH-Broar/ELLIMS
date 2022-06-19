@@ -108,7 +108,7 @@ void process_packet(int c_id, char* packet)
 		LoginData dbTMP;
 		strcpy(dbTMP.name, p->name);
 		strcpy(dbTMP.pass, p->pass);
-		DataBaseManager::addDBEvent(c_id,DB_EV_LOGIN, dbTMP);
+		DataBaseManager::addDBEvent(c_id, DB_EV_LOGIN, dbTMP);
 
 		clients[c_id]._sl.unlock();
 
@@ -127,10 +127,6 @@ void process_packet(int c_id, char* packet)
 			range.emplace_back(0, 1);
 			range.emplace_back(0, -1);
 			range.emplace_back(-1, 0);
-			break;
-		case 1:
-			break;
-		case 2:
 			break;
 		}
 
@@ -167,24 +163,20 @@ void process_packet(int c_id, char* packet)
 
 			if (hitted > 0)
 			{
-				//cout << "\nCATCHED";
-				for (auto& every : sectors[pl.sectorX][pl.sectorY])
+				string mess;
+				mess = clients[c_id].getData().name;
+				mess += " attack ";
+				mess += pl.getData().name;
+				mess += " by ";
+				mess += to_string(hitted);
+				clients[c_id].send_chat_packet(-1, mess.c_str());
+				clients[c_id].send_stat_change_packet(pln);
+				for (auto& every : r_view_list)
 				{
-					if (every.second == false)
-						continue;
-					if (!clients[every.first].getData().isPlayer)
+					if (!clients[every].getData().isPlayer)
 						continue;
 
-					//cout << "\nSENDED";
-					clients[every.first].send_stat_change_packet(pln);
-
-					string mess;
-					mess = clients[c_id].getData().name;
-					mess += " attack ";
-					mess += pl.getData().name;
-					mess += " by ";
-					mess += to_string(hitted);
-					clients[every.first].send_chat_packet(-1, mess.c_str());
+					clients[every].send_stat_change_packet(pln);
 				}
 			}
 			else if (hitted < 0)
@@ -192,21 +184,20 @@ void process_packet(int c_id, char* packet)
 				clients[c_id]._sl.lock();
 				bool levelup = clients[c_id].appendEXP((pl.getData().level + 3) * pl.getData().level * 2);
 				clients[c_id]._sl.unlock();
-				for (auto& every : sectors[pl.sectorX][pl.sectorY])
+
+				string mess;
+				mess = pl.getData().name;
+				mess += " collapsed!";
+				clients[c_id].send_chat_packet(-1, mess.c_str());
+				clients[c_id].send_stat_change_packet(c_id);
+				clients[c_id].send_remove_packet(pln);
+				for (auto& every : r_view_list)
 				{
-					if (every.second == false)
-						continue;
-					if (!clients[every.first].getData().isPlayer)
+					if (!clients[every].getData().isPlayer)
 						continue;
 
-
-					clients[every.first].send_remove_packet(pln);
-					clients[every.first].send_stat_change_packet(c_id);
-
-					string mess;
-					mess = pl.getData().name;
-					mess += " collapsed!";
-					clients[every.first].send_chat_packet(-1, mess.c_str());
+					clients[every].send_stat_change_packet(c_id);
+					clients[every].send_remove_packet(pln);
 
 					if (levelup)
 					{
@@ -214,7 +205,7 @@ void process_packet(int c_id, char* packet)
 						lmess = clients[c_id].getData().name;
 						lmess += " level up to ";
 						lmess += clients[c_id].getData().level;
-						clients[every.first].send_chat_packet(-1, lmess.c_str());
+						clients[every].send_chat_packet(-1, lmess.c_str());
 					}
 				}
 			}
@@ -691,7 +682,105 @@ void do_worker()
 			switch (ai_over->_timer_type)
 			{
 			case TIMER_EVENT_TYPE::EV_ATTACK:
+			{
+				int npc_id = ai_over->object_id;
+				//처리
+				std::vector<COORD> range;
+				range.reserve(5);
+				range.emplace_back(1, 0);
+				range.emplace_back(0, 1);
+				range.emplace_back(0, -1);
+				range.emplace_back(-1, 0);
+
+				for (int i = 0; i < 3; ++i)
+				{
+					for (int h = 0; h < 3; ++h)
+					{
+						if (clients[npc_id].sectorX - 1 + i < 0 ||
+							clients[npc_id].sectorX - 1 + i >= W_WIDTH / SECTOR_WIDTH ||
+							clients[npc_id].sectorY - 1 + h < 0 ||
+							clients[npc_id].sectorY - 1 + h >= W_HEIGHT / SECTOR_HEIGHT)
+							continue;
+
+						for (auto& pln : sectors[clients[npc_id].sectorX - 1 + i][clients[npc_id].sectorY - 1 + h])
+						{
+							if (pln.second == false)
+								continue;
+							if (pln.first == npc_id)
+								continue;
+
+							auto& pl = clients[pln.first];
+							if (pl.ID() >= MAX_USER) continue;
+
+							int hitted = 0;
+
+							pl._sl.lock();
+							cout << "Attemp ";
+							if (abs(pl.getData().x - clients[npc_id].getData().x) +
+								abs(pl.getData().y - clients[npc_id].getData().y) <= 1)
+							{
+								//피격
+								hitted = clients[npc_id].getData().level + 1 + (rand() % 3);
+
+								pl.setDamage(hitted);
+								pl._sl.unlock();
+							}
+							else
+							{
+								pl._sl.unlock();
+							}
+
+							if (hitted > 0)
+							{
+								cout << "Att" << endl;
+								string mess;
+								mess += clients[npc_id].getData().name;
+								mess += " attack ";
+								mess = pl.getData().name;
+								mess += " by ";
+								mess += to_string(hitted);
+								pl.send_chat_packet(-1, mess.c_str());
+
+								pl.vl.lock();
+								unordered_set<int> r_view_list = pl.view_list;
+								pl.vl.unlock();
+
+								for (auto& every : r_view_list)
+								{
+									if (!clients[every].getData().isPlayer)
+										continue;
+
+									clients[every].send_stat_change_packet(pln.first);
+								}
+							}
+							else if (hitted < 0)
+							{
+								string mess;
+								mess = pl.getData().name;
+								mess += " collapsed!";
+
+								pl.vl.lock();
+								unordered_set<int> r_view_list = pl.view_list;
+								pl.vl.unlock();
+
+								for (auto& every : r_view_list)
+								{
+									if (!clients[every].getData().isPlayer)
+										continue;
+
+									clients[every].send_chat_packet(-1, mess.c_str());
+									clients[every].send_stat_change_packet(pln.first);
+									if (every != pln.first)
+										clients[every].send_remove_packet(pln.first);
+
+								}
+							}
+						}
+					}
+				}
+
 				break;
+			}
 			case TIMER_EVENT_TYPE::EV_MOVE:
 				HeartManager::move_npc(ai_over->object_id, ai_over->target_id);
 				break;
@@ -711,7 +800,7 @@ void do_worker()
 				break;
 			}
 		}
-			break;
+		break;
 		}
 
 	}

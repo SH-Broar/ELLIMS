@@ -165,16 +165,31 @@ float est(s_Map::NODE& n, s_Map::NODE& g)
 
 int HeartManager::A_Star_Pathfinding(lua_State* L)
 {
+	int npc_id = lua_tonumber(L, -5);
 	int x = lua_tonumber(L, -4);
 	int y = lua_tonumber(L, -3);
 	int tx = lua_tonumber(L, -2);
 	int ty = lua_tonumber(L, -1);
-	lua_pop(L, 4);
+	lua_pop(L, 5);
 
 	// astar
 	cout << "\nastar " << x << ", " << y << " " << tx << ", " << ty << endl;
 	vector<s_Map::NODE> OpenFinder;
 	vector<s_Map::NODE> Closed;
+
+	int dis = abs(tx - x) + abs(ty - y);
+	if (dis <= 1)
+	{
+		cout << npc_id << " end" << endl;
+		add_timer(npc_id, 200, EV_ATTACK, npc_id);
+		lua_pushnumber(L, -1);
+		return 1;
+	}
+	if (dis >= 10)
+	{
+		lua_pushnumber(L, -2);
+		return 1;
+	}
 
 	s_Map::NODE s;
 	s.x = x;
@@ -235,7 +250,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 			}
 			break;
 		}
-
+		int ran = rand() % 4;
 		{
 			s_Map::NODE rear = current;
 			rear.x--;
@@ -357,6 +372,8 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 	//
 
 	lua_pushnumber(L, rand() % 4 + 1);
+
+
 	return 1;
 
 }
@@ -396,7 +413,12 @@ void HeartManager::ai_thread()
 		{
 		case TIMER_EVENT_TYPE::EV_ATTACK:
 		{
-
+			OVER_AI over;
+			over.object_id = t.object_id;
+			over.target_id = t.target_id;
+			over._timer_type = EV_ATTACK;
+			over._comp_type = OP_AI;
+			PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
 		}
 		break;
 		case TIMER_EVENT_TYPE::EV_MOVE:
