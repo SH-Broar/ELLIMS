@@ -178,10 +178,10 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 	vector<s_Map::NODE> Closed;
 
 	int dis = abs(tx - x) + abs(ty - y);
-	if (dis <= 1)
+	if (dis <= 2)
 	{
 		cout << npc_id << " end" << endl;
-		add_timer(npc_id, 200, EV_ATTACK, npc_id);
+		add_timer(npc_id, 1, EV_ATTACK, npc_id);
 		lua_pushnumber(L, -1);
 		return 1;
 	}

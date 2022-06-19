@@ -119,11 +119,14 @@ void process_packet(int c_id, char* packet)
 	}
 	case CS_ATTACK:
 	{
-		clients[c_id].tl.lock();
-		if (clients[c_id].last_act_time + chrono::milliseconds(500) > chrono::system_clock::now())
+		if (c_id < MAX_USER)
 		{
-			clients[c_id].tl.unlock();
-			break;
+			clients[c_id].tl.lock();
+			if (clients[c_id].last_act_time + chrono::milliseconds(500) > chrono::system_clock::now())
+			{
+				clients[c_id].tl.unlock();
+				break;
+			}
 		}
 		clients[c_id].last_act_time = chrono::system_clock::now();
 		clients[c_id].tl.unlock();
@@ -264,11 +267,14 @@ void process_packet(int c_id, char* packet)
 	}
 	case CS_MOVE:
 	{
-		clients[c_id].tl.lock();
-		if (clients[c_id].last_act_time + chrono::milliseconds(500) > chrono::system_clock::now() )
+		if (c_id < MAX_USER)
 		{
-			clients[c_id].tl.unlock();
-			break;
+			clients[c_id].tl.lock();
+			if (clients[c_id].last_act_time + chrono::milliseconds(500) > chrono::system_clock::now())
+			{
+				clients[c_id].tl.unlock();
+				break;
+			}
 		}
 		clients[c_id].last_act_time = chrono::system_clock::now();
 		clients[c_id].tl.unlock();
@@ -695,47 +701,6 @@ void do_worker()
 						}
 					}
 
-					////view list
-
-					//for (auto& pl : clients)
-					//{
-					//	if (pl.ID() == c_id) continue;
-
-					//	pl._sl.lock();
-					//	if (pl._s_state != ST_INGAME)
-					//	{
-					//		pl._sl.unlock();
-					//		continue;
-					//	}
-
-					//	if (RANGE >= distance_cell(c_id, pl.ID()))
-					//	{
-					//		pl.vl.lock();
-					//		pl.view_list.insert(c_id);
-					//		pl.vl.unlock();
-
-					//		pl.send_put_packet(c_id);
-					//	}
-					//	pl._sl.unlock();
-					//}
-
-					////-> c_id
-					//for (auto& pl : clients)
-					//{
-					//	if (pl.ID() == c_id) continue;
-					//	lock_guard<mutex> aa{ pl._sl };	//편한 언락
-					//	if (pl._s_state != ST_INGAME)continue;
-
-					//	if (RANGE >= distance_cell(c_id, pl.ID()))
-					//	{
-					//		clients[c_id].vl.lock();
-					//		clients[c_id].view_list.insert(pl.ID());
-					//		clients[c_id].vl.unlock();
-
-					//		clients[c_id].send_put_packet(pl.ID());
-					//	}
-					//}
-
 				}
 
 				HeartManager::add_timer(c_id, 5000, EV_HEAL, c_id);
@@ -754,12 +719,6 @@ void do_worker()
 			{
 				int npc_id = ai_over->object_id;
 				//처리
-				std::vector<COORD> range;
-				range.reserve(5);
-				range.emplace_back(1, 0);
-				range.emplace_back(0, 1);
-				range.emplace_back(0, -1);
-				range.emplace_back(-1, 0);
 
 				for (int i = 0; i < 3; ++i)
 				{
@@ -792,11 +751,7 @@ void do_worker()
 								hitted = clients[npc_id].getData().level + 1 + (rand() % 3);
 
 								pl.setDamage(hitted);
-								pl._sl.unlock();
-							}
-							else
-							{
-								pl._sl.unlock();
+
 							}
 
 							if (hitted > 0)
@@ -813,6 +768,7 @@ void do_worker()
 								pl.vl.lock();
 								unordered_set<int> r_view_list = pl.view_list;
 								pl.vl.unlock();
+
 								pl.send_stat_change_packet(pln.first);
 								for (auto& every : r_view_list)
 								{
@@ -845,6 +801,7 @@ void do_worker()
 										clients[every].send_remove_packet(pln.first);
 								}
 							}
+							pl._sl.unlock();
 						}
 					}
 				}
@@ -857,7 +814,6 @@ void do_worker()
 			case TIMER_EVENT_TYPE::EV_HEAL:
 				clients[ai_over->object_id]._sl.lock();
 				clients[ai_over->object_id].autoHeal();
-				clients[ai_over->object_id]._sl.unlock();
 				for (auto& every : sectors[clients[ai_over->object_id].sectorX][clients[ai_over->object_id].sectorY])
 				{
 					if (every.second == false)
@@ -866,6 +822,7 @@ void do_worker()
 					//cout << "\nSENDED";
 					clients[every.first].send_stat_change_packet(ai_over->object_id);
 				}
+				clients[ai_over->object_id]._sl.unlock();
 				HeartManager::add_timer(ai_over->object_id, 5000, EV_HEAL, ai_over->object_id);
 				break;
 			}

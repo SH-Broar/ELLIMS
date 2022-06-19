@@ -274,6 +274,114 @@ void SESSION::adaptDeath()
 	{
 		data.EXP = data.EXP / 2;
 		data.HP = data.MaxHP;
+
+		vl.lock();
+		unordered_set<int> r_view_list = view_list;
+		vl.unlock();
+
+		for (auto& v : view_list)
+		{
+			send_remove_packet(v);
+		}
+		setXY(W_WIDTH / 2, W_HEIGHT / 2);
+
+		for (int i = 0; i < 3; ++i)
+		{
+			for (int h = 0; h < 3; ++h)
+			{
+				if (sectorX - 1 + i < 0 ||
+					sectorX - 1 + i >= W_WIDTH / SECTOR_WIDTH ||
+					sectorY - 1 + h < 0 ||
+					sectorY - 1 + h >= W_HEIGHT / SECTOR_HEIGHT)
+					continue;
+
+				for (auto& pln : sectors[sectorX - 1 + i][sectorY - 1 + h])
+				{
+					if (pln.second == false)
+						continue;
+					if (pln.first == ID())
+					{
+						send_move_packet(ID(), 0);
+						continue;
+					}
+
+					auto& pl = clients[pln.first];
+
+					//범위 내의 NPC 깨우기
+					if (pl._s_state == ST_NPC_SLEEP)
+					{
+						SESSION_STATE sst = ST_NPC_SLEEP;
+						if (atomic_compare_exchange_weak(&(pl._s_state), &sst, ST_INGAME))
+						{
+							HeartManager::add_timer(pl.npc_id, 1000, EV_MOVE, ID());
+						}
+					}
+
+					if (pl.ID() >= MAX_USER) continue;
+					// lock_guard<mutex> aa{pl._sl};	//편한 언락
+
+					if (pl._s_state != ST_INGAME)continue;
+
+					//near의 모든 객체에 대해?
+					if (distance_cell(ID(), pl.ID()) <= RANGE)
+					{
+						vl.lock();
+						//없으면
+						if (!view_list.contains(pl.ID()))
+						{
+							view_list.insert(pl.ID());
+							vl.unlock();
+
+							//put
+							send_put_packet(pl.ID());
+
+
+							//내가 상대한테 없으면
+							pl.vl.lock();
+							if (!pl.view_list.contains(ID()))
+							{
+								pl.view_list.insert(ID());
+								pl.vl.unlock();
+
+								//put
+								pl.send_put_packet(ID());
+							}
+							else
+							{
+								pl.vl.unlock();
+
+								//move
+								pl.send_move_packet(ID(), 0);
+							}
+						}
+						else // 있으면
+						{
+							vl.unlock();
+
+							//내가 상대한테 없으면
+							pl.vl.lock();
+							if (!pl.view_list.contains(ID()))
+							{
+								pl.view_list.insert(ID());
+								pl.vl.unlock();
+
+								//put
+								pl.send_put_packet(ID());
+							}
+							else
+							{
+								pl.vl.unlock();
+
+								//move
+								pl.send_move_packet(ID(), 0);
+							}
+						}
+					}
+				}
+			}
+		}
+
+
 		//send_stat_change_packet(data.sc_id);
 
 	}
