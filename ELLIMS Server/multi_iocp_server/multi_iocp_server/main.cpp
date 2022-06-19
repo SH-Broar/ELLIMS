@@ -715,7 +715,7 @@ void do_worker()
 							int hitted = 0;
 
 							pl._sl.lock();
-							cout << "Attemp ";
+							//cout << "Attemp ";
 							if (abs(pl.getData().x - clients[npc_id].getData().x) +
 								abs(pl.getData().y - clients[npc_id].getData().y) <= 1)
 							{
@@ -732,11 +732,11 @@ void do_worker()
 
 							if (hitted > 0)
 							{
-								cout << "Att" << endl;
+								//cout << "Att" << endl;
 								string mess;
-								mess += clients[npc_id].getData().name;
+								mess = clients[npc_id].getData().name;
 								mess += " attack ";
-								mess = pl.getData().name;
+								mess += pl.getData().name;
 								mess += " by ";
 								mess += to_string(hitted);
 								pl.send_chat_packet(-1, mess.c_str());
@@ -744,7 +744,7 @@ void do_worker()
 								pl.vl.lock();
 								unordered_set<int> r_view_list = pl.view_list;
 								pl.vl.unlock();
-
+								pl.send_stat_change_packet(pln.first);
 								for (auto& every : r_view_list)
 								{
 									if (!clients[every].getData().isPlayer)
@@ -763,6 +763,8 @@ void do_worker()
 								unordered_set<int> r_view_list = pl.view_list;
 								pl.vl.unlock();
 
+								pl.send_chat_packet(-1, mess.c_str());
+								pl.send_stat_change_packet(pln.first);
 								for (auto& every : r_view_list)
 								{
 									if (!clients[every].getData().isPlayer)
@@ -772,7 +774,6 @@ void do_worker()
 									clients[every].send_stat_change_packet(pln.first);
 									if (every != pln.first)
 										clients[every].send_remove_packet(pln.first);
-
 								}
 							}
 						}
