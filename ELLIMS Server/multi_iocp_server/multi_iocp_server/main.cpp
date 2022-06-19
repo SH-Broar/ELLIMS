@@ -88,6 +88,9 @@ void process_packet(int c_id, char* packet)
 	{
 	case CS_LOGIN:
 	{
+		clients[c_id].tl.lock();
+		clients[c_id].last_act_time = chrono::system_clock::now();
+		clients[c_id].tl.unlock();
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 
 		clients[c_id]._sl.lock();
@@ -109,13 +112,21 @@ void process_packet(int c_id, char* packet)
 		strcpy(dbTMP.name, p->name);
 		strcpy(dbTMP.pass, p->pass);
 		DataBaseManager::addDBEvent(c_id, DB_EV_LOGIN, dbTMP);
-
+		clients[c_id].dir = 0;
 		clients[c_id]._sl.unlock();
 
 		break;
 	}
 	case CS_ATTACK:
 	{
+		clients[c_id].tl.lock();
+		if (clients[c_id].last_act_time + chrono::milliseconds(500) > chrono::system_clock::now())
+		{
+			clients[c_id].tl.unlock();
+			break;
+		}
+		clients[c_id].last_act_time = chrono::system_clock::now();
+		clients[c_id].tl.unlock();
 		CS_ATTACK_PACKET* p = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
 		//
 		std::vector<COORD> range;
@@ -127,6 +138,41 @@ void process_packet(int c_id, char* packet)
 			range.emplace_back(0, 1);
 			range.emplace_back(0, -1);
 			range.emplace_back(-1, 0);
+			break;
+		case 1:
+			switch (clients[c_id].dir)
+			{
+			case 0:
+				range.emplace_back(0, -1);
+				range.emplace_back(0, -2);
+				range.emplace_back(0, -3);
+				break;
+			case 1:
+				range.emplace_back(0, 1);
+				range.emplace_back(0, 2);
+				range.emplace_back(0, 3);
+				break;
+			case 2:
+				range.emplace_back(-1,0);
+				range.emplace_back(-2,0);
+				range.emplace_back(-3,0);
+				break;
+			case 3:
+				range.emplace_back(1, 0);
+				range.emplace_back(2, 0);
+				range.emplace_back(3, 0);
+				break;
+			}
+			break;
+		case 2:
+			range.emplace_back(1, 0);
+			range.emplace_back(0, 1);
+			range.emplace_back(0, -1);
+			range.emplace_back(-1, 0);
+			range.emplace_back(2, 0);
+			range.emplace_back(0, 2);
+			range.emplace_back(0, -2);
+			range.emplace_back(-2, 0);
 			break;
 		}
 
@@ -189,6 +235,9 @@ void process_packet(int c_id, char* packet)
 				mess = pl.getData().name;
 				mess += " collapsed!";
 				clients[c_id].send_chat_packet(-1, mess.c_str());
+				mess = to_string((pl.getData().level + 3) * pl.getData().level * 2);
+				mess += " EXP Gained!";
+				clients[c_id].send_chat_packet(-1, mess.c_str());
 				clients[c_id].send_stat_change_packet(c_id);
 				clients[c_id].send_remove_packet(pln);
 				for (auto& every : r_view_list)
@@ -215,6 +264,14 @@ void process_packet(int c_id, char* packet)
 	}
 	case CS_MOVE:
 	{
+		clients[c_id].tl.lock();
+		if (clients[c_id].last_act_time + chrono::milliseconds(500) > chrono::system_clock::now() )
+		{
+			clients[c_id].tl.unlock();
+			break;
+		}
+		clients[c_id].last_act_time = chrono::system_clock::now();
+		clients[c_id].tl.unlock();
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
 		short x = clients[c_id].X();
@@ -222,21 +279,33 @@ void process_packet(int c_id, char* packet)
 
 		switch (p->direction)
 		{
-		case -1:
-			x = W_WIDTH / 2;
-			y = W_HEIGHT / 2;
-			break;
 		case 0:
-			if (y > 0 && s_Map::canMove(x, y - 1))y--;
+			if (y > 0 && s_Map::canMove(x, y - 1))
+			{
+				y--;
+				clients[c_id].dir = 0;
+			}
 			break;
 		case 1:
-			if (y < W_HEIGHT - 1 && s_Map::canMove(x, y + 1))y++;
+			if (y < W_HEIGHT - 1 && s_Map::canMove(x, y + 1))
+			{
+				y++;
+				clients[c_id].dir = 1;
+			}
 			break;
 		case 2:
-			if (x > 0 && s_Map::canMove(x - 1, y))x--;
+			if (x > 0 && s_Map::canMove(x - 1, y))
+			{
+				x--;
+				clients[c_id].dir = 2;
+			}
 			break;
 		case 3:
-			if (x < W_WIDTH - 1 && s_Map::canMove(x + 1, y))x++;
+			if (x < W_WIDTH - 1 && s_Map::canMove(x + 1, y))
+			{
+				x++;
+				clients[c_id].dir = 3;
+			}
 			break;
 		}
 

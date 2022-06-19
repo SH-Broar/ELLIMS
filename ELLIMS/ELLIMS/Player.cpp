@@ -184,8 +184,10 @@ void Player::ProcessCommand(char c)
 		//¿Ã∆Â∆Æ √≥∏Æ
 		break;
 	case 'x':
+		Network::SendAttack(1);
 		break;
 	case 'c':
+		Network::SendAttack(2);
 		break;
 	}
 }

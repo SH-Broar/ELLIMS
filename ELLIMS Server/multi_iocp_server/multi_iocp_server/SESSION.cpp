@@ -274,17 +274,8 @@ void SESSION::adaptDeath()
 	{
 		data.EXP = data.EXP / 2;
 		data.HP = data.MaxHP;
-		send_stat_change_packet(data.sc_id);
+		//send_stat_change_packet(data.sc_id);
 
-		CS_MOVE_PACKET p;
-		p.direction = -1;
-		p.client_time = 0;
-		p.size = sizeof(CS_MOVE_PACKET);
-		p.type = CS_MOVE;
-
-		OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<unsigned char*>(reinterpret_cast<void *>(&p)) };
-		sdata->_comp_type = OP_RECV;
-		PostQueuedCompletionStatus(g_h_iocp, 0, data.sc_id, reinterpret_cast<LPOVERLAPPED>(&sdata));
 	}
 	else
 	{

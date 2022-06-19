@@ -55,6 +55,10 @@ public:
 	lua_State* L;
 	std::mutex	ll;
 
+	chrono::system_clock::time_point last_act_time;
+	std::mutex tl;
+
+	int dir;
 public:
 
 	SESSION();
