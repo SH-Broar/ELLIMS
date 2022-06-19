@@ -181,7 +181,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 	if (dis <= 2)
 	{
 		cout << npc_id << " end" << endl;
-		add_timer(npc_id, 1, EV_ATTACK, npc_id);
+		add_timer(npc_id, 500, EV_ATTACK, npc_id);
 		lua_pushnumber(L, -1);
 		return 1;
 	}

@@ -277,12 +277,14 @@ void SESSION::adaptDeath()
 
 		vl.lock();
 		unordered_set<int> r_view_list = view_list;
+		view_list.clear();
 		vl.unlock();
 
-		for (auto& v : view_list)
+		for (auto& v : r_view_list)
 		{
 			send_remove_packet(v);
 		}
+		
 		setXY(W_WIDTH / 2, W_HEIGHT / 2);
 
 		for (int i = 0; i < 3; ++i)

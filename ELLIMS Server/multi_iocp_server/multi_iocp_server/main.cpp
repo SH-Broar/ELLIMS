@@ -745,7 +745,7 @@ void do_worker()
 							pl._sl.lock();
 							//cout << "Attemp ";
 							if (abs(pl.getData().x - clients[npc_id].getData().x) +
-								abs(pl.getData().y - clients[npc_id].getData().y) <= 1)
+								abs(pl.getData().y - clients[npc_id].getData().y) <= 2)
 							{
 								//ÇÇ°Ý
 								hitted = clients[npc_id].getData().level + 1 + (rand() % 3);
@@ -783,6 +783,16 @@ void do_worker()
 								string mess;
 								mess = pl.getData().name;
 								mess += " collapsed!";
+
+								clients[npc_id].ll.lock();
+								lua_getglobal(clients[npc_id].L, "set_state");
+								lua_pushnumber(clients[npc_id].L, 1);
+								int error = lua_pcall(clients[npc_id].L, 1, 0, 0);
+								if (error) {
+									cout << "Error:" << lua_tostring(clients[npc_id].L, -1);
+									lua_pop(clients[npc_id].L, 1);
+								}
+								clients[npc_id].ll.unlock();
 
 								pl.vl.lock();
 								unordered_set<int> r_view_list = pl.view_list;
