@@ -25,20 +25,21 @@ void Scene::changeScene(SceneName sceneName)
 	{
 	case SceneName::TITLE:
 	{
+		bool newUser = false;
 		areas.reserve(6);
 
 		updatable = false;
 		areas.emplace_back(SCREEN_WIDTH / 2 - 6, SCREEN_WIDTH / 2 + 13, 10, 10, ClickableType::NONE);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 19, 19, ClickableType::HOVER);
-		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 22, 22, ClickableType::HOVER);
+		areas.emplace_back(SCREEN_WIDTH / 2 - 3, SCREEN_WIDTH / 2 + 10, 22, 22, ClickableType::HOVER);
 
 		areas.emplace_back(SCREEN_WIDTH / 2 - 5, SCREEN_WIDTH / 2 + 5, 19, 19, ClickableType::BUTTON);
 		areas.emplace_back(SCREEN_WIDTH / 2 - 5, SCREEN_WIDTH / 2 + 5, 23, 23, ClickableType::BUTTON);
-		areas.emplace_back(SCREEN_WIDTH / 2 - 2, SCREEN_WIDTH / 2 + 10, 28, 28, ClickableType::HOVER);
+		areas.emplace_back(SCREEN_WIDTH / 2 - 3, SCREEN_WIDTH / 2 + 10, 28, 28, ClickableType::HOVER);
 
 		areas[0] = " E L L I M S ";
 		areas[1] = "Start";
-		areas[2] = "Close";
+		areas[2] = "Sign In";
 
 		areas[3].setType(FramePrintType::FULL);
 		areas[3] = "    ID     ";
@@ -47,7 +48,7 @@ void Scene::changeScene(SceneName sceneName)
 		areas[4] = " Password    ";
 		areas[4].setActive(false);
 
-		areas[5] = "LogIn";
+		areas[5] = "Game In";
 		areas[5].setActive(false);
 
 		areas[1] = [&](int mx, int my) -> int {
@@ -59,8 +60,14 @@ void Scene::changeScene(SceneName sceneName)
 			return 0;
 		};
 
-		areas[2] = [](int mx, int my) -> int {
-			Game::gameEnded();
+		areas[2] = [&](int mx, int my) -> int {
+			newUser = true;
+			areas[1].setActive(false);
+			areas[2].setActive(false);
+			areas[3].setActive(true);
+			areas[4].setActive(true);
+			areas[5] = "Sign In";
+			areas[5].setActive(true);
 			return 0;
 		};
 
@@ -92,14 +99,14 @@ void Scene::changeScene(SceneName sceneName)
 			if (!Game::networkConnected)
 			{
 				Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
-				Network::NetworkCodex(areas[3].getText(), areas[4].getText());
+				Network::NetworkCodex(areas[3].getText(), areas[4].getText(), newUser);
 				//while (!Game::networkConnected) { SleepEx(30, TRUE); }
 				Game::DBConnected = true;
 			}
 			else
 			{
 				Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
-				Network::TryLogin(areas[3].getText(), areas[4].getText());
+				Network::TryLogin(areas[3].getText(), areas[4].getText(), newUser);
 				Game::DBConnected = true;
 			}
 

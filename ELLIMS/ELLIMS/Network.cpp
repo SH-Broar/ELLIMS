@@ -41,7 +41,7 @@ Network::~Network()
 	WSACleanup();
 }
 
-void Network::NetworkCodex(char* id, char* pass)
+void Network::NetworkCodex(char* id, char* pass, bool newUser)
 {
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -73,10 +73,10 @@ void Network::NetworkCodex(char* id, char* pass)
 
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_c_socket), g_h_iocp, 1, 0);
 
-	TryLogin(id,  pass);
+	TryLogin(id,  pass, newUser);
 }
 
-void Network::TryLogin(char* id, char* pass)
+void Network::TryLogin(char* id, char* pass, bool newUser)
 {
 	recv_over._comp_type = OP_RECV;
 	recv_over._wsabuf.buf = reinterpret_cast<CHAR*>(recv_over._overlapped_buf);
@@ -87,6 +87,7 @@ void Network::TryLogin(char* id, char* pass)
 
 	int temp = 1;
 
+	l_packet.isNewUser = newUser;
 	//¾ÆÀÌµð
 	strcpy_s(l_packet.name, id);
 	strcpy_s(l_packet.pass, pass);

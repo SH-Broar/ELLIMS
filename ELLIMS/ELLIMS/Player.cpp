@@ -61,6 +61,9 @@ void Player::m()
 	case 3:
 		characterIcon = 'z';
 		break;
+	default:
+		Game::printDebug("ERROR");
+		break;
 	}
 
 	isActive = true;

@@ -25,7 +25,7 @@ void DataBaseManager::DBThread()
 	while (true)
 	{
 		DB_EVENT ev;
-		
+
 		while (!dbWorkQueue.try_pop(ev))
 		{
 			SleepEx(1, TRUE);
@@ -60,7 +60,20 @@ void DataBaseManager::DBThread()
 			over.datas = d;
 			PostQueuedCompletionStatus(g_h_iocp, 0, d.sc_id, reinterpret_cast<LPOVERLAPPED>(&over));
 		}
-			break;
+		break;
+		case DB_EVENT_TYPE::DB_EV_NEWUSER:
+		{
+			LoginData d;
+			d = newLoginData(ev.session.name, ev.session.pass);
+			d.sc_id = ev.id;
+
+			OVER_DB over;
+			over._db_type = DB_EV_LOGIN;
+			over._comp_type = OP_DB;
+			over.datas = d;
+			PostQueuedCompletionStatus(g_h_iocp, 0, d.sc_id, reinterpret_cast<LPOVERLAPPED>(&over));
+		}
+		break;
 		case DB_EVENT_TYPE::DB_EV_LOGOUT:
 			if (strcmp(ev.session.name, "_DUMMY") != 0)
 			{
@@ -69,9 +82,6 @@ void DataBaseManager::DBThread()
 
 
 			break;
-		case DB_EVENT_TYPE::DB_EV_DUMMY:
-			break;
-
 		}
 	}
 }
@@ -166,6 +176,7 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 									result.MaxMP = MaxMP;
 									result.EXP = EXP;
 									result.isValidLogin = true;
+									result.race = 0;
 									cout << "DB Login Success : " << result.name << endl;
 								}
 								else
@@ -175,6 +186,101 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 								}
 							}
 						}
+					}
+					else {
+						ShowError(hstmt, SQL_HANDLE_STMT, retcode);
+					}
+					// Process data  
+					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+						SQLCancel(hstmt);
+						SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+					}
+
+					SQLDisconnect(hdbc);
+				}
+
+				SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+			}
+		}
+		SQLFreeHandle(SQL_HANDLE_ENV, henv);
+	}
+	return result;
+}
+
+LoginData DataBaseManager::newLoginData(char* name, char* password)
+{
+	LoginData result{};
+	result.level = -1;
+
+	setlocale(LC_ALL, "korean");
+	//std::wcout.imbue(std::locale("korean"));
+
+	SQLHENV henv;
+	SQLHDBC hdbc;
+	SQLHSTMT hstmt = 0;
+	SQLRETURN retcode;
+
+	constexpr int length = 10;
+
+	// Allocate environment handle  
+	retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
+
+	// Set the ODBC version environment attribute  
+	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+		retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0);
+
+		// Allocate connection handle  
+		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+			retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
+
+			// Set login timeout to 5 seconds  
+			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+				SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
+
+				// Connect to data source  
+				retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2017180021_gameserver", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
+
+				// Allocate statement handle  
+				if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+					retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+
+					SQLWCHAR proc[100];
+					wsprintf(proc, L"EXEC new_user_data %S, %S", name, password);
+					printf("%S\n", proc);
+
+					retcode = SQLExecDirect(hstmt, proc, SQL_NTS);
+
+					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+					{
+
+						// Fetch and print each row of data. On an error, display a message and exit.  
+
+						if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+						{
+							ShowError(hstmt, SQL_HANDLE_STMT, retcode);
+						}
+						if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+						{
+							sprintf_s(result.id, "%s", name);
+							sprintf_s(result.name, "%s", name);
+							result.level = 1;
+							result.isPlayer = true;
+							result.x = 200;
+							result.y = 200;
+							result.HP = 50;
+							result.MaxHP = 50;
+							result.MP = 10;
+							result.MaxMP = 10;
+							result.EXP = 0;
+							result.isValidLogin = true;
+							result.race = 0;
+							cout << "DB New User Success : " << result.name << endl;
+						}
+						else
+						{
+							ShowError(hstmt, SQL_HANDLE_STMT, retcode);
+						}
+
 					}
 					else {
 						ShowError(hstmt, SQL_HANDLE_STMT, retcode);
@@ -245,7 +351,7 @@ bool DataBaseManager::setLoginData(LoginData& data)
 							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
 							{
 								ret = true;
-								printf("%s : Save Success\n",data.id);
+								printf("%s : Save Success\n", data.id);
 							}
 						}
 					}

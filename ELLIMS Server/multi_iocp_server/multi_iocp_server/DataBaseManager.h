@@ -15,6 +15,7 @@ public:
 	static void addDBEvent(int id, DB_EVENT_TYPE type, LoginData& sess);
 
 	static LoginData getLoginData(char* name, char* password);
+	static LoginData newLoginData(char* name, char* password);
 	static bool setLoginData(LoginData& data);
 };
 

@@ -40,8 +40,8 @@ public:
 	Network();
 	~Network();
 
-	static void NetworkCodex(char* id, char* pass);
-	static void TryLogin(char* id, char* pass);
+	static void NetworkCodex(char* id, char* pass, bool newUser);
+	static void TryLogin(char* id, char* pass, bool newUser);
 	static void PacketProcess();
 
 private:

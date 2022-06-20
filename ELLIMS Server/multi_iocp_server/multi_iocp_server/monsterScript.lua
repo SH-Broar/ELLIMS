@@ -3,7 +3,7 @@ movestate = 0  --state 0 : fix, 1 : roaming peace, 2 : roaming aggro, 11 : aggro
 initX = 0
 initY = 0
 name = ""
-type = 0 --0 boss 1 2 3 4 monster
+type = 0 --1stand 2roaming 3aggro
 level = 1 --attack = level*3
 
 function set_object_id (id, move, x, y, t, l) --나중에 파라미터로 안 받고 그냥 여기서 처리
@@ -37,7 +37,11 @@ function event_self_revive(player_id)
 end
 
 function set_state(move)
-	movestate = move
+	if move == 1 then
+		movestate = type-1
+	else
+		movestate = move
+	end
 end
 
 function get_state()
@@ -45,7 +49,11 @@ function get_state()
 end
 
 function npc_move(x, y, tx, ty)
-	dir = 1
+
+	if movestate == 0 then
+		dir = 0
+		return x, y
+	end
 
 	if movestate == 11 then
 		dir = astar(my_id,x,y,tx,ty)

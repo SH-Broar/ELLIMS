@@ -29,6 +29,7 @@ constexpr char SC_STAT_CHANGE = 17;
 struct CS_LOGIN_PACKET {
 	unsigned char size;
 	char	type;
+	bool  isNewUser;
 	char	name[NAME_SIZE];
 	char  pass[NAME_SIZE];
 };

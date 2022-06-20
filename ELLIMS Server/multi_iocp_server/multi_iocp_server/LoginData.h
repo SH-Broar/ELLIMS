@@ -14,4 +14,5 @@ public:
 	int HP, MaxHP;
 	int MP, MaxMP;
 	int EXP;
+	int race;
 };

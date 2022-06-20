@@ -158,14 +158,7 @@ void SESSION::send_put_packet(int c_id)
 	put_packet.size = sizeof(put_packet);
 	put_packet.type = SC_ADD_OBJECT;
 	put_packet.id = c_id;
-	if (clients[c_id].getData().isPlayer)
-	{
-		put_packet.race = 0;
-	}
-	else
-	{
-		put_packet.race = clients[c_id].getData().level + 1;
-	}
+	put_packet.race = clients[c_id].getData().race;
 	//strcpy(put_packet.name, data.name);
 	put_packet.x = clients[c_id].X();
 	put_packet.y = clients[c_id].Y();

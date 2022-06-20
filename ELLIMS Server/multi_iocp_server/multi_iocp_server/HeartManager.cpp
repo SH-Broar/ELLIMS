@@ -14,16 +14,17 @@ void HeartManager::initialize_npc()
 		ld.x = rand() % W_WIDTH;
 		ld.y = rand() % W_HEIGHT;
 		ld.isPlayer = false;
-		ld.level = rand() % 3;
-		ld.MaxHP = rand() % 200 + 50;
+		ld.level = rand() % 10;
+		ld.MaxHP = (rand() % 100) + (10 * ld.level);
 		ld.HP = ld.MaxHP;
-		ld.MaxMP = rand() % 100 + 10;
+		ld.MaxMP = (rand() % 500) + 10;
 		ld.MP = ld.MaxMP;
 		ld.EXP = ld.MaxHP / 10;
 		sprintf_s(ld.name, "M-%d", i);
 		int npc_id = i + MAX_USER;
 		clients[npc_id].npc_id = npc_id;
 		ld.sc_id = npc_id;
+		ld.race = (rand() % 3) + 1;
 
 		clients[npc_id].setData(ld);
 
@@ -43,11 +44,11 @@ void HeartManager::initialize_npc()
 		//나중에 lua에게 일임
 		lua_getglobal(clients[npc_id].L, "set_object_id");
 		lua_pushnumber(clients[npc_id].L, npc_id);
-		lua_pushnumber(clients[npc_id].L, 1);
+		lua_pushnumber(clients[npc_id].L, ld.race - 1);
 		lua_pushnumber(clients[npc_id].L, ld.x);
 		lua_pushnumber(clients[npc_id].L, ld.y);
-		lua_pushnumber(clients[npc_id].L, rand()%5);
-		lua_pushnumber(clients[npc_id].L, rand()%20);
+		lua_pushnumber(clients[npc_id].L, ld.race);
+		lua_pushnumber(clients[npc_id].L, ld.level);
 		//lua_pushstring(clients[npc_id].L, "monster");
 		lua_pcall(clients[npc_id].L, 6, 0, 0);
 
@@ -83,7 +84,6 @@ void HeartManager::move_npc(int npc_id, int target_id)
 		s_Map::s_movemap[clients[npc_id].getData().x][clients[npc_id].getData().y] = false;
 		return;
 	}
-
 
 	//lua에 길찾기 넘기기
 	clients[npc_id].ll.lock();
@@ -148,8 +148,21 @@ void HeartManager::move_npc(int npc_id, int target_id)
 				clients[p_id].vl.unlock();
 		}
 	}
+
 	if (is_player_exist)
 	{
+		if (clients[npc_id].getData().race == 3 && distance_cell(npc_id, targ) <= 5)
+		{
+			clients[npc_id].ll.lock();
+			lua_getglobal(clients[npc_id].L, "set_state");
+			lua_pushnumber(clients[npc_id].L, 11);
+			int error = lua_pcall(clients[npc_id].L, 1, 0, 0);
+			if (error) {
+				cout << "Error:" << lua_tostring(clients[npc_id].L, -1);
+				lua_pop(clients[npc_id].L, 1);
+			}
+			clients[npc_id].ll.unlock();
+		}
 		add_timer(npc_id, 1000, EV_MOVE, targ);
 	}
 	else
@@ -441,7 +454,7 @@ void HeartManager::ai_thread()
 			over._comp_type = OP_AI;
 			PostQueuedCompletionStatus(g_h_iocp, 0, t.target_id, reinterpret_cast<LPOVERLAPPED>(&over));
 		}
-			break;
+		break;
 
 		case TIMER_EVENT_TYPE::EV_RESURRECTION:
 		{
@@ -450,9 +463,11 @@ void HeartManager::ai_thread()
 				SESSION_STATE sst = ST_NPC_DEAD;
 				if (atomic_compare_exchange_strong(&(clients[t.object_id]._s_state), &sst, ST_NPC_SLEEP))
 				{
+					clients[t.object_id].ll.lock();
 					lua_getglobal(clients[t.object_id].L, "set_state");
 					lua_pushnumber(clients[t.object_id].L, 1);
 					lua_pcall(clients[t.object_id].L, 1, 0, 0);
+					clients[t.object_id].ll.unlock();
 				}
 			}
 			break;

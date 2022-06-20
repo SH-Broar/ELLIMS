@@ -111,7 +111,15 @@ void process_packet(int c_id, char* packet)
 		LoginData dbTMP;
 		strcpy(dbTMP.name, p->name);
 		strcpy(dbTMP.pass, p->pass);
-		DataBaseManager::addDBEvent(c_id, DB_EV_LOGIN, dbTMP);
+		if (p->isNewUser)
+		{
+			DataBaseManager::addDBEvent(c_id, DB_EV_NEWUSER, dbTMP);
+		}
+		else
+		{
+			DataBaseManager::addDBEvent(c_id, DB_EV_LOGIN, dbTMP);
+		}
+
 		clients[c_id].dir = 0;
 		clients[c_id]._sl.unlock();
 
@@ -593,15 +601,28 @@ void do_worker()
 				int c_id = key;
 				Data.sc_id = c_id;
 
-				clients[c_id]._sl.lock();
 
+				for (int i = 0; i < MAX_USER; ++i)
+				{
+					clients[i]._sl.lock();
+					if (clients[i]._s_state != ST_FREE)
+					{
+						if (strcmp(clients[i].getData().id, Data.id) == 0)
+						{
+							Data.isValidLogin = false;
+						}
+					}
+					clients[i]._sl.unlock();
+				}
+
+				clients[c_id]._sl.lock();
 				clients[c_id].setData(Data);
 				clients[c_id].send_login_info_packet();
 				if (!Data.isValidLogin)
 				{
 					cout << "This is Not ValidLogin";
-					// 아이디 생성
 					clients[c_id]._sl.unlock();
+					disconnect(c_id);
 					break;
 				}
 				else

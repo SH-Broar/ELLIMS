@@ -4,6 +4,7 @@
 
 struct DB_EVENT {
 	int id;
+	bool isNewUser;
 	DB_EVENT_TYPE EVENT;
 	LoginData session;
 };
