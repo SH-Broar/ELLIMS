@@ -2,6 +2,7 @@
 #include "Game.h"
 
 Game game{};
+constexpr char* SERVER_ADDR = (char*)"127.0.0.1";
 
 int main()
 {

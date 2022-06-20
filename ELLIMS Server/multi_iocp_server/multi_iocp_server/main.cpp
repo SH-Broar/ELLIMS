@@ -556,27 +556,28 @@ void do_worker()
 			{
 				disconnect(key);
 			}
-			int remain_data = num_bytes + clients[key]._prev_remain;
+			clients[key]._prev_remain += num_bytes;
+			
 			char* p = ex_over->_send_buf;
-
-			while (remain_data > 0)
+			vector<char*> packets;
+			packets.reserve(3);
+			do
 			{
 				int packet_size = p[0];
-				if (packet_size <= remain_data)
+				if (packet_size <= clients[key]._prev_remain)
 				{
-					process_packet(static_cast<int>(key), p);
+					packets.push_back(p);
 					p = p + packet_size;
-					remain_data = remain_data - packet_size;
+					clients[key]._prev_remain -= packet_size;
 				}
-				else
-				{
-					break;
-				}
-			}
-			clients[key]._prev_remain = remain_data;
-			if (remain_data > 0)
+			} while (clients[key]._prev_remain > 0);
+			for (auto& pp : packets)
 			{
-				memcpy(ex_over->_send_buf, p, remain_data);
+				process_packet(key, pp);
+			}
+			if (clients[key]._prev_remain > 0)
+			{
+				memcpy(ex_over->_send_buf, p, clients[key]._prev_remain);
 			}
 
 			clients[key].do_recv();

@@ -1,5 +1,4 @@
 constexpr int PORT_NUM = 4000;
-constexpr char* SERVER_ADDR = (char*)"127.0.0.1";
 
 constexpr int BUF_SIZE = 200;
 constexpr int MESS_SIZE = 128;
