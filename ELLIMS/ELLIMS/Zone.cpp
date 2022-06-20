@@ -3,7 +3,7 @@
 #include "Game.h"
 
 
-Zone::Zone() : l(1), r(SCREEN_WIDTH-2), t(SCREEN_HEIGHT-2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), mess(""), isClickable(ClickableType::NONE), ClickCallbackFunction(nullptr), isActive(true), temperanceActive(true)
+Zone::Zone() : l(1), r(SCREEN_WIDTH - 2), t(SCREEN_HEIGHT - 2), b(1), wrappingMode(ZoneWrapMode::WRAPPING), printType(FramePrintType::NONE), hovered(false), borderCharacter('*'), text(""), mess(""), isClickable(ClickableType::NONE), ClickCallbackFunction(nullptr), isActive(true), temperanceActive(true)
 {
 	ZoneChanged = true;
 };
@@ -94,8 +94,29 @@ void Zone::addTyping(char c)
 	ZoneChanged = true;
 }
 
-char* Zone::getText()
+char* Zone::getText(bool spec)
 {
+	if (spec)
+	{
+		if (strlen(text) < MESS_SIZE)
+		{
+			strcpy(mess, text);
+		}
+		for (int i = 0; i < strlen(mess); i++)
+		{
+			if ((mess[i] >= 'a' && mess[i] <= 'z') || (mess[i] >= 'A' && mess[i] <= 'Z') || (mess[i] >= '0' && mess[i] <= '9'))
+			{
+			}
+			else
+			{
+				strcpy(mess, "ERRORNAME");
+				return mess;
+			}
+		}
+	}
+
+
+
 	if (strlen(text) < MESS_SIZE)
 	{
 		strcpy(mess, text);
@@ -104,6 +125,8 @@ char* Zone::getText()
 	}
 	strcpy(mess, "text TOO Long");
 	return mess;
+
+
 }
 
 bool Zone::print()
@@ -159,7 +182,7 @@ bool Zone::print()
 		else
 			Game::DoubleFrameBuffer[trackerX - 2][trackerY] = ' ';
 	}
-	
+
 	int tracs = 0;
 	while (strlen(text) > tracs)
 	{
@@ -226,7 +249,7 @@ void Zone::clearZone(ClearType c)
 		zoneChanged();
 		return;
 	}
-	
+
 	int trackerX = l;
 	int trackerY = b;
 
@@ -312,7 +335,7 @@ __int64 Zone::getLegion()
 	{
 		Game::printDebug("getLegion OVERFLOW", "ZONE");
 	}
-		
+
 	__int64 t;
 	t = l;
 	t *= 1000;
@@ -328,7 +351,7 @@ __int64 Zone::getLegion()
 
 int Zone::getWidth()
 {
-	return r - l+1;
+	return r - l + 1;
 }
 
 void Zone::zoneChanged()

@@ -2,12 +2,18 @@
 #include "Game.h"
 
 Game game{};
-constexpr char* SERVER_ADDR = (char*)"127.0.0.1";
+//constexpr char* SERVER_ADDR = (char*)"127.0.0.1";
+
+char Game::addr[20];
 
 int main()
 {
 	system("mode con cols=120 lines=35");
 	SetConsoleTitle(L"E L L I M S");
+
+	std::cout << "IP : ";
+	std::cin >> Game::addr;
+
 	std::thread mouseThread{ game.MouseClick };
 	std::thread printThread{ game.InitUISetting };
 	std::thread networkThread{ game.networkT };

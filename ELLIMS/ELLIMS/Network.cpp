@@ -55,7 +55,7 @@ void Network::NetworkCodex(char* id, char* pass, bool newUser)
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(PORT_NUM);
 	//server_addr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
-	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
+	inet_pton(AF_INET, Game::addr, &server_addr.sin_addr);
 
 	if (WSAConnect(g_c_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr), NULL, NULL, NULL, NULL) != 0)
 	{
@@ -149,7 +149,7 @@ void Network::PacketProcess()
 	}
 	if (0 == io_size) {
 		Game::printDebug("CONNECTION LOST", "GQCS");
-		Game::gameEnded();
+		//Game::gameEnded();
 		return;
 	}
 
@@ -160,7 +160,7 @@ void Network::PacketProcess()
 		break;
 	case OP_RECV:
 	{
-		//패킷 재조립 (수정 필요)
+		//패킷 재조립
 		char* buf = recv_over._overlapped_buf;
 		unsigned psize = curr_packet_size;
 		unsigned pr_size = prev_packet_data;
@@ -185,6 +185,7 @@ void Network::PacketProcess()
 				io_size = 0;
 			}
 		}
+
 		curr_packet_size = psize;
 		prev_packet_data = pr_size;
 		DWORD recv_flag = 0;
@@ -194,7 +195,7 @@ void Network::PacketProcess()
 			if (err_no != WSA_IO_PENDING)
 			{
 				error_display("RECV ERROR", err_no);
-				Game::gameEnded();
+				//Game::gameEnded();
 			}
 		}
 	}

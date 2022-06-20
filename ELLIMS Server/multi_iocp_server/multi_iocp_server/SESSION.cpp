@@ -54,14 +54,14 @@ void SESSION::send_chat_packet(int c_id, const char* mess)
 		p.chat_type = 3;
 		strcpy_s(p.name, "_SYSTEM");
 		strcpy_s(p.mess, mess);
-		printf(" : %s", p.mess);
+		//printf(" : %s", p.mess);
 	}
 	else
 	{
 		p.chat_type = 0;
 		strcpy_s(p.name, clients[c_id].NAME());
 		strcpy_s(p.mess, mess);
-		printf("chat : %s\n", p.mess);
+		//printf("chat : %s\n", p.mess);
 	}
 
 	do_send(&p);
@@ -259,6 +259,9 @@ void SESSION::setDamage(int& damage)
 		data.HP = 0;
 		adaptDeath();
 	}
+
+	if (data.HP > data.MaxHP)
+		data.HP = data.MaxHP;
 }
 
 void SESSION::adaptDeath()
@@ -312,11 +315,19 @@ void SESSION::adaptDeath()
 						}
 					}
 
-					if (pl.ID() >= MAX_USER) continue;
-					// lock_guard<mutex> aa{pl._sl};	//편한 언락
+					pl._sl.lock();
+					if (pl.ID() >= MAX_USER)
+					{
+						pl._sl.unlock();
+						continue;
+					}
 
-					if (pl._s_state != ST_INGAME)continue;
-
+					if (pl._s_state != ST_INGAME)
+					{
+						pl._sl.unlock();
+						continue;
+					}
+					
 					//near의 모든 객체에 대해?
 					if (distance_cell(ID(), pl.ID()) <= RANGE)
 					{
@@ -372,6 +383,9 @@ void SESSION::adaptDeath()
 							}
 						}
 					}
+					
+					pl._sl.unlock();
+
 				}
 			}
 		}
@@ -389,7 +403,7 @@ void SESSION::adaptDeath()
 			if (atomic_compare_exchange_weak(&_s_state, &sst, ST_NPC_DEAD))
 			{
 				data.HP = data.MaxHP;
-				HeartManager::add_timer(npc_id, 30000, EV_RESURRECTION, npc_id);
+				HeartManager::add_timer(npc_id, 3000, EV_RESURRECTION, npc_id);
 
 			}
 		}

@@ -28,6 +28,7 @@ void HeartManager::initialize_npc()
 
 		clients[npc_id].setData(ld);
 
+		clients[npc_id].ll.lock();
 		clients[npc_id].L = luaL_newstate();
 		luaL_openlibs(clients[npc_id].L);
 		luaL_loadfile(clients[npc_id].L, "monsterScript.lua");
@@ -42,6 +43,7 @@ void HeartManager::initialize_npc()
 		lua_register(clients[npc_id].L, "roam", Roaming);
 
 		//나중에 lua에게 일임
+
 		lua_getglobal(clients[npc_id].L, "set_object_id");
 		lua_pushnumber(clients[npc_id].L, npc_id);
 		lua_pushnumber(clients[npc_id].L, ld.race - 1);
@@ -51,6 +53,7 @@ void HeartManager::initialize_npc()
 		lua_pushnumber(clients[npc_id].L, ld.level);
 		//lua_pushstring(clients[npc_id].L, "monster");
 		lua_pcall(clients[npc_id].L, 6, 0, 0);
+		clients[npc_id].ll.unlock();
 
 
 		clients[npc_id]._s_state = ST_NPC_SLEEP;
@@ -60,6 +63,8 @@ void HeartManager::initialize_npc()
 
 void HeartManager::add_timer(int obj_id, int act_time, TIMER_EVENT_TYPE e_type, int target_id)
 {
+	if (obj_id < MAX_USER && e_type != TIMER_EVENT_TYPE::EV_HEAL)
+		return;
 	using namespace chrono;
 	TIMER_EVENT ev;
 	ev.act_time = system_clock::now() + milliseconds(act_time);
@@ -112,16 +117,23 @@ void HeartManager::move_npc(int npc_id, int target_id)
 
 	unordered_set<int> new_vl;
 	bool is_player_exist = false;
-	int targ = npc_id;
+	int targ = target_id;
+	int min = INT_MAX;
 	for (int i = 0; i < MAX_USER; ++i) {
 		if (clients[i]._s_state != ST_INGAME) continue;
-		if (distance_cell(npc_id, i) <= RANGE)
+		int dist = distance_cell(npc_id, i);
+		if (dist <= RANGE)
 		{
 			new_vl.insert(i);
 			is_player_exist |= true;
-			targ = i;
+			if (dist < min)
+			{
+				min = dist;
+				targ = i;
+			}
 		}
 	}
+	//cout << targ;
 
 	for (auto p_id : new_vl) {
 		clients[p_id].vl.lock();
@@ -167,7 +179,13 @@ void HeartManager::move_npc(int npc_id, int target_id)
 	}
 	else
 	{
-		clients[npc_id]._s_state = ST_NPC_SLEEP;
+		if (clients[npc_id]._s_state == ST_INGAME)
+		{
+			SESSION_STATE sst = ST_INGAME;
+			if (atomic_compare_exchange_weak(&(clients[npc_id]._s_state), &sst, ST_NPC_SLEEP))
+			{
+			}
+		}
 	}
 }
 
@@ -186,14 +204,14 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 	lua_pop(L, 5);
 
 	// astar
-	cout << "\nastar " << x << ", " << y << " " << tx << ", " << ty << endl;
+	//cout << "\nastar " << x << ", " << y << " " << tx << ", " << ty << endl;
 	vector<s_Map::NODE> OpenFinder;
 	vector<s_Map::NODE> Closed;
 
 	int dis = abs(tx - x) + abs(ty - y);
 	if (dis <= 2)
 	{
-		cout << npc_id << " end" << endl;
+		//cout << npc_id << " end" << endl;
 		add_timer(npc_id, 500, EV_ATTACK, npc_id);
 		lua_pushnumber(L, -1);
 		return 1;
@@ -229,10 +247,10 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 		{
 			//end
 			auto contruct = current;
-			cout << "end" << endl;
+			//cout << "end" << endl;
 			while (contruct.parent->x != s.x || contruct.parent->y != s.y)
 			{
-				cout << contruct.x << ", " << contruct.y << endl;
+				//cout << contruct.x << ", " << contruct.y << endl;
 				contruct = *contruct.parent;
 			}
 			if (contruct.x - contruct.parent->x == 0)
@@ -393,6 +411,7 @@ int HeartManager::A_Star_Pathfinding(lua_State* L)
 
 int HeartManager::Roaming(lua_State* L)
 {
+	//cout << "Rand" << endl;
 	//printf("  RAND  ");
 	int x = lua_tonumber(L, -2);
 	int y = lua_tonumber(L, -1);
@@ -413,66 +432,66 @@ void HeartManager::ai_thread()
 			SleepEx(1, TRUE);
 			continue;
 		}
-		TIMER_EVENT t = timer_queue.top();
-		while (t.act_time > chrono::system_clock::now())
+		else
 		{
-			//auto p = std::chrono::duration_cast<std::chrono::milliseconds>(timer_queue.top().act_time - chrono::system_clock::now());
-			//std::cout << p <<endl;
-			SleepEx(1, TRUE);
-		}
-		timer_queue.pop();
-
-		switch (t.ev)
-		{
-		case TIMER_EVENT_TYPE::EV_ATTACK:
-		{
-			OVER_AI over;
-			over.object_id = t.object_id;
-			over.target_id = t.target_id;
-			over._timer_type = EV_ATTACK;
-			over._comp_type = OP_AI;
-			PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
-		}
-		break;
-		case TIMER_EVENT_TYPE::EV_MOVE:
-		{
-			//printf("EV_MOVE");
-			OVER_AI over;
-			over.object_id = t.object_id;
-			over.target_id = t.target_id;
-			over._timer_type = EV_MOVE;
-			over._comp_type = OP_AI;
-			PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
-		}
-		break;
-		case TIMER_EVENT_TYPE::EV_HEAL:
-		{
-			OVER_AI over;
-			over.object_id = t.object_id;
-			over.target_id = t.target_id;
-			over._timer_type = EV_HEAL;
-			over._comp_type = OP_AI;
-			PostQueuedCompletionStatus(g_h_iocp, 0, t.target_id, reinterpret_cast<LPOVERLAPPED>(&over));
-		}
-		break;
-
-		case TIMER_EVENT_TYPE::EV_RESURRECTION:
-		{
-			if (clients[t.object_id]._s_state == ST_NPC_DEAD)
+			TIMER_EVENT t = timer_queue.top();
+			while (t.act_time > chrono::system_clock::now())
 			{
-				SESSION_STATE sst = ST_NPC_DEAD;
-				if (atomic_compare_exchange_strong(&(clients[t.object_id]._s_state), &sst, ST_NPC_SLEEP))
-				{
-					clients[t.object_id].ll.lock();
-					lua_getglobal(clients[t.object_id].L, "set_state");
-					lua_pushnumber(clients[t.object_id].L, 1);
-					lua_pcall(clients[t.object_id].L, 1, 0, 0);
-					clients[t.object_id].ll.unlock();
-				}
+				//auto p = std::chrono::duration_cast<std::chrono::milliseconds>(timer_queue.top().act_time - chrono::system_clock::now());
+				//std::cout << p <<endl;
+				SleepEx(10, TRUE);
+			}
+			timer_queue.pop();
+
+			switch (t.ev)
+			{
+			case TIMER_EVENT_TYPE::EV_ATTACK:
+			{
+				OVER_AI over;
+				over.object_id = t.object_id;
+				over.target_id = t.target_id;
+				over._timer_type = EV_ATTACK;
+				over._comp_type = OP_AI;
+				PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
 			}
 			break;
+			case TIMER_EVENT_TYPE::EV_MOVE:
+			{
+				//printf("EV_MOVE");
+				OVER_AI over;
+				over.object_id = t.object_id;
+				over.target_id = t.target_id;
+				over._timer_type = EV_MOVE;
+				over._comp_type = OP_AI;
+				PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
+			}
+			break;
+			case TIMER_EVENT_TYPE::EV_HEAL:
+			{
+				OVER_AI over;
+				over.object_id = t.object_id;
+				over.target_id = t.target_id;
+				over._timer_type = EV_HEAL;
+				over._comp_type = OP_AI;
+				PostQueuedCompletionStatus(g_h_iocp, 0, t.target_id, reinterpret_cast<LPOVERLAPPED>(&over));
+			}
+			break;
+
+			case TIMER_EVENT_TYPE::EV_RESURRECTION:
+			{
+				clients[t.object_id]._s_state = ST_NPC_SLEEP;
+
+				clients[t.object_id].ll.lock();
+				lua_getglobal(clients[t.object_id].L, "set_state");
+				lua_pushnumber(clients[t.object_id].L, 1);
+				lua_pcall(clients[t.object_id].L, 1, 0, 0);
+				clients[t.object_id].ll.unlock();
+
+				break;
+			}
+			}
 		}
-		}
+
 		SleepEx(1, TRUE);
 	}
 }

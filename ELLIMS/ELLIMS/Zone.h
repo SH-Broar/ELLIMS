@@ -55,7 +55,7 @@ public:
 
 	void zoneChanged();
 
-	char* getText();
+	char* getText(bool spec);
 	int getWidth();
 
 	__int64 getLegion();

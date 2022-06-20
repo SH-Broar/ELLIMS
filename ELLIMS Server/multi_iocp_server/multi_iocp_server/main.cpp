@@ -5,6 +5,8 @@ array<SESSION, MAX_USER + NUM_NPC> clients;
 HANDLE g_h_iocp;
 SOCKET g_s_socket;
 
+//#define STRESSTEST
+
 concurrent_unordered_map<int, concurrent_unordered_map<int, concurrent_unordered_map<int, bool>>> sectors;
 
 void error_display(const char* msg, int err_no)
@@ -54,30 +56,33 @@ void disconnect(int c_id)
 	closesocket(clients[c_id]._socket);
 	clients[c_id]._s_state = ST_FREE;
 	DataBaseManager::addDBEvent(c_id, DB_EV_LOGOUT, clients[c_id].getData());
+
+	auto l = clients[c_id].view_list;
 	clients[c_id]._sl.unlock();
 
-	for (auto& pl : clients)
+	for (auto& pl : l)
 	{
-		if (pl.ID() == c_id) continue;
-		if (pl.ID() >= MAX_USER) continue;
-		pl._sl.lock();
-		if (pl._s_state != ST_INGAME)
+		if (pl == c_id) continue;
+		if (pl >= MAX_USER) continue;
+		clients[pl]._sl.lock();
+		if (clients[pl]._s_state != ST_INGAME)
 		{
-			pl._sl.unlock();
+			clients[pl]._sl.unlock();
 			continue;
 		} //읽기만 하는데요?
 		//쓰기 작업의 원인이 되는 조건이잖아
 
-		pl.vl.lock();
-		if (0 != pl.view_list.count(c_id))
+		clients[pl].vl.lock();
+		if (0 != clients[pl].view_list.count(c_id))
 		{
-			pl.view_list.erase(c_id);
-			pl.vl.unlock();
-			pl.send_remove_packet(c_id);
+			clients[pl].view_list.erase(c_id);
+			clients[pl].vl.unlock();
+			clients[pl].send_remove_packet(c_id);
 		}
 		else
-			pl.vl.unlock();
-		pl._sl.unlock();
+			clients[pl].vl.unlock();
+
+		clients[pl]._sl.unlock();
 	}
 
 }
@@ -106,11 +111,18 @@ void process_packet(int c_id, char* packet)
 			disconnect(c_id);
 			break;
 		}
+		if (strcmp(p->name, "ERRORNAME") == 0 || strcmp(p->pass, "ERRORNAME") == 0)
+		{
+			clients[c_id].send_login_fail_packet(0);
+			clients[c_id]._sl.unlock();
+			disconnect(c_id);
+		}
 
 		//DB 스레드
 		LoginData dbTMP;
 		strcpy(dbTMP.name, p->name);
 		strcpy(dbTMP.pass, p->pass);
+
 		if (p->isNewUser)
 		{
 			DataBaseManager::addDBEvent(c_id, DB_EV_NEWUSER, dbTMP);
@@ -176,15 +188,21 @@ void process_packet(int c_id, char* packet)
 			}
 			break;
 		case 2:
-			range.emplace_back(1, 0);
-			range.emplace_back(0, 1);
-			range.emplace_back(0, -1);
-			range.emplace_back(-1, 0);
-			range.emplace_back(2, 0);
-			range.emplace_back(0, 2);
-			range.emplace_back(0, -2);
-			range.emplace_back(-2, 0);
+		{
+			int heal = -1 * ((rand() % 5) + 5);
+			clients[c_id]._sl.lock();
+			clients[c_id].setDamage(heal);
+			clients[c_id]._sl.unlock();
+
+			string mess;
+			mess = clients[c_id].getData().name;
+			mess += " heal ";
+			mess += to_string(heal);
+			mess += " HP!";
+			clients[c_id].send_chat_packet(-1, mess.c_str());
+			return;
 			break;
+		}
 		}
 
 		clients[c_id].vl.lock();
@@ -210,6 +228,8 @@ void process_packet(int c_id, char* packet)
 						//피격
 						//cout << "\nHITTED";
 						hitted = rand() % 5 + clients[c_id].getData().level;
+						if (p->skilltype == 1)
+							hitted = 50;
 						pl._sl.lock();
 						pl.setDamage(hitted);
 						pl._sl.unlock();
@@ -365,10 +385,17 @@ void process_packet(int c_id, char* packet)
 						}
 					}
 
-					if (pl.ID() >= MAX_USER) continue;
-					lock_guard<mutex> aa{ pl._sl };	//편한 언락
-
-					if (pl._s_state != ST_INGAME)continue;
+					pl._sl.lock();
+					if (pl.ID() >= MAX_USER)
+					{
+						pl._sl.unlock();
+						continue;
+					}
+					if (pl._s_state != ST_INGAME)
+					{
+						pl._sl.unlock();
+						continue;
+					}
 
 					//near의 모든 객체에 대해?
 					if (distance_cell(c_id, pl.ID()) <= RANGE)
@@ -425,6 +452,7 @@ void process_packet(int c_id, char* packet)
 							}
 						}
 					}
+					pl._sl.unlock();
 				}
 			}
 		}
@@ -528,7 +556,7 @@ void do_worker()
 			if (client_id != -1)
 			{
 
-				printf("Login : %d\n", client_id);
+				//printf("Login : %d\n", client_id);
 				clients[client_id].ID(1);
 				clients[client_id].setXY(0, 0);
 				sprintf(clients[client_id].NAME(), "tmp");
@@ -557,7 +585,7 @@ void do_worker()
 				disconnect(key);
 			}
 			clients[key]._prev_remain += num_bytes;
-			
+
 			char* p = ex_over->_send_buf;
 			vector<char*> packets;
 			packets.reserve(3);
@@ -602,7 +630,7 @@ void do_worker()
 				int c_id = key;
 				Data.sc_id = c_id;
 
-
+#ifndef STRESSTEST
 				for (int i = 0; i < MAX_USER; ++i)
 				{
 					clients[i]._sl.lock();
@@ -615,20 +643,22 @@ void do_worker()
 					}
 					clients[i]._sl.unlock();
 				}
+#endif
 
 				clients[c_id]._sl.lock();
 				clients[c_id].setData(Data);
 				clients[c_id].send_login_info_packet();
+
 				if (!Data.isValidLogin)
 				{
-					cout << "This is Not ValidLogin";
+					//cout << "This is Not ValidLogin";
 					clients[c_id]._sl.unlock();
 					disconnect(c_id);
 					break;
 				}
 				else
 				{
-					cout << "Login Success : " << Data.name;
+					//cout << "Login Success : " << Data.name;
 					clients[c_id]._s_state = ST_INGAME;
 					clients[c_id]._sl.unlock();
 
@@ -665,10 +695,18 @@ void do_worker()
 									}
 								}
 
-								if (pl.ID() >= MAX_USER) continue;
-								lock_guard<mutex> aa{ pl._sl };	//편한 언락
+								pl._sl.lock();
+								if (pl.ID() >= MAX_USER)
+								{
+									pl._sl.unlock();
+									continue;
+								}
 
-								if (pl._s_state != ST_INGAME)continue;
+								if (pl._s_state != ST_INGAME)
+								{
+									pl._sl.unlock();
+									continue;
+								}
 
 								//near의 모든 객체에 대해?
 								if (distance_cell(c_id, pl.ID()) <= RANGE)
@@ -725,6 +763,8 @@ void do_worker()
 										}
 									}
 								}
+
+								pl._sl.unlock();
 							}
 						}
 					}
@@ -907,7 +947,7 @@ int main()
 	vector <thread> worker_threads;
 
 	//이거 1로 하면 싱글 스레드로
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		worker_threads.emplace_back(do_worker);
 	}

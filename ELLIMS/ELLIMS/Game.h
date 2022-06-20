@@ -72,6 +72,8 @@ public:
 	static bool ingame;
 
 	static bool monsterStatus;
+
+	static char addr[20];
 	//----
 private:
 	static int debugNum;

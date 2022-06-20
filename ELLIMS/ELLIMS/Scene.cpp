@@ -99,14 +99,14 @@ void Scene::changeScene(SceneName sceneName)
 			if (!Game::networkConnected)
 			{
 				Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
-				Network::NetworkCodex(areas[3].getText(), areas[4].getText(), newUser);
+				Network::NetworkCodex(areas[3].getText(true), areas[4].getText(true), newUser);
 				//while (!Game::networkConnected) { SleepEx(30, TRUE); }
 				Game::DBConnected = true;
 			}
 			else
 			{
-				Game::print("Connecting To Server....", SCREEN_WIDTH / 2 - 11, 26);
-				Network::TryLogin(areas[3].getText(), areas[4].getText(), newUser);
+				Game::print("Connecting To Server...", SCREEN_WIDTH / 2 - 11, 26);
+				Network::TryLogin(areas[3].getText(true), areas[4].getText(true), newUser);
 				Game::DBConnected = true;
 			}
 
@@ -160,7 +160,7 @@ void Scene::changeScene(SceneName sceneName)
 			return 0;
 		};
 		areas[4] = [&](void) -> void {
-			Network::SendChat(areas[4].getText());
+			Network::SendChat(areas[4].getText(false));
 			Game::setFocusZone(areas[4], ClearType::TEXT);
 			return;
 		};

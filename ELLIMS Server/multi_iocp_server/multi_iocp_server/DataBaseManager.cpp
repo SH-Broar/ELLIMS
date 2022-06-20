@@ -28,7 +28,7 @@ void DataBaseManager::DBThread()
 
 		while (!dbWorkQueue.try_pop(ev))
 		{
-			SleepEx(1, TRUE);
+			//SleepEx(50, TRUE);
 		}
 		switch (ev.EVENT)
 		{
@@ -36,19 +36,23 @@ void DataBaseManager::DBThread()
 		{
 			LoginData d;
 #ifdef STRESSTEST
-			strcpy(d.name, "_DUMMY");
+//			strcpy(d.name, "_DUMMY");
+//			d.x = rand() % W_WIDTH;
+//			d.y = rand() % W_HEIGHT;
+//			d.isValidLogin = true;
+//			d.isPlayer = true;
+//			sprintf_s(d.id, "%S", "DUMMY");
+//			sprintf_s(d.name, "%S", "DUMMY");
+//			d.level = 1;
+//			d.HP = 100;
+//			d.MaxHP = 100;
+//			d.MP = 2;
+//			d.MaxMP = 2;
+//			d.EXP = 1;
+//			d.race = 0;
+			d = getLoginData(const_cast<char*>("test"), const_cast < char*>("test"));
 			d.x = rand() % W_WIDTH;
 			d.y = rand() % W_HEIGHT;
-			d.isValidLogin = true;
-			d.isPlayer = true;
-			sprintf_s(d.id, "%S", "DUMMY");
-			sprintf_s(d.name, "%S", "DUMMY");
-			d.level = 1;
-			d.HP = 1;
-			d.MaxHP = 1;
-			d.MP = 2;
-			d.MaxMP = 2;
-			d.EXP = 1;
 #else
 			d = getLoginData(ev.session.name, ev.session.pass);
 #endif
@@ -75,12 +79,7 @@ void DataBaseManager::DBThread()
 		}
 		break;
 		case DB_EVENT_TYPE::DB_EV_LOGOUT:
-			if (strcmp(ev.session.name, "_DUMMY") != 0)
-			{
 				setLoginData(ev.session);
-			}
-
-
 			break;
 		}
 	}
@@ -177,7 +176,7 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 									result.EXP = EXP;
 									result.isValidLogin = true;
 									result.race = 0;
-									cout << "DB Login Success : " << result.name << endl;
+									//cout << "DB Login Success : " << result.name << endl;
 								}
 								else
 								{
@@ -246,7 +245,7 @@ LoginData DataBaseManager::newLoginData(char* name, char* password)
 
 					SQLWCHAR proc[100];
 					wsprintf(proc, L"EXEC new_user_data %S, %S", name, password);
-					printf("%S\n", proc);
+					//printf("%S\n", proc);
 
 					retcode = SQLExecDirect(hstmt, proc, SQL_NTS);
 
@@ -274,7 +273,7 @@ LoginData DataBaseManager::newLoginData(char* name, char* password)
 							result.EXP = 0;
 							result.isValidLogin = true;
 							result.race = 0;
-							cout << "DB New User Success : " << result.name << endl;
+							//cout << "DB New User Success : " << result.name << endl;
 						}
 						else
 						{
@@ -304,7 +303,9 @@ LoginData DataBaseManager::newLoginData(char* name, char* password)
 
 bool DataBaseManager::setLoginData(LoginData& data)
 {
-	bool ret = false;
+	bool ret = true;
+#ifndef STRESSTEST
+	ret = false;
 
 	setlocale(LC_ALL, "korean");
 	//std::wcout.imbue(std::locale("korean"));
@@ -340,7 +341,7 @@ bool DataBaseManager::setLoginData(LoginData& data)
 
 					SQLWCHAR proc[300];
 					wsprintf(proc, L"EXEC set_user_data %S, %S, %d, %d, %d, %d, %d, %d, %d, %d", data.id, data.name, data.level, data.x, data.y, data.HP, data.MaxHP, data.MP, data.MaxMP, data.EXP);
-					printf("%S\n", proc);
+					//printf("%S\n", proc);
 
 					retcode = SQLExecDirect(hstmt, proc, SQL_NTS);
 
@@ -351,7 +352,7 @@ bool DataBaseManager::setLoginData(LoginData& data)
 							if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
 							{
 								ret = true;
-								printf("%s : Save Success\n", data.id);
+								//printf("%s : Save Success\n", data.id);
 							}
 						}
 					}
@@ -372,6 +373,7 @@ bool DataBaseManager::setLoginData(LoginData& data)
 		}
 		SQLFreeHandle(SQL_HANDLE_ENV, henv);
 	}
+#endif
 	return ret;
 }
 
