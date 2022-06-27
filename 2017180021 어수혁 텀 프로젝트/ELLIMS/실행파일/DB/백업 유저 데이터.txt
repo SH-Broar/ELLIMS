@@ -1,0 +1,11 @@
+백업 당시 DB 구조는 이렇습니다.
+ID와 keyword를 사용해 로그인 할 수 있습니다.
+
+ID	keyword	name	level	x	y	HP	MaxHP	MP	MaxMP	EXP
+
+0	Password	0	1	200	200	50	50	10	10	0
+asdf	zzzz	texture	3	62	55	30	100	24	25	12
+common	poi	common	1	980	997	50	50	10	10	16
+cv	bv	cv	1	200	201	50	50	10	10	0
+newchar	vcx	newchar	1	998	999	50	50	10	10	28
+test	test	tester1	1	200	200	50	50	10	10	0
