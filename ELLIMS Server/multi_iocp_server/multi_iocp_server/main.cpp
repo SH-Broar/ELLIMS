@@ -5,7 +5,7 @@ array<SESSION, MAX_USER + NUM_NPC> clients;
 HANDLE g_h_iocp;
 SOCKET g_s_socket;
 
-//#define STRESSTEST
+#define STRESSTEST
 
 concurrent_unordered_map<int, concurrent_unordered_map<int, concurrent_unordered_map<int, bool>>> sectors;
 
@@ -947,7 +947,7 @@ int main()
 	vector <thread> worker_threads;
 
 	//이거 1로 하면 싱글 스레드로
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		worker_threads.emplace_back(do_worker);
 	}

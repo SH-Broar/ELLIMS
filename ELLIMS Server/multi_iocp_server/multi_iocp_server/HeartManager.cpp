@@ -2,7 +2,7 @@
 #include "AMBIT.h"
 
 array<chrono::system_clock::time_point, NUM_NPC> HeartManager::next_move_times;
-priority_queue<TIMER_EVENT> HeartManager::timer_queue;
+concurrent_priority_queue<TIMER_EVENT> HeartManager::timer_queue;
 mutex HeartManager::timer_l;
 
 void HeartManager::initialize_npc()
@@ -434,61 +434,63 @@ void HeartManager::ai_thread()
 		}
 		else
 		{
-			TIMER_EVENT t = timer_queue.top();
-			while (t.act_time > chrono::system_clock::now())
+			TIMER_EVENT t;
+			if (timer_queue.try_pop(t))
 			{
-				//auto p = std::chrono::duration_cast<std::chrono::milliseconds>(timer_queue.top().act_time - chrono::system_clock::now());
-				//std::cout << p <<endl;
-				SleepEx(10, TRUE);
-			}
-			timer_queue.pop();
+				while (t.act_time > chrono::system_clock::now())
+				{
+					//auto p = std::chrono::duration_cast<std::chrono::milliseconds>(timer_queue.top().act_time - chrono::system_clock::now());
+					//std::cout << p <<endl;
+					SleepEx(10, TRUE);
+				}
 
-			switch (t.ev)
-			{
-			case TIMER_EVENT_TYPE::EV_ATTACK:
-			{
-				OVER_AI over;
-				over.object_id = t.object_id;
-				over.target_id = t.target_id;
-				over._timer_type = EV_ATTACK;
-				over._comp_type = OP_AI;
-				PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
-			}
-			break;
-			case TIMER_EVENT_TYPE::EV_MOVE:
-			{
-				//printf("EV_MOVE");
-				OVER_AI over;
-				over.object_id = t.object_id;
-				over.target_id = t.target_id;
-				over._timer_type = EV_MOVE;
-				over._comp_type = OP_AI;
-				PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
-			}
-			break;
-			case TIMER_EVENT_TYPE::EV_HEAL:
-			{
-				OVER_AI over;
-				over.object_id = t.object_id;
-				over.target_id = t.target_id;
-				over._timer_type = EV_HEAL;
-				over._comp_type = OP_AI;
-				PostQueuedCompletionStatus(g_h_iocp, 0, t.target_id, reinterpret_cast<LPOVERLAPPED>(&over));
-			}
-			break;
-
-			case TIMER_EVENT_TYPE::EV_RESURRECTION:
-			{
-				clients[t.object_id]._s_state = ST_NPC_SLEEP;
-
-				clients[t.object_id].ll.lock();
-				lua_getglobal(clients[t.object_id].L, "set_state");
-				lua_pushnumber(clients[t.object_id].L, 1);
-				lua_pcall(clients[t.object_id].L, 1, 0, 0);
-				clients[t.object_id].ll.unlock();
-
+				switch (t.ev)
+				{
+				case TIMER_EVENT_TYPE::EV_ATTACK:
+				{
+					OVER_AI over;
+					over.object_id = t.object_id;
+					over.target_id = t.target_id;
+					over._timer_type = EV_ATTACK;
+					over._comp_type = OP_AI;
+					PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
+				}
 				break;
-			}
+				case TIMER_EVENT_TYPE::EV_MOVE:
+				{
+					//printf("EV_MOVE");
+					OVER_AI over;
+					over.object_id = t.object_id;
+					over.target_id = t.target_id;
+					over._timer_type = EV_MOVE;
+					over._comp_type = OP_AI;
+					PostQueuedCompletionStatus(g_h_iocp, 0, t.object_id, reinterpret_cast<LPOVERLAPPED>(&over));
+				}
+				break;
+				case TIMER_EVENT_TYPE::EV_HEAL:
+				{
+					OVER_AI over;
+					over.object_id = t.object_id;
+					over.target_id = t.target_id;
+					over._timer_type = EV_HEAL;
+					over._comp_type = OP_AI;
+					PostQueuedCompletionStatus(g_h_iocp, 0, t.target_id, reinterpret_cast<LPOVERLAPPED>(&over));
+				}
+				break;
+
+				case TIMER_EVENT_TYPE::EV_RESURRECTION:
+				{
+					clients[t.object_id]._s_state = ST_NPC_SLEEP;
+
+					clients[t.object_id].ll.lock();
+					lua_getglobal(clients[t.object_id].L, "set_state");
+					lua_pushnumber(clients[t.object_id].L, 1);
+					lua_pcall(clients[t.object_id].L, 1, 0, 0);
+					clients[t.object_id].ll.unlock();
+
+					break;
+				}
+				}
 			}
 		}
 

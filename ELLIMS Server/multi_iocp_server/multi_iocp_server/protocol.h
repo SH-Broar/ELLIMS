@@ -7,7 +7,7 @@ constexpr int NAME_SIZE = 20;
 constexpr int W_WIDTH = 300;	//나중에 2000으로
 constexpr int W_HEIGHT = 300;
 
-constexpr int MAX_USER = 10000;
+constexpr int MAX_USER = 100000;
 constexpr int NUM_NPC = 1000; //나중에 20만으로
 
 // Packet ID

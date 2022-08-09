@@ -16,7 +16,7 @@ struct TIMER_EVENT {
 
 class HeartManager
 {
-    static priority_queue<TIMER_EVENT> timer_queue;
+    static concurrent_priority_queue<TIMER_EVENT> timer_queue;
     static mutex timer_l;
 
     static array<chrono::system_clock::time_point,NUM_NPC> next_move_times;

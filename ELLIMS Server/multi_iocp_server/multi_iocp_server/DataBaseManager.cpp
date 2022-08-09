@@ -19,7 +19,7 @@ DataBaseManager::DataBaseManager()
 
 }
 
-//#define STRESSTEST
+#define STRESSTEST
 void DataBaseManager::DBThread()
 {
 	while (true)
@@ -99,7 +99,7 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 	LoginData result{};
 	result.level = -1;
 
-	setlocale(LC_ALL, "korean");
+	std::setlocale(LC_ALL, "korean");
 	//std::wcout.imbue(std::locale("korean"));
 
 	SQLHENV henv;
@@ -136,7 +136,7 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 
 					SQLWCHAR proc[100];
 					wsprintf(proc, L"EXEC user_data %S, %S", name, password);
-					printf("%S\n", proc);
+					//printf("%S\n", proc);
 
 					retcode = SQLExecDirect(hstmt, proc, SQL_NTS);
 
@@ -176,6 +176,12 @@ LoginData DataBaseManager::getLoginData(char* name, char* password)
 									result.EXP = EXP;
 									result.isValidLogin = true;
 									result.race = 0;
+#ifdef STRESSTEST
+									static int liter = 1;
+									sprintf_s(result.id, "%s%d", "tester",liter);
+									sprintf_s(result.name, "%s%d", "tester",liter);
+									liter++;
+#endif
 									//cout << "DB Login Success : " << result.name << endl;
 								}
 								else
@@ -211,7 +217,7 @@ LoginData DataBaseManager::newLoginData(char* name, char* password)
 	LoginData result{};
 	result.level = -1;
 
-	setlocale(LC_ALL, "korean");
+	std::setlocale(LC_ALL, "korean");
 	//std::wcout.imbue(std::locale("korean"));
 
 	SQLHENV henv;
