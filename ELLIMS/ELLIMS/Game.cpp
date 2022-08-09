@@ -28,6 +28,8 @@ int Game::GameStart()
 
 	while (true)
 	{
+		MouseAndKeyboardEvent();
+
 		//hover and click
 
 		nowScene.clickScene(mouse_X, mouse_Y, mouse_Left_down_Event);
@@ -78,10 +80,10 @@ int Game::GameStart()
 
 		if (gameEnd)
 			break;
+
 		mouse_Left_down_Event = false;
 		newCharInputed = false;
 		newCommandInputed = PlayerCommand::NONE;
-		SleepEx(10, TRUE);
 	}
 	return 0;
 }

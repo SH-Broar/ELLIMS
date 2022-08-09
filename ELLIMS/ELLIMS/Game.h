@@ -47,8 +47,13 @@ private:
 	static std::atomic<bool> oncedPress;
 	static std::atomic<PlayerCommand> newCommandInputed;
 
+	static HANDLE       hIn, hOut;
+	static DWORD        dwNOER;
+	static INPUT_RECORD rec;
+
 public:
-	static void MouseClick();
+	static void PrepareMouseAndKeyboardModule();
+	static void MouseAndKeyboardEvent();
 	static COORD getMouseXY();
 
 	static std::string FrameBuffer[SCREEN_HEIGHT];

@@ -14,7 +14,7 @@ int main()
 	std::cout << "IP : ";
 	std::cin >> Game::addr;
 
-	std::thread mouseThread{ game.MouseClick };
+	game.PrepareMouseAndKeyboardModule();
 	std::thread printThread{ game.InitUISetting };
 	std::thread networkThread{ game.networkT };
 
@@ -25,6 +25,5 @@ int main()
 	SleepEx(10000, TRUE);
 
 	networkThread.join();
-	mouseThread.join();
 	printThread.join();
 }

@@ -1,7 +1,6 @@
 #include "Turboc.h"
 #include "Game.h"
 
-
 int Game::mouse_X = 0;
 int Game::mouse_Y = 0;
 
@@ -14,22 +13,29 @@ std::atomic<bool> Game::oncedPress = false;
 std::atomic<bool> Game::mouse_Left_down;
 std::atomic<bool> Game::mouse_Left_down_Event;
 
-void Game::MouseClick()
+HANDLE       Game::hIn, Game::hOut;
+DWORD       Game::dwNOER;
+INPUT_RECORD Game::rec;
+
+void Game::PrepareMouseAndKeyboardModule()
 {
-	bool eventOnce = false;
-
-	HANDLE       hIn, hOut;
-	DWORD        dwNOER;
-	INPUT_RECORD rec;
-
 	hIn = GetStdHandle(STD_INPUT_HANDLE);
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleMode(hIn, ENABLE_PROCESSED_INPUT | ENABLE_MOUSE_INPUT);
+}
 
-	while (TRUE) {
+void Game::MouseAndKeyboardEvent()
+{
+	bool eventOnce = false;
+
+	DWORD leads;
+	GetNumberOfConsoleInputEvents(hIn, &leads);
+	while (leads > 0)
+	{
 		if (gameEnd)
-			break;
+			return;
 		ReadConsoleInput(hIn, &rec, 1, &dwNOER);
+		leads--;
 
 		if (rec.EventType == MOUSE_EVENT)
 		{
@@ -43,7 +49,6 @@ void Game::MouseClick()
 					mouse_Left_down_Event = true;
 					eventOnce = true;
 				}
-
 				continue;
 			}
 			mouse_Left_down = false;
@@ -136,7 +141,6 @@ void Game::MouseClick()
 				}
 				oncedPress = false;
 			}
-			SleepEx(10, TRUE);
 		}
 	}
 }
