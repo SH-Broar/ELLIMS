@@ -8,6 +8,8 @@ class SESSION;
 class DataBaseManager
 {
 public:
+
+
 	DataBaseManager();
 
 	static void DBThread();
